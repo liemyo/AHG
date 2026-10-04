@@ -1,0 +1,1765 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>/* phones: whole app at 90% (layout widens to fill the screen); max-scale stops iOS zooming into inputs */
+if (Math.min(screen.width, screen.height) <= 820) document.querySelector('meta[name=viewport]').content = 'width=device-width, initial-scale=0.9, minimum-scale=0.9, maximum-scale=0.9, viewport-fit=cover';
+try { const t = JSON.parse(localStorage.getItem('ahg.theme') || '{}'); if (t.mode && t.mode !== 'auto') document.documentElement.dataset.theme = t.mode; if (t.accent) document.documentElement.style.setProperty('--acc', t.accent); } catch {}</script>
+<title>Virtual Work AHG</title>
+<meta name="description" content="Virtual Work AHG — reminder, global chat, task dan kasbon tim, sinkron real time di HP dan laptop.">
+<meta name="theme-color" content="#1a8566">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231a8566'/><text x='50' y='63' font-family='Arial' font-weight='700' font-size='34' fill='white' text-anchor='middle'>AHG</text></svg>">
+<style>:root{--acc:#1a8566;--bg:#f4f6f5;--card:#fff;--soft:#eef1ef;--line:#dfe4e1;--text:#16191a;--muted:#5f6b67;--red:#d93d42;--green:#15803d;--warn:#b45309;--na:60%;--shadow:0 1px 2px rgba(10,30,20,.05),0 4px 14px rgba(10,30,20,.05);--acc-ink:#fff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1312;--card:#181d1c;--soft:#212826;--line:#2c3532;--text:#eef3f1;--muted:#9fb0aa;--red:#ff6b70;--green:#4ade80;--warn:#fbbf24;--na:26%;--shadow:none;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0f1312;--card:#181d1c;--soft:#212826;--line:#2c3532;--text:#eef3f1;--muted:#9fb0aa;--red:#ff6b70;--green:#4ade80;--warn:#fbbf24;--na:26%;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px;min-width:0;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb,var(--acc) 40%,transparent);border-color:var(--acc)}
+input:disabled,select:disabled,textarea:disabled{opacity:.75}
+textarea{resize:vertical}
+a{color:var(--acc)}
+h1,h2,h3{letter-spacing:-.01em}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 13px;cursor:pointer;white-space:nowrap;font-weight:600;font-size:14px}
+.btn:hover{background:var(--soft)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--red)}
+.btn.danger-f{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.big{padding:12px;font-size:16px}
+.btn.in-b{color:var(--green)}.btn.out-b{color:var(--red)}
+.muted{color:var(--muted)}.small{font-size:13px}
+.err{color:var(--red);font-weight:600;min-height:1.2em;margin:0;font-size:14px}
+.warn-t{color:var(--warn);font-weight:600}
+.ib{border:0;background:none;cursor:pointer;width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;font-size:17px;color:var(--muted);padding:0;flex:none}
+.ib:hover{background:color-mix(in srgb,var(--text) 8%,transparent)}
+.ib.on{color:#f0a020}
+.ib.big{font-size:26px;width:40px;height:40px;color:var(--text)}
+.ib.sm{width:26px;height:26px;font-size:13px}
+.mini{border:0;background:none;color:var(--acc);font-weight:700;font-size:12px;cursor:pointer;padding:0 4px}
+.sp{flex:1}
+.full{width:100%}
+.chk-l{display:flex!important;align-items:center;gap:8px;flex-direction:row!important;font-weight:500!important;cursor:pointer}
+.chk-l input{width:18px;height:18px;accent-color:var(--acc)}
+/* avatars */
+.av{--av:#1a8566;width:32px;height:32px;border-radius:50%;background:var(--av);color:#fff;display:inline-grid;place-items:center;font-weight:700;font-size:14px;flex:none;line-height:1}
+.av.xs{width:18px;height:18px;font-size:10px;vertical-align:-4px}
+.av.xl{width:56px;height:56px;font-size:24px}
+.av.gl{background:color-mix(in srgb,var(--acc) 18%,var(--card));font-size:16px}
+.avw{position:relative;display:inline-flex;flex:none}
+.st{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#9aa5a1;border:2px solid var(--card)}
+.st.on{background:#22c55e}
+.on-t{color:#16a34a;font-weight:700}
+/* login */
+.login{min-height:100dvh;display:grid;place-items:center;padding:20px;background:radial-gradient(1200px 600px at 10% -10%,color-mix(in srgb,var(--acc) 22%,transparent),transparent),var(--bg)}
+.lcard{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.12)}
+.lcard label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+.lcard input{padding:11px 13px;font-size:16px}
+.lbrand{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.lbrand h1{margin:0;font-size:24px}.lbrand p{margin:2px 0 0;font-size:14px}
+.pw{display:flex;align-items:center;gap:4px}.pw input{flex:1}
+.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 80%,#fff),var(--acc));color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.02em;flex:none}
+.logo.big{width:56px;height:56px;border-radius:16px;font-size:18px}
+/* shell */
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr) 290px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "side main users";min-height:100dvh}
+.top{grid-area:top;position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:16px;padding:8px 20px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.clock{display:flex;flex-direction:column;line-height:1.15;min-width:190px}
+.clock b{font-size:22px;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:var(--acc)}
+.clock span{font-size:12.5px;color:var(--muted);font-weight:600}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;margin:0 auto 0 0}
+.top-r{display:flex;align-items:center;gap:12px}
+.sync{font-size:12px;color:var(--muted);white-space:nowrap}
+.sync.err{color:var(--warn)}
+.me-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:4px 12px 4px 4px;cursor:pointer;font-weight:600}
+.me-btn:hover{background:var(--soft)}
+.me-btn small{font-size:10.5px;background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc);border-radius:99px;padding:1px 6px;margin-left:2px}
+.caret{color:var(--muted);font-size:12px}
+.side{grid-area:side;position:sticky;top:61px;align-self:start;height:calc(100dvh - 61px);overflow:auto;padding:14px 10px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:11px;border:0;background:none;padding:10px 12px;border-radius:12px;cursor:pointer;text-align:left;color:var(--text);font-weight:600;font-size:15px}
+.nav:hover{background:var(--soft)}
+.nav.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
+.nav .ic{width:22px;text-align:center;font-size:18px}
+.nav .lb{flex:1}
+.n{font-size:11.5px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:99px;display:inline-grid;place-items:center;background:var(--soft);color:var(--muted)}
+.n.hot{background:var(--red);color:#fff}
+.n.grn{background:color-mix(in srgb,#22c55e 20%,transparent);color:#16a34a}
+.side-f{margin-top:auto;padding:12px;display:flex;flex-direction:column;gap:2px}
+.nv-users{display:none}
+main{grid-area:main;min-width:0;padding:18px 24px 100px}
+.upanel{grid-area:users;position:sticky;top:61px;align-self:start;height:calc(100dvh - 61px);overflow:auto;border-left:1px solid var(--line);padding:14px 12px}
+.up-h{display:flex;flex-direction:column;padding:2px 6px 10px}
+.up-h b{font-size:15px}
+.up-f{padding:6px}
+.ulist{display:flex;flex-direction:column;gap:2px}
+.ulist.big{padding:6px}
+.urow{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;cursor:pointer}
+.urow:hover{background:var(--soft)}
+.urow.me{cursor:default;background:none}
+.ui{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.3}
+.ui b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ui small{font-size:12px;color:var(--muted)}
+.ui small b,.adm{font-size:10.5px}
+.adm{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc);border-radius:99px;padding:1px 6px}
+.wh{opacity:0;font-size:14px}
+.urow:hover .wh{opacity:.8}
+.bnav{display:none}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.head h1{margin:0;font-size:24px}
+.hc{font-size:14px;color:var(--muted);font-weight:600;margin-left:6px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.empty{text-align:center;color:var(--muted);margin:36px 10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap;color:var(--text)}
+.chip small{color:var(--muted);font-weight:700}
+.chip.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--card));color:var(--acc)}
+.chip-sel{border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600}
+/* reminder */
+.cal{padding:12px 14px 14px;margin-bottom:14px}
+.cal-h{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.cal-t{display:flex;gap:6px}
+.cal-t select{font-weight:700;font-size:16px;border-color:transparent;background:var(--soft)}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal-g.wk span{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:4px 0}
+.cal-g.wk span:last-child{color:var(--red)}
+.day{position:relative;min-height:96px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:5px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;gap:3px;text-align:left;color:var(--text);overflow:hidden;min-width:0}
+.day:hover{border-color:color-mix(in srgb,var(--acc) 60%,var(--line))}
+.day.out{opacity:.45}
+.day.sun .dn{color:var(--red)}
+.day .dn{font-weight:700;font-size:13.5px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%}
+.day.today .dn{background:var(--acc);color:#fff}
+.day.sel{border-color:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 7%,var(--card))}
+.dots{display:none;gap:3px;flex-wrap:wrap;align-items:center;justify-content:center}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.dots i.dn-ok{background:none;border:1.5px solid var(--c)}
+.dots em{font-size:9px;font-style:normal;color:var(--muted);font-weight:700}
+.evs{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ev{font-size:11.5px;line-height:1.3;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--c) 18%,transparent);border-left:3px solid var(--c);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.ev.ok{text-decoration:line-through;opacity:.6}
+.more{font-size:11px;color:var(--muted);font-weight:600}
+.qadd{display:grid;grid-template-columns:minmax(0,2.2fr) 150px 110px 120px minmax(0,1.6fr) auto;gap:8px;padding:10px;margin-bottom:14px}
+.lhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.rlist{display:flex;flex-direction:column;gap:8px}
+.rrow{--c:#3b82f6;display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:11px 12px;box-shadow:var(--shadow)}
+.rrow.done{opacity:.72}
+.rrow.done .rt{text-decoration:line-through}
+.rchk{width:26px;height:26px;border-radius:50%;border:2px solid var(--c);background:none;cursor:pointer;flex:none;color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;margin-top:1px}
+.rrow.done .rchk{background:var(--c)}
+.rb{flex:1;min-width:0}
+.rt{font-weight:700;font-size:15.5px;overflow-wrap:anywhere}
+.rn{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;color:color-mix(in srgb,var(--text) 82%,transparent);margin-top:2px}
+.rm{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted);margin-top:6px}
+.rm b{color:var(--text)}
+.due{font-weight:700;color:var(--text)}
+.due.late{color:var(--red)}
+.okm{color:var(--green)}
+.ra{display:flex;gap:0}
+/* dialogs */
+dialog{border:0;border-radius:18px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--card);color:var(--text);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+dialog.wide{width:min(860px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(5,15,10,.5)}
+.dlg{padding:20px;display:flex;flex-direction:column;gap:12px}
+.dlg h2{margin:0;font-size:19px}
+.dlg h3{margin:0 0 6px;font-size:15px}
+.dlg label{display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:13.5px}
+.dlg p{margin:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dlg-f{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.swatches,.colors{display:flex;gap:8px;flex-wrap:wrap}
+.sw{cursor:pointer;display:inline-flex!important}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw i{width:28px;height:28px;border-radius:50%;background:var(--c);border:2px solid color-mix(in srgb,var(--text) 15%,transparent);display:block}
+.sw.note i[style*=transparent]{background:linear-gradient(135deg,transparent 45%,var(--red) 46%,var(--red) 54%,transparent 55%)}
+.sw input:checked+i{outline:3px solid var(--acc);outline-offset:2px}
+.seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.seg label{flex:1;display:block!important;cursor:pointer}
+.seg input{position:absolute;opacity:0}
+.seg span{display:block;text-align:center;padding:9px 6px;font-weight:700}
+.seg input:checked+span{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
+.seg input:checked+span.in{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.seg input:checked+span.out{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.ed-bar{display:flex;align-items:center;gap:4px}
+.ed-bar b{font-size:16px}
+/* chat */
+.chat{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;height:calc(100dvh - 61px - 36px - 40px)}
+main[data-view=chat]{padding-bottom:18px}
+.convs{background:var(--card);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
+.cv-h{padding:12px 14px 6px}
+.cv-l{flex:1;overflow:auto;padding:4px 6px;display:flex;flex-direction:column;gap:2px}
+.conv{display:flex;align-items:center;gap:10px;border:0;background:none;padding:8px;border-radius:12px;cursor:pointer;text-align:left;color:var(--text)}
+.conv:hover{background:var(--soft)}
+.conv.on{background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.cn{flex:1;min-width:0;display:flex;flex-direction:column;font-weight:700;font-size:14px;line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cn small{font-weight:500;color:var(--muted);font-size:11.5px}
+.cv-new{display:flex;flex-direction:column;gap:4px;padding:10px;border-top:1px solid var(--line);font-weight:700;font-size:12.5px}
+.cpane{background:var(--card);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.c-h{display:flex;flex-direction:column;padding:10px 16px;border-bottom:1px solid var(--line)}
+.c-h b{font-size:16px}
+.m-conv{display:none}
+.c-list{flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:3px;background:color-mix(in srgb,var(--soft) 50%,var(--card))}
+.c-list .more{align-self:center;margin-bottom:8px}
+.dsep{text-align:center;margin:12px 0 6px}
+.dsep span{font-size:12px;font-weight:700;color:var(--muted);background:var(--card);border:1px solid var(--line);padding:2px 10px;border-radius:99px}
+.msg{display:flex;gap:8px;align-items:flex-end;max-width:min(680px,88%);margin-top:6px}
+.msg.cont{margin-top:0}
+.msg.mine{align-self:flex-end;flex-direction:row-reverse}
+.mav{width:32px;flex:none}
+.bub{background:var(--card);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:7px 11px 5px;min-width:0;box-shadow:var(--shadow)}
+.msg.mine .bub{background:color-mix(in srgb,var(--acc) 14%,var(--card));border-color:color-mix(in srgb,var(--acc) 30%,var(--line));border-radius:16px 16px 4px 16px}
+.msg.wh .bub{border-style:dashed;border-color:#8b5cf6;background:color-mix(in srgb,#8b5cf6 9%,var(--card))}
+.mh{font-size:12.5px;margin-bottom:1px}
+.whl{color:#8b5cf6;font-weight:700;font-size:11.5px}
+.mt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px}
+.mf{display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.mdel{border:0;background:none;cursor:pointer;font-size:11px;opacity:0;padding:0}
+.msg:hover .mdel{opacity:.7}
+.atts{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.att-img{border:0;padding:0;background:none;cursor:zoom-in;border-radius:10px;overflow:hidden}
+.att-img img{display:block;max-width:240px;max-height:200px;border-radius:10px}
+.att-file{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;cursor:pointer;text-align:left;max-width:280px;color:var(--text)}
+.att-file:hover{border-color:var(--acc)}
+.fi{font-size:22px}
+.fn{display:flex;flex-direction:column;font-size:13px;font-weight:600;overflow-wrap:anywhere;line-height:1.3}
+.fn small{font-weight:500;color:var(--muted)}
+.composer{border-top:1px solid var(--line);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.composer.whm{background:color-mix(in srgb,#8b5cf6 7%,var(--card))}
+.wh-bar{font-size:12.5px;color:#7c3aed;font-weight:600}
+.pend{display:flex;flex-wrap:wrap;gap:6px}
+.pend:empty{display:none}
+.pf{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:3px 4px 3px 6px;font-size:12.5px;background:var(--card);max-width:100%}
+.pf img{width:30px;height:30px;object-fit:cover;border-radius:6px}
+.pf .ib{width:24px;height:24px;font-size:12px}
+.c-row{display:flex;align-items:flex-end;gap:4px}
+.c-row textarea{flex:1;resize:none;max-height:160px;min-height:40px;border-radius:12px;padding:9px 12px;line-height:1.4}
+.attach{cursor:pointer}
+.send{height:40px}
+/* task */
+.links{padding:12px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
+.lk-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lk-l{display:flex;flex-wrap:wrap;gap:6px}
+.lk{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;background:var(--soft);max-width:100%}
+.lk a{display:inline-flex;align-items:center;gap:6px;padding:5px 4px 5px 10px;text-decoration:none;color:var(--text);font-weight:600;font-size:13px;min-width:0}
+.lk a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+.lk img{width:16px;height:16px;border-radius:3px}
+.lk .x{border:0;background:none;cursor:pointer;color:var(--muted);padding:0 9px 0 4px;font-size:12px}
+.lk:hover{border-color:var(--acc)}
+.lk-add{display:grid;grid-template-columns:2fr 1fr auto;gap:8px}
+.ttabs{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.tf{display:flex;gap:8px;align-items:center}
+.tf input{flex:1}
+.quick{width:100%;margin:0 0 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:11px 16px;display:flex;align-items:center;color:var(--muted);cursor:text;font-weight:600;text-align:left}
+.quick span{margin-left:auto;font-size:18px;color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;align-items:stretch}
+.grid.list{grid-template-columns:1fr;gap:8px}
+.ncard{display:flex;flex-direction:column;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px 10px;cursor:pointer;box-shadow:var(--shadow);overflow:hidden}
+.ncard:hover{border-color:color-mix(in srgb,var(--text) 25%,transparent)}
+.ncard.col{background:color-mix(in srgb,var(--nc) var(--na),var(--card));border-color:transparent}
+.ncard.st-done h3{text-decoration:line-through;opacity:.7}
+.nh{display:flex;align-items:flex-start;gap:6px}
+.nh h3{margin:2px 0 6px;font-size:15.5px;flex:1;overflow-wrap:anywhere;line-height:1.35}
+.nh .ib{width:28px;height:28px;margin:-4px -6px 0 0;font-size:19px}
+.nb{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;color:color-mix(in srgb,var(--text) 85%,transparent);max-height:12em;overflow:hidden}
+.ro-body{max-height:none;padding:4px 0}
+.cl{display:flex;flex-direction:column;gap:1px;font-size:14px;margin-top:4px}
+.cli{display:flex;gap:6px;align-items:flex-start}
+.cli.dn span:last-child{text-decoration:line-through;color:var(--muted)}
+.cb{border:0;background:none;padding:0;cursor:pointer;font-size:15px;line-height:1.4;color:var(--muted)}
+.tlink{display:inline-flex;align-self:flex-start;margin-top:6px;font-size:13px;font-weight:700;text-decoration:none;background:color-mix(in srgb,var(--acc) 12%,transparent);padding:3px 10px;border-radius:99px}
+.nf{margin-top:auto;padding-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px}
+.stb{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:2px 9px;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted)}
+.stb.st-doing{color:#b45309;border-color:#f59e0b;background:color-mix(in srgb,#f59e0b 14%,var(--card))}
+.stb.st-done{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 12%,var(--card))}
+.tag{background:color-mix(in srgb,var(--text) 8%,transparent);border-radius:99px;padding:1px 8px;font-weight:600}
+.tag.late{background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red)}
+.who{font-weight:700;color:var(--acc)}
+.routine{padding:12px 14px}
+.rt-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rt-h>div{display:flex;flex-direction:column;line-height:1.3}
+.prog{height:6px;border-radius:99px;background:var(--soft);margin:10px 0;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--acc);border-radius:99px;transition:width .3s}
+.tbl-wrap{overflow-x:auto}
+.rtbl{width:100%;border-collapse:collapse;min-width:640px}
+.rtbl th,.rtbl td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:center;vertical-align:middle}
+.rtbl thead th{font-size:12.5px;color:var(--muted)}
+.rtbl thead th small{display:block;font-weight:500}
+.rtbl tbody th,.rtbl thead th:first-child{text-align:left;min-width:180px}
+.rtbl tbody th small{display:block;color:var(--muted);font-weight:500;font-size:11.5px}
+.rtbl td small{display:block;font-size:10.5px;color:var(--muted);line-height:1.2;margin-top:2px}
+.rtbl .td{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.rtbl td.na{background-image:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--text) 5%,transparent) 6px 7px)}
+.rck{width:30px;height:30px;border-radius:9px;border:2px solid color-mix(in srgb,var(--acc) 60%,var(--line));background:var(--card);cursor:pointer;color:#fff;font-weight:900;font-size:16px}
+.rck.on{background:var(--acc);border-color:var(--acc)}
+.rck.miss{border-color:color-mix(in srgb,var(--red) 50%,var(--line))}
+.linkish{border:0;background:none;padding:0;cursor:pointer;font-weight:700;color:var(--text);text-align:left;font-size:14px}
+.linkish:hover{color:var(--acc)}
+.ted{gap:10px}
+.ted.col,dialog:has(.ted.col){background:color-mix(in srgb,var(--nc) var(--na),var(--card))}
+.e-title{border:0!important;background:none!important;font-size:22px;font-weight:700;padding:4px 0;outline:0!important}
+.e-body{border:0!important;background:none!important;min-height:110px;padding:4px 0;font-size:15.5px;line-height:1.55;outline:0!important;resize:vertical}
+.cl-ed{display:flex;flex-direction:column;gap:4px}
+.cli-ed{display:flex;align-items:center;gap:6px}
+.cli-ed .tf-d{width:18px;height:18px;accent-color:var(--acc);flex:none}
+.cli-ed .tf-t{flex:1;background:color-mix(in srgb,var(--card) 60%,transparent)}
+.tgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.tgrid input,.tgrid select{background:color-mix(in srgb,var(--card) 70%,transparent)}
+.rt-box{border:1px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.days-pick{display:flex;gap:6px;flex-wrap:wrap}
+.days-pick label{display:block!important;cursor:pointer}
+.days-pick input{position:absolute;opacity:0}
+.days-pick span{display:block;padding:6px 12px;border:1px solid var(--line);border-radius:99px;font-weight:700;font-size:13px;background:var(--card)}
+.days-pick input:checked+span{background:var(--acc);border-color:var(--acc);color:#fff}
+.cmts{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+#cm-list{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;max-height:340px;overflow:auto}
+.cmt{display:flex;gap:10px;align-items:flex-start}
+.cmt>div{flex:1;min-width:0;background:color-mix(in srgb,var(--soft) 80%,transparent);border-radius:12px;padding:7px 11px}
+.ch{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ch b{font-size:13.5px}
+.ct{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.cm-add{display:flex;gap:8px;align-items:flex-end}
+.cm-add textarea{flex:1}
+/* cash */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+.kcard{--c:#16a34a;display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:12px 14px;cursor:pointer;box-shadow:var(--shadow);color:var(--text);min-width:0}
+.kcard:hover{border-color:var(--c)}
+.kcard.on{box-shadow:0 0 0 2px var(--c);background:color-mix(in srgb,var(--c) 7%,var(--card))}
+.kh{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.kh b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ks{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:4px}
+.ks.neg{color:var(--red)}
+.kl{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.kio{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;font-weight:700;margin-top:6px}
+.in{color:var(--green)}.out{color:var(--red)}
+.kn{font-size:12px;color:var(--muted);margin-top:4px}
+.kcard.add{border-style:dashed;border-top-width:1px;align-items:center;justify-content:center;text-align:center;box-shadow:none;background:none;min-height:120px}
+.kcard.add .plus{font-size:28px;color:var(--acc);line-height:1}
+.cflt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px;margin-bottom:10px}
+.cflt input#c-q{flex:1;min-width:160px}
+.pnav{display:inline-flex;align-items:center;gap:2px;font-size:14px}
+.csum{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13.5px;font-weight:600;padding:2px 4px 10px}
+.txl{display:flex;flex-direction:column;gap:12px}
+.txd{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.txh{display:flex;justify-content:space-between;padding:8px 14px;background:var(--soft);font-size:13.5px}
+.tx{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-top:1px solid var(--line)}
+.tx.ed{cursor:pointer}
+.tx.ed:hover{background:color-mix(in srgb,var(--soft) 60%,transparent)}
+.txh+.tx{border-top:0}
+.tic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;flex:none}
+.tic.in{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green)}
+.tic.out{background:color-mix(in srgb,var(--red) 13%,transparent);color:var(--red)}
+.ti{flex:1;min-width:0;display:flex;flex-direction:column}
+.ti b{overflow-wrap:anywhere}
+.ti small{color:var(--muted);font-size:12px}
+.kc{--c:#16a34a;font-weight:700;color:var(--c)}
+.kc::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:5px}
+.ta{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ta.in{color:var(--green)}.ta.out{color:var(--red)}
+.filep{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;flex-wrap:wrap}
+.rep-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.rtab,.atbl{width:100%;border-collapse:collapse;font-size:14px}
+.rtab th,.rtab td,.atbl th,.atbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.rtab th:first-child,.rtab td:first-child,.atbl th,.atbl td{text-align:left}
+.rtab thead th,.atbl thead th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.rtab .tot td{font-weight:800;border-top:2px solid var(--text)}
+.atbl{min-width:820px}
+.atbl td{vertical-align:middle;white-space:normal}
+.uc{display:flex;align-items:center;gap:8px}
+.uc span{display:flex;flex-direction:column;line-height:1.25}
+.uc small{color:var(--muted)}
+.acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+/* profile */
+.prof{gap:14px}
+.pf-top{display:flex;gap:14px;align-items:center}
+.big{font-size:19px}
+.sect{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.sect .row2{grid-template-columns:1fr auto}
+#pw-form .row2{grid-template-columns:1fr 1fr}
+#pw-form>.btn{align-self:flex-start}
+/* viewer */
+#viewer{width:auto;max-width:calc(100vw - 24px);background:#111;color:#fff}
+.vw{display:flex;flex-direction:column}
+.vw-h{display:flex;align-items:center;gap:8px;padding:8px 10px}
+.vw-h .ib{color:#fff}
+.vw img{max-width:calc(100vw - 24px);max-height:calc(100dvh - 90px);display:block;margin:0 auto}
+/* toasts */
+#toasts{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.toast{pointer-events:auto;cursor:pointer;max-width:min(380px,calc(100vw - 32px));background:var(--text);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .2s ease-out;overflow-wrap:anywhere}
+.toast.warn{background:#b45309;color:#fff}
+.toast.msg{background:var(--acc);color:#fff}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+#print-area{display:none}
+/* medium screens: users panel moves into the menu */
+@media (max-width:1180px){
+  .shell{grid-template-columns:220px minmax(0,1fr);grid-template-areas:"top top" "side main"}
+  .upanel{display:none}
+  .nv-users{display:flex}
+  .qadd{grid-template-columns:minmax(0,2fr) 140px 110px 110px;}
+  .qadd #ra-note{grid-column:1/4}
+  .tgrid{grid-template-columns:1fr 1fr}
+}
+/* phones */
+@media (max-width:820px){
+  .shell{display:block}
+  .top{padding:8px 12px;gap:10px}
+  .clock{min-width:0}
+  .clock b{font-size:19px}
+  .clock span{font-size:11.5px}
+  .brand{display:none}
+  .top-r{margin-left:auto}
+  .top-r .sync{display:none}
+  .me-btn .mn,.me-btn .caret{display:none}
+  .me-btn{padding:3px}
+  .side{display:none}
+  main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
+  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
+  .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+  .bnav .ic{font-size:20px;position:relative;line-height:1.2}
+  .bnav .dot{position:absolute;top:-4px;left:62%;font-style:normal;font-size:10px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--muted);color:#fff;display:grid;place-items:center}
+  .bnav .dot.hot{background:var(--red)}
+  .head h1{font-size:21px}
+  .head .tools{width:100%}
+  .head .tools .btn{flex:1}
+  .day{min-height:52px;padding:3px;align-items:center}
+  .day .dn{width:24px;height:24px;font-size:13px}
+  .evs{display:none}.dots{display:flex}
+  .cal{padding:10px 8px}
+  .cal-g{gap:3px}
+  .qadd{grid-template-columns:1fr 1fr 1fr}
+  .qadd #ra-title,.qadd #ra-note{grid-column:1/-1}
+  .qadd .btn{grid-column:1/-1}
+  .lhead .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .rrow{padding:10px}
+  .chat{grid-template-columns:1fr;height:calc(100dvh - 58px - 24px - 84px - env(safe-area-inset-bottom))}
+  main[data-view=chat]{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .convs{display:none}
+  .m-conv{display:block;font-weight:700;font-size:15px;margin-bottom:2px}
+  .d-conv{display:none}
+  .c-h{padding:8px 10px}
+  .c-list{padding:10px 8px}
+  .msg{max-width:92%}
+  .att-img img{max-width:200px}
+  .lk-add{grid-template-columns:1fr 1fr}
+  .lk-add #lk-url{grid-column:1/-1}
+  .grid{grid-template-columns:1fr 1fr;gap:8px}
+  .ncard{padding:10px 11px 8px}
+  .grid.list{grid-template-columns:1fr}
+  dialog,dialog.wide{width:100vw;max-width:100vw;max-height:100dvh;height:auto;border-radius:18px 18px 0 0;margin:auto 0 0}
+  .tgrid{grid-template-columns:1fr 1fr}
+  .row2{grid-template-columns:1fr 1fr}
+  .kgrid{grid-template-columns:1fr 1fr;gap:8px}
+  .kcard{padding:10px 11px}
+  .ks{font-size:18px}
+  .cflt{display:grid;grid-template-columns:1fr 1fr}
+  .cflt .pnav,.cflt input#c-q{grid-column:1/-1;justify-content:center}
+  .tx{padding:9px 10px;gap:9px}
+  #toasts{left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom));align-items:stretch}
+  .toast{max-width:none}
+}
+@media (max-width:420px){ .grid{grid-template-columns:1fr} }
+@media print{
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{display:block;position:absolute;left:0;top:0;width:100%;color:#000;background:#fff;font:11px/1.4 Arial,sans-serif}
+  #print-area h1{font-size:20px;margin:0 0 4px}
+  #print-area h2{font-size:14px;margin:18px 0 6px}
+  #print-area table{width:100%;border-collapse:collapse;margin-top:8px}
+  #print-area th,#print-area td{border-bottom:1px solid #ccc;padding:4px 6px;text-align:left}
+  #print-area th{background:#e8f1ed}
+  #print-area .tot td{font-weight:700;border-top:1.5px solid #000}
+  dialog{display:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app"><div style="padding:40px;font-family:sans-serif;color:#888">Memuat Virtual Work AHG…</div></div>
+<dialog id="dlg"></dialog>
+<dialog id="viewer"></dialog>
+<dialog id="cfm"></dialog>
+<div id="toasts"></div>
+<div id="print-area"></div>
+<noscript>Virtual Work AHG memerlukan JavaScript.</noscript>
+<script>// ---------- Excel (.xlsx) + PDF writers (from Saku.yuk, no libraries) ----------
+const XLSX = {
+  _crc: null,
+  crc32(u8) { if (!XLSX._crc) { XLSX._crc = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; XLSX._crc[n] = c >>> 0; } }
+    let c = 0xffffffff; for (let i = 0; i < u8.length; i++) c = XLSX._crc[(c ^ u8[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; },
+  zip(files) {
+    const enc = new TextEncoder(); const parts = [], central = []; let off = 0; const d = new Date();
+    const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    for (const f of files) {
+      const name = enc.encode(f.name), data = typeof f.data === 'string' ? enc.encode(f.data) : f.data, crc = XLSX.crc32(data);
+      const h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, time, true); h.setUint16(12, date, true);
+      h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+      const c = new DataView(new ArrayBuffer(46)); c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, time, true); c.setUint16(14, date, true);
+      c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+      parts.push(new Uint8Array(h.buffer), name, data); central.push(new Uint8Array(c.buffer), name); off += 30 + name.length + data.length;
+    }
+    const cdSize = central.reduce((a, x) => a + x.length, 0); const e = new DataView(new ArrayBuffer(22)); e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+    const all = [...parts, ...central, new Uint8Array(e.buffer)]; const out = new Uint8Array(all.reduce((a, x) => a + x.length, 0)); let p = 0; for (const x of all) { out.set(x, p); p += x.length; } return out;
+  },
+  col: i => { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; },
+  x: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, ''),
+  serial: d => { d = new Date(d); return (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()) - Date.UTC(1899, 11, 30)) / 864e5; },
+  // style ids: 0 normal, 1 bold, 2 #,##0, 3 bold #,##0, 4 date+time, 5 0.0%, 6 title, 7 date
+  cell(v, ref) {
+    const o = v !== null && typeof v === 'object' && !(v instanceof Date) ? v : { v }; let val = o.v; let st = o.s ?? 0;
+    if (val == null || val === '') return st ? `<c r="${ref}" s="${st}"/>` : '';
+    if (val instanceof Date) { st = o.s ?? 4; val = XLSX.serial(val); }
+    if (typeof val === 'number') return `<c r="${ref}" s="${st}"><v>${val}</v></c>`;
+    return `<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${XLSX.x(val)}</t></is></c>`;
+  },
+  sheet(rows, widths = []) {
+    const cols = widths.length ? `<cols>${widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>` : '';
+    const body = rows.map((r, i) => `<row r="${i + 1}">${(r || []).map((v, j) => XLSX.cell(v, XLSX.col(j) + (i + 1))).join('')}</row>`).join('');
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${cols}<sheetData>${body}</sheetData></worksheet>`;
+  },
+  build(sheets) {
+    const ns = 'http://schemas.openxmlformats.org/'; const files = [
+      { name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="${ns}package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>` },
+      { name: '_rels/.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${ns}package/2006/relationships"><Relationship Id="rId1" Type="${ns}officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+      { name: 'xl/workbook.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${ns}spreadsheetml/2006/main" xmlns:r="${ns}officeDocument/2006/relationships"><sheets>${sheets.map((s, i) => `<sheet name="${XLSX.x(s.name.slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>` },
+      { name: 'xl/_rels/workbook.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${ns}package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${ns}officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="${ns}officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+      { name: 'xl/styles.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${ns}spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="dd/mm/yyyy hh:mm"/><numFmt numFmtId="165" formatCode="0.0%"/><numFmt numFmtId="166" formatCode="dd/mm/yyyy"/></numFmts><fonts count="3"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="8"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="3" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>` },
+      ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: XLSX.sheet(s.rows, s.widths) }))];
+    return XLSX.zip(files);
+  }
+};
+// Minimal PDF writer (A4, Helvetica, WinAnsi) — produces a real downloadable .pdf without libraries.
+const PDF = {
+  HW: [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584],
+  WIN: { 0x2013: 0x96, 0x2014: 0x97, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93, 0x201d: 0x94, 0x2022: 0x95, 0x2026: 0x85, 0x20ac: 0x80, 0x2212: 0x2d },
+  codes(str) { const out = []; for (const ch of String(str ?? '')) { const c = ch.codePointAt(0); if (c >= 32 && c < 127) out.push(c); else if (c >= 160 && c < 256) out.push(c); else if (PDF.WIN[c]) out.push(PDF.WIN[c]); else if (c === 9 || c === 10 || c === 13) out.push(32); else out.push(63); } return out; },
+  cw(c, bold) { const w = c >= 32 && c < 127 ? PDF.HW[c - 32] : c === 0x97 ? 1000 : c === 0x95 ? 350 : 556; return bold && !(c >= 48 && c <= 57) ? w * 1.06 : w; },
+  width(str, size, bold) { return PDF.codes(str).reduce((a, c) => a + PDF.cw(c, bold), 0) * size / 1000; },
+  fit(str, size, max, bold) { str = String(str ?? ''); if (PDF.width(str, size, bold) <= max) return str; let s = str; while (s.length && PDF.width(s + '…', size, bold) > max) s = s.slice(0, -1); return s + '…'; },
+  doc() {
+    const W = 595.28, H = 841.89; const pages = []; let cur = null;
+    const col = c => c.map(v => (v / 255).toFixed(3)).join(' ');
+    const d = {
+      W, H, get page() { return pages.length; },
+      add() { cur = []; pages.push(cur); return d; },
+      text(x, y, str, size = 10, o = {}) { const cs = PDF.codes(str); const w = PDF.width(str, size, o.bold); if (o.align === 'right') x -= w; else if (o.align === 'center') x -= w / 2;
+        const lit = cs.map(c => c === 40 || c === 41 || c === 92 ? '\\' + String.fromCharCode(c) : c > 126 ? '\\' + c.toString(8).padStart(3, '0') : String.fromCharCode(c)).join('');
+        cur.push(`BT /${o.bold ? 'F2' : 'F1'} ${size} Tf ${col(o.color || [0, 0, 0])} rg ${x.toFixed(2)} ${(H - y).toFixed(2)} Td (${lit}) Tj ET`); },
+      rect(x, y, w, h, fill) { cur.push(`${col(fill)} rg ${x.toFixed(2)} ${(H - y - h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`); },
+      box(x, y, w, h, stroke, lw = 0.6) { cur.push(`${col(stroke)} RG ${lw} w ${x.toFixed(2)} ${(H - y - h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re S`); },
+      line(x1, y1, x2, y2, stroke = [200, 200, 200], lw = 0.5) { cur.push(`${col(stroke)} RG ${lw} w ${x1.toFixed(2)} ${(H - y1).toFixed(2)} m ${x2.toFixed(2)} ${(H - y2).toFixed(2)} l S`); },
+      eachPage(fn) { const keep = cur; pages.forEach((p, i) => { cur = p; fn(i + 1, pages.length); }); cur = keep; },
+      build() {
+        const objs = []; const add = s => { objs.push(s); return objs.length; };
+        add('<< /Type /Catalog /Pages 2 0 R >>'); add(''); add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'); add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+        const kids = [];
+        for (const p of pages) { const stream = p.join('\n'); const c = add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+          kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${c} 0 R >>`)); }
+        objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${kids.length} >>`;
+        let out = '%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'; const offs = [];
+        objs.forEach((o, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+        const xref = out.length; out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+        out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+        const u8 = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u8[i] = out.charCodeAt(i) & 255; return u8;
+      }
+    };
+    return d.add();
+  }
+};
+
+// Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
+const BUILD = '20261004-083850';
+const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
+
+// ---------- helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const store = st => ({ get: k => { try { return st.getItem('ahg.' + k); } catch { return null; } }, set: (k, v) => { try { st.setItem('ahg.' + k, v); } catch {} }, del: k => { try { st.removeItem('ahg.' + k); } catch {} } });
+const LS = store(window.localStorage), SS = store(window.sessionStorage);
+const jget = (k, d) => { try { return JSON.parse(LS.get(k)) ?? d; } catch { return d; } };
+const uid = () => { const a = crypto.getRandomValues(new Uint8Array(15)); return [...a].map(x => x.toString(36).padStart(2, '0')).join('').slice(0, 20); };
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const pYmd = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const today = () => ymd(new Date());
+const weekStart = d => addDays(d, -((d.getDay() + 6) % 7)); // Monday
+const DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'], DSH = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const MSH = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const hm = t => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const dText = s => { const d = pYmd(s); return `${DSH[d.getDay()]}, ${d.getDate()} ${MSH[d.getMonth()]} ${d.getFullYear()}`; };
+const dShort = s => { const d = pYmd(s); return `${d.getDate()} ${MSH[d.getMonth()]} ${d.getFullYear()}`; };
+const dtText = t => { const d = new Date(t); return `${d.getDate()} ${MSH[d.getMonth()]} ${d.getFullYear()} ${hm(t)}`; };
+function ago(t) {
+  if (!t) return '—';
+  const d = new Date(t), now = new Date(), s = (now - d) / 1000;
+  if (s < 60) return 'baru saja'; if (s < 3600) return Math.floor(s / 60) + ' mnt lalu';
+  if (ymd(d) === ymd(now)) return 'hari ini ' + hm(t);
+  if (ymd(d) === ymd(addDays(now, -1))) return 'kemarin ' + hm(t);
+  return `${d.getDate()} ${MSH[d.getMonth()]}${d.getFullYear() !== now.getFullYear() ? ' ' + d.getFullYear() : ''} ${hm(t)}`;
+}
+const num = n => Math.round(n).toLocaleString('id-ID');
+const money = n => (n < 0 ? '−Rp' : 'Rp') + num(Math.abs(n));
+const parseNum = s => Number(String(s ?? '').replace(/[^\d]/g, '')) || 0;
+const fsize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(0) + ' KB' : (n / 1048576).toFixed(1).replace('.', ',') + ' MB';
+const linkify = t => esc(t).replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]|www\.[^\s<]+[^\s<.,;:!?)\]'"])/g, u => `<a href="${u.startsWith('www.') ? 'https://' + u : u}" target="_blank" rel="noopener">${u}</a>`);
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+const normUrl = u => { u = String(u || '').trim(); if (!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; };
+const slug = s => String(s).normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40) || 'semua';
+
+const PALETTE = { blue: ['Biru', '#3b82f6'], green: ['Hijau', '#16a34a'], teal: ['Toska', '#0d9488'], orange: ['Oranye', '#f59e0b'], red: ['Merah', '#ef4444'], purple: ['Ungu', '#8b5cf6'], pink: ['Merah muda', '#ec4899'], gray: ['Abu', '#64748b'] };
+const NOTE_COLORS = { '': ['Tanpa warna', 'transparent'], red: ['Merah', '#f28b82'], orange: ['Oranye', '#fbbc04'], yellow: ['Kuning', '#fff475'], green: ['Hijau', '#ccff90'], teal: ['Toska', '#a7ffeb'], blue: ['Biru', '#aecbfa'], purple: ['Ungu', '#d7aefb'], pink: ['Merah muda', '#fdcfe8'], gray: ['Abu', '#d3d6db'] };
+const ACCENTS = { '#1a8566': 'Hijau AHG', '#2563eb': 'Biru', '#7c3aed': 'Ungu', '#db2777': 'Pink', '#e07b00': 'Oranye', '#dc2626': 'Merah', '#0d9488': 'Toska', '#475569': 'Abu' };
+const AV_COLORS = ['#1a8566', '#2563eb', '#7c3aed', '#db2777', '#e07b00', '#dc2626', '#0d9488', '#475569', '#9333ea', '#0891b2'];
+const STATUS = { todo: ['Belum', '○'], doing: ['Proses', '◐'], done: ['Selesai', '●'] };
+const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
+
+// ---------- state ----------
+const now0 = new Date();
+const S = {
+  token: '', me: null, users: [], skew: 0, items: new Map(), seq: 0, queue: new Set(), loaded: false,
+  view: 'reminder',
+  rem: { y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
+  chat: { conv: 'g', files: [], limit: 200, sending: false },
+  task: { tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
+  cash: { cat: '', p: 'month', ref: today(), from: '', to: '', q: '', who: '' },
+  rep: null, sync: { busy: false, again: false, at: null, err: '' }, dlg: null
+};
+const isAdmin = () => S.me?.role === 'admin';
+const live = kind => [...S.items.values()].filter(i => i.kind === kind && !i.deleted);
+const canEdit = it => isAdmin() || it.owner === S.me?.name;
+const user = n => S.users.find(u => u.name === n);
+const uname = n => user(n)?.display || n || '—';
+function ucolor(n) { const u = user(n); if (u?.color) return u.color; let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AV_COLORS[h % AV_COLORS.length]; }
+const av = (n, cls = '') => `<span class="av ${cls}" style="--av:${ucolor(n)}" title="${esc(uname(n))}">${esc((uname(n) || '?').trim().slice(0, 1).toUpperCase())}</span>`;
+const srvNow = () => Date.now() - S.skew;
+const online = u => u && !u.away && u.last_seen && srvNow() - Date.parse(u.last_seen) < 75000;
+const pref = () => { const p = live('pref').filter(i => i.owner === S.me?.name).sort((a, b) => b.updated - a.updated)[0]; return p || null; };
+const prefData = () => pref()?.data || {};
+
+// ---------- cache ----------
+const cacheKey = () => 'c.' + S.me?.name;
+function saveCache() {
+  if (!S.me) return;
+  const items = [...S.items.values()];
+  try { localStorage.setItem('ahg.' + cacheKey(), JSON.stringify({ items, seq: S.seq, queue: [...S.queue], users: S.users, me: S.me })); }
+  catch { try { localStorage.setItem('ahg.' + cacheKey(), JSON.stringify({ items: items.filter(i => S.queue.has(i.id)), seq: 0, queue: [...S.queue], users: S.users, me: S.me })); } catch {} }
+}
+function loadCache() {
+  S.items = new Map(); S.queue = new Set(); S.seq = 0;
+  const c = jget(cacheKey(), null); if (!c) return;
+  for (const it of c.items || []) S.items.set(it.id, it);
+  S.seq = Number(c.seq || 0); S.queue = new Set(c.queue || []); S.users = c.users || S.users;
+  if (c.me && !S.me.fresh) S.me = { ...S.me, ...c.me };
+}
+
+// ---------- server ----------
+async function rpc(fn, args, opt = {}) { // retries: some networks drop connections
+  for (let i = 0; ; i++) {
+    try {
+      const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method: 'POST', cache: 'no-store', keepalive: !!opt.keepalive, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args) });
+      if (!r.ok) { const e = new Error('server ' + r.status); e.server = true; throw e; }
+      const t = await r.text(); return t ? JSON.parse(t) : null;
+    } catch (e) { if (i >= 4 || e.server || opt.once) throw navigator.onLine ? e : new Error('offline'); await new Promise(r => setTimeout(r, 300 * (i + 1))); }
+  }
+}
+function put(it, quiet) { // local write → queue → push
+  if (!it.owner) it.owner = S.me.name;
+  if (!it.created) it.created = srvNow();
+  it.updated = srvNow(); it.lv = (S.items.get(it.id)?.lv || 0) + 1;
+  S.items.set(it.id, it); S.queue.add(it.id); saveCache(); if (!quiet) render(); pushSoon();
+  return it;
+}
+const create = (kind, data, extra = {}) => { const { quiet, ...rest } = extra; return put({ id: uid(), kind, owner: S.me.name, to: null, data, created: 0, updated: 0, deleted: false, ...rest }, quiet); };
+const patch = (id, p, quiet) => { const it = S.items.get(id); if (it) put({ ...it, data: { ...it.data, ...p } }, quiet); };
+const remove = id => { const it = S.items.get(id); if (it) put({ ...it, deleted: true, data: it.kind === 'check' ? it.data : {} }); };
+let pushTimer = null;
+function pushSoon() { clearTimeout(pushTimer); pushTimer = setTimeout(syncNow, 250); showSync(); }
+async function syncNow() {
+  if (!S.token) return;
+  if (S.sync.busy) { S.sync.again = true; return; }
+  S.sync.busy = true; showSync(); let changed = false; const who = S.token;
+  try {
+    if (S.queue.size) {
+      const ids = [...S.queue], sent = ids.map(id => S.items.get(id)).filter(Boolean), snap = new Map(sent.map(i => [i.id, i.lv]));
+      const batches = [[]]; let size = 0;
+      for (const { id, kind, data, deleted } of sent) {
+        const it = { id, kind, data, deleted }, n = JSON.stringify(it).length;
+        if (batches.at(-1).length && (size + n > 2.5e6 || batches.at(-1).length >= 100)) { batches.push([]); size = 0; }
+        batches.at(-1).push(it); size += n;
+      }
+      for (const b of batches) {
+        const r = await rpc('ahg_put', { p_token: S.token, p_items: b });
+        if (!r?.ok) { if (r?.err === 'auth') return authLost(); throw new Error('gagal menyimpan'); }
+        if (r.rejected?.length) toast('Sebagian perubahan tidak diizinkan (hanya pembuat atau Admin yang bisa mengubah).', 'warn');
+      }
+      for (const id of ids) if (S.items.get(id)?.lv === snap.get(id)) S.queue.delete(id);
+      saveCache(); ping();
+    }
+    for (let guard = 0; guard < 50; guard++) {
+      const r = await rpc('ahg_sync', { p_token: S.token, p_after: S.seq });
+      if (who !== S.token) return;
+      if (!r?.ok) { if (r?.err === 'auth') return authLost(); throw new Error('server menolak'); }
+      if (r.me) { S.skew = Date.now() - Date.parse(r.me.last_seen); S.me = r.me; }
+      if (JSON.stringify(r.users) !== JSON.stringify(S.users)) { S.users = r.users || []; changed = true; }
+      for (const x of r.rows || []) {
+        const it = { id: x.id, kind: x.kind, owner: x.owner, to: x.to || null, data: x.data || {}, created: Number(x.created), updated: Number(x.updated), deleted: !!x.deleted, seq: Number(x.seq) };
+        const cur = S.items.get(it.id);
+        if (!S.queue.has(it.id)) {
+          if (!cur || JSON.stringify({ ...cur, lv: 0 }) !== JSON.stringify({ ...it, lv: 0 })) changed = true;
+          if (S.loaded && !cur && !it.deleted) notifyNew(it);
+          S.items.set(it.id, it);
+        }
+        S.seq = Math.max(S.seq, it.seq);
+      }
+      if (!r.more) break;
+    }
+    if (changed) saveCache();
+    S.loaded = true; S.sync.at = new Date(); S.sync.err = '';
+  } catch (e) { S.sync.err = e?.message === 'offline' ? 'offline — tersimpan di perangkat ini' : (e?.message || String(e)); }
+  finally { S.sync.busy = false; }
+  if (S.sync.again) { S.sync.again = false; return syncNow(); }
+  if (changed) { render(); if (S.view === 'chat' && !document.hidden) markRead(); } else { showSync(); renderUsers(); }
+}
+// realtime: supabase broadcast pings (no data inside), plus a 15 s check that also keeps "online" fresh
+let sb = null, chan = null;
+async function liveStart() {
+  try {
+    if (!window.supabase) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    sb ||= window.supabase.createClient(SB_URL, SB_KEY);
+    liveStop();
+    chan = sb.channel('ahg-live').on('broadcast', { event: 'chg' }, () => syncNow()).subscribe();
+  } catch {}
+}
+function liveStop() { if (sb && chan) sb.removeChannel(chan); chan = null; }
+function ping() { try { chan?.send({ type: 'broadcast', event: 'chg', payload: { t: Date.now() } }); } catch {} }
+const syncText = () => S.sync.err ? '⚠ ' + S.sync.err : S.sync.busy || S.queue.size ? '⏳ Menyimpan…' : S.sync.at ? '☁ Tersinkron ' + hm(S.sync.at) : '☁ Menghubungkan…';
+function showSync() { $$('.sync').forEach(e => { e.textContent = syncText(); e.classList.toggle('err', !!S.sync.err); }); }
+
+// ---------- files (chat attachments, cash receipts) ----------
+const fileUrls = new Map();
+const readB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = rej; r.readAsDataURL(f); });
+async function shrink(file, max, q) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image(); img.src = url; await img.decode();
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', q);
+  } finally { URL.revokeObjectURL(url); }
+}
+async function prepFile(file) { // → {fid, name, mime, size, data(base64), thumb?}
+  const isImg = /^image\/(png|jpe?g|webp|heic|heif|bmp)$/i.test(file.type);
+  let name = file.name || 'file', mime = file.type || 'application/octet-stream', data, thumb = '';
+  if (isImg) {
+    try {
+      thumb = await shrink(file, 360, 0.7);
+      if (file.size > 1.5e6 || /hei[cf]/i.test(file.type)) { data = (await shrink(file, 2560, 0.85)).split(',')[1]; mime = 'image/jpeg'; name = name.replace(/\.\w+$/, '') + '.jpg'; }
+    } catch {}
+  }
+  if (!data) { if (file.size > 8e6) throw new Error(`"${name}" terlalu besar (maks 8 MB).`); data = await readB64(file); }
+  return { fid: uid() + uid().slice(0, 6), name, mime, size: Math.round(data.length * 3 / 4), data, thumb };
+}
+async function uploadFile(f) {
+  const r = await rpc('ahg_file_put', { p_token: S.token, p_id: f.fid, p_name: f.name, p_mime: f.mime, p_data: f.data });
+  if (!r?.ok) throw new Error(r?.err === 'size' ? 'File terlalu besar.' : 'Upload gagal.');
+  return { id: f.fid, name: f.name, mime: f.mime, size: f.size, thumb: f.thumb || '' };
+}
+async function fileUrl(id) {
+  if (fileUrls.has(id)) return fileUrls.get(id);
+  const r = await rpc('ahg_file_get', { p_token: S.token, p_id: id });
+  if (!r?.ok) throw new Error('File tidak ditemukan.');
+  const bin = atob(r.data), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([u8], { type: r.mime })); fileUrls.set(id, url); return url;
+}
+function saveAs(url, name) { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+function saveBytes(u8, name, mime) { const url = URL.createObjectURL(new Blob([u8], { type: mime })); saveAs(url, name); setTimeout(() => URL.revokeObjectURL(url), 4000); }
+const fileIcon = m => /^image\//.test(m) ? '🖼' : /pdf/.test(m) ? '📕' : /sheet|excel|csv/.test(m) ? '📗' : /word|document/.test(m) ? '📘' : /zip|rar|7z/.test(m) ? '🗜' : /audio/.test(m) ? '🎵' : /video/.test(m) ? '🎬' : '📄';
+function filesHtml(files = []) {
+  return files.length ? `<div class="atts">${files.map(f => f.thumb
+    ? `<button type="button" class="att-img" data-a="openFile" data-id="${esc(f.id)}" data-name="${esc(f.name)}" data-mime="${esc(f.mime)}"><img src="${esc(f.thumb)}" alt="${esc(f.name)}"></button>`
+    : `<button type="button" class="att-file" data-a="openFile" data-id="${esc(f.id)}" data-name="${esc(f.name)}" data-mime="${esc(f.mime)}"><span class="fi">${fileIcon(f.mime)}</span><span class="fn">${esc(f.name)}<small>${fsize(f.size || 0)} · unduh</small></span></button>`).join('')}</div>` : '';
+}
+
+// ---------- notifications ----------
+const notifyPref = () => ({ sound: true, browser: false, rem: 'all', ...jget('notify', {}) });
+let audioCtx = null;
+function beep() {
+  if (!notifyPref().sound) return;
+  try { audioCtx ||= new AudioContext(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.0001, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35); o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.4); } catch {}
+}
+function sysNotify(title, body) {
+  if (!notifyPref().browser || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try { new Notification(title, { body, tag: 'ahg-' + title }); } catch {}
+}
+function notifyNew(it) {
+  if (it.owner === S.me.name) return;
+  if (it.kind === 'msg') {
+    const conv = convOf(it), viewing = S.view === 'chat' && S.chat.conv === conv && !document.hidden;
+    if (viewing) return;
+    const who = uname(it.owner), txt = (it.data.text || (it.data.files?.length ? '📎 lampiran' : '')).slice(0, 120);
+    toast(`${it.to ? '🤫 ' : '💬 '}<b>${esc(who)}</b>: ${esc(txt)}`, 'msg', () => { S.chat.conv = conv; go('chat'); });
+    beep(); sysNotify((it.to ? 'Whisper dari ' : 'Chat: ') + who, txt);
+  } else if (it.kind === 'reminder') {
+    toast(`⏰ <b>${esc(uname(it.owner))}</b> membuat reminder: ${esc(it.data.title || '')}`, 'info', () => go('reminder'));
+  } else if (it.kind === 'comment') {
+    const t = S.items.get(it.data.task);
+    if (t && (t.owner === S.me.name || t.data.assign === S.me.name)) { toast(`💬 <b>${esc(uname(it.owner))}</b> mengomentari task “${esc(t.data.title || 'Tanpa judul')}”`, 'info', () => openTask(t.id)); beep(); }
+  } else if (it.kind === 'task' && it.data.assign === S.me.name) {
+    toast(`✅ <b>${esc(uname(it.owner))}</b> menugaskan task kepadamu: ${esc(it.data.title || '')}`, 'info', () => openTask(it.id)); beep();
+  }
+}
+function checkDue() { // reminder alarms while the page is open
+  if (!S.me) return; const np = notifyPref(); if (np.rem === 'off') return;
+  const done = jget('due.' + S.me.name, {}), t = Date.now(); let fired = false;
+  for (const r of live('reminder')) {
+    if (r.data.done || done[r.id] || !r.data.date || (np.rem === 'mine' && r.owner !== S.me.name)) continue;
+    const due = pYmd(r.data.date); const [h, m] = (r.data.time || '08:00').split(':').map(Number); due.setHours(h || 0, m || 0);
+    if (due <= t && t - due < 864e5) { done[r.id] = t; fired = true; toast(`⏰ Reminder: <b>${esc(r.data.title)}</b>${r.data.time ? ' · ' + r.data.time : ''}`, 'warn', () => go('reminder'), 15000); beep(); sysNotify('Reminder', r.data.title); }
+  }
+  if (fired) LS.set('due.' + S.me.name, JSON.stringify(done));
+}
+function toast(html, type = 'info', onClick, ms = 6000) {
+  const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = html;
+  el.onclick = () => { el.remove(); onClick?.(); };
+  $('#toasts').appendChild(el); setTimeout(() => el.remove(), ms);
+}
+
+// ---------- theme ----------
+const theme = () => ({ mode: 'auto', accent: '#1a8566', scale: 100, ...jget('theme', {}) });
+function applyTheme() {
+  const t = theme(), r = document.documentElement;
+  if (t.mode === 'auto') delete r.dataset.theme; else r.dataset.theme = t.mode;
+  r.style.setProperty('--acc', t.accent); document.body.style.zoom = t.scale === 100 ? '' : t.scale / 100;
+  $('meta[name=theme-color]')?.setAttribute('content', t.accent);
+}
+function setTheme(p) { LS.set('theme', JSON.stringify({ ...theme(), ...p })); applyTheme(); savePref({ theme: theme() }); }
+function savePref(p) { if (!S.me) return; const cur = pref(); if (cur) put({ ...cur, data: { ...cur.data, ...p } }, true); else create('pref', p); }
+
+// ---------- login ----------
+const LOGIN_ERR = { name: 'Nama pengguna 3–32 karakter: huruf kecil, angka, titik, garis bawah atau minus.', pass: 'Password minimal 4 karakter.', wrong: 'Password salah.', locked: 'Terlalu banyak percobaan salah. Coba lagi 15 menit lagi.' };
+async function login(name, pass, remember) {
+  name = String(name || '').trim().toLowerCase();
+  if (!/^[a-z0-9._-]{3,32}$/.test(name)) throw new Error(LOGIN_ERR.name);
+  if ((pass || '').length < 4) throw new Error(LOGIN_ERR.pass);
+  const r = await rpc('ahg_login', { p_name: name, p_pass: pass }).catch(e => { throw new Error('Tidak bisa menghubungi server (' + e.message + ').'); });
+  if (!r?.ok) throw new Error(LOGIN_ERR[r?.err] || 'Gagal masuk.');
+  S.token = r.token; S.me = { ...r.me, fresh: true }; S.skew = Date.now() - Date.parse(r.me.last_seen);
+  const sess = JSON.stringify({ token: r.token, name: r.me.name });
+  if (remember) { LS.set('session', sess); SS.del('session'); } else { SS.set('session', sess); LS.del('session'); }
+  LS.set('lastuser', r.me.name);
+  start(r.new ? `Selamat datang, <b>${esc(r.me.name)}</b>! Akunmu sudah dibuat — ingat password-nya.` : '');
+}
+function start(msg) {
+  loadCache(); S.loaded = false; S.view = 'reminder'; S.chat.conv = 'g'; S.dlg = null;
+  const t = prefData().theme; if (t && !LS.get('theme')) { LS.set('theme', JSON.stringify(t)); applyTheme(); }
+  render(); liveStart(); syncNow().then(() => { const t2 = prefData().theme; if (t2 && JSON.stringify(t2) !== JSON.stringify(theme())) { LS.set('theme', JSON.stringify(t2)); applyTheme(); } checkDue(); });
+  if (msg) toast(msg, 'info', null, 9000);
+}
+function clearSession() { LS.del('session'); SS.del('session'); liveStop(); S.token = ''; S.me = null; S.items = new Map(); S.queue = new Set(); S.seq = 0; S.users = []; closeAll(); }
+async function logout() {
+  if (S.queue.size) await syncNow().catch(() => {});
+  rpc('ahg_away', { p_token: S.token, p_logout: true }, { once: true }).catch(() => {});
+  clearSession(); render();
+}
+function authLost() {
+  const name = S.me?.name; clearSession();
+  S.loginMsg = 'Sesi berakhir (password direset/diubah atau akun dihapus). Silakan masuk lagi.'; render();
+  if (name) { const u = $('#l-user'); if (u) u.value = name; }
+}
+
+// ---------- render ----------
+const app = () => $('#app');
+const setHTML = (el, h) => { if (el && el._h !== h) { el.innerHTML = h; el._h = h; } }; // untouched DOM = clicks never land on a replaced node
+function render() {
+  if (!S.me) { renderLogin(); return; }
+  if (!$('.shell')) renderShell();
+  renderNav(); renderMain(); renderUsers(); showSync(); refreshDialog();
+}
+function renderLogin() {
+  const last = LS.get('lastuser') || '';
+  app().innerHTML = `<div class="login"><form class="lcard" id="login-form" autocomplete="on">
+    <div class="lbrand"><span class="logo big">AHG</span><div><h1>Virtual Work AHG</h1><p class="muted">Ruang kerja tim — reminder, chat, task & kasbon</p></div></div>
+    <label>Nama pengguna<input id="l-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(last)}" placeholder="mis. budi" required></label>
+    <label>Password<span class="pw"><input id="l-pass" name="password" type="password" autocomplete="current-password" required><button type="button" class="ib" data-a="pwShow" title="Tampilkan">👁</button></span></label>
+    <label class="chk-l"><input type="checkbox" id="l-rem" checked> Tetap masuk di perangkat ini</label>
+    <p class="err" id="l-err">${esc(S.loginMsg || '')}</p>
+    <button class="btn primary big" id="l-btn" type="submit">Masuk</button>
+    <p class="muted small">Belum punya akun? Ketik nama pengguna & password baru — akun dibuat otomatis saat pertama masuk.</p>
+  </form></div>`;
+  S.loginMsg = '';
+  (last ? $('#l-pass') : $('#l-user')).focus();
+}
+function renderShell() {
+  app().innerHTML = `<div class="shell">
+    <header class="top">
+      <div class="clock" id="clock"><b id="clk-t">--:--:--</b><span id="clk-d"></span></div>
+      <div class="brand"><span class="logo">AHG</span><span class="bt">Virtual Work AHG</span></div>
+      <div class="top-r"><span class="sync"></span><button type="button" class="me-btn" data-a="profile" id="me-btn"></button></div>
+    </header>
+    <aside class="side" id="side"></aside>
+    <main id="main"></main>
+    <aside class="upanel" id="users"></aside>
+    <nav class="bnav" id="bnav"></nav>
+  </div>`;
+  tickClock();
+}
+function tickClock() {
+  const d = new Date(), t = $('#clk-t'); if (!t) return;
+  t.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const ds = `${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const de = $('#clk-d'); if (de.textContent !== ds) de.textContent = ds;
+}
+function badges() {
+  const read = prefData().read || {}, me = S.me.name; let chat = 0; const per = {};
+  for (const m of live('msg')) if (m.owner !== me) { const c = convOf(m); if (m.created > (read[c] || 0)) { per[c] = (per[c] || 0) + 1; chat++; } }
+  const remOpen = live('reminder').filter(r => !r.data.done && r.data.date && r.data.date <= today()).length;
+  const routine = routineToday().filter(x => !x.done).length;
+  return { chat, per, rem: remOpen, task: routine };
+}
+function renderNav() {
+  const b = badges(), on = S.users.filter(online).length;
+  const items = ['reminder', 'chat', 'task', 'cash', 'users', ...(isAdmin() ? ['admin'] : [])];
+  const n = { reminder: b.rem, chat: b.chat, task: b.task, users: on };
+  setHTML($('#side'), items.map(v => `<button type="button" class="nav ${S.view === v ? 'on' : ''} nv-${v}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}</span><span class="lb">${VIEWS[v][1]}</span>${n[v] ? `<span class="n ${v === 'chat' ? 'hot' : v === 'users' ? 'grn' : ''}">${n[v]}</span>` : ''}</button>`).join('')
+    + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
+  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
+  setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
+  document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
+}
+function go(v) {
+  if (v === 'admin' && !isAdmin()) v = 'reminder';
+  if (S.view !== v) { S.view = v; window.scrollTo(0, 0); }
+  render();
+  if (v === 'chat') markRead();
+}
+// re-render keeps typed text, focus and caret in inputs that have an id (unless data-keep="0")
+function keep(root, fn) {
+  const vals = {}; $$('input[id],textarea[id],select[id]', root).forEach(e => { if (e.dataset.keep !== '0' && e.type !== 'file') vals[e.id] = e.type === 'checkbox' ? e.checked : e.value; });
+  const f = document.activeElement, fid = root.contains(f) ? f?.id : null; let ss, se; try { ss = f.selectionStart; se = f.selectionEnd; } catch {}
+  const sc = {}; $$('[data-scroll]', root).forEach(e => sc[e.dataset.scroll] = [e.scrollTop, e.scrollHeight - e.scrollTop - e.clientHeight < 60]);
+  fn();
+  for (const [id, v] of Object.entries(vals)) { const e = document.getElementById(id); if (e && e.dataset.keep !== '0' && root.contains(e)) { if (e.type === 'checkbox') e.checked = v; else e.value = v; } }
+  if (fid) { const e = document.getElementById(fid); if (e) { e.focus({ preventScroll: true }); try { if (ss != null) e.setSelectionRange(ss, se); } catch {} } }
+  $$('[data-scroll]', root).forEach(e => { const s = sc[e.dataset.scroll]; if (!s || s[1]) e.scrollTop = e.scrollHeight; else e.scrollTop = s[0]; });
+}
+function renderMain() {
+  const m = $('#main'); if (!m) return;
+  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
+  const sameChat = S.view === 'chat' && m.dataset.view === 'chat' && m.dataset.conv === S.chat.conv && $('#composer', m);
+  if (sameChat) { // keep the composer (typing, IME, file picker) — refresh only lists and header
+    const tmp = document.createElement('div'); tmp.innerHTML = html;
+    for (const sel of ['.cv-l', '.c-h', '.cv-new']) { const a = $(sel, m), b = $(sel, tmp); if (a && b && a.innerHTML !== b.innerHTML) a.innerHTML = b.innerHTML; }
+    const l = $('#c-list', m), nl = $('#c-list', tmp);
+    if (l.innerHTML !== nl.innerHTML) { const atEnd = l.scrollHeight - l.scrollTop - l.clientHeight < 60, top = l.scrollTop; l.innerHTML = nl.innerHTML; l.scrollTop = atEnd ? l.scrollHeight : top; }
+    const sb = $('.send', m); sb.disabled = S.chat.sending; sb.textContent = S.chat.sending ? '⏳' : 'Kirim';
+    return;
+  }
+  if (m._h === html && m.dataset.view === S.view) return;
+  m._h = html;
+  keep(m, () => { m.innerHTML = html; m.dataset.view = S.view; m.dataset.conv = S.view === 'chat' ? S.chat.conv : ''; });
+  if (S.view === 'chat') { const c = $('#c-text'); if (c && !c.dataset.init) { c.dataset.init = 1; autoGrow(c); } }
+}
+function autoGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(160, t.scrollHeight + 2) + 'px'; }
+
+// ---------- users panel ----------
+function lastSeenText(u) {
+  if (online(u)) return '<span class="on-t">● Online</span>';
+  if (!u.last_seen) return 'Belum pernah online';
+  return 'Terakhir online ' + ago(Date.parse(u.last_seen) + S.skew);
+}
+function userList(compact) {
+  const list = [...S.users].sort((a, b) => (online(b) - online(a)) || (Date.parse(b.last_seen || 0) - Date.parse(a.last_seen || 0)) || a.name.localeCompare(b.name));
+  const unread = badges().per;
+  return list.map(u => { const me = u.name === S.me.name, w = unread['w:' + u.name] || 0;
+    return `<div class="urow ${me ? 'me' : ''}" ${me ? '' : `data-a="whisper" data-u="${esc(u.name)}" title="Whisper ke ${esc(uname(u.name))}"`}>
+      <span class="avw">${av(u.name)}<i class="st ${online(u) ? 'on' : ''}"></i></span>
+      <span class="ui"><b>${esc(uname(u.name))}${me ? ' <small>(kamu)</small>' : ''}${u.role === 'admin' ? ' <small class="adm">Admin</small>' : ''}</b><small>@${esc(u.name)} · ${lastSeenText(u)}${u.reset ? ' · <span class="warn-t">password direset</span>' : ''}</small></span>
+      ${w ? `<span class="n hot">${w}</span>` : me || compact ? '' : '<span class="wh">🤫</span>'}
+    </div>`; }).join('');
+}
+function renderUsers() {
+  const el = $('#users'); if (!el || !S.me) return;
+  const on = S.users.filter(online).length;
+  setHTML(el, `<div class="up-h"><b>👥 Users</b><span class="muted small">${on} online · ${S.users.length} anggota</span></div><div class="ulist">${userList()}</div><p class="muted small up-f">Klik nama untuk kirim chat whisper.</p>`);
+  if (S.view === 'users') setHTML($('#main .ulist'), userList());
+}
+function vUsersPage() {
+  const on = S.users.filter(online).length;
+  return `<div class="head"><h1>👥 Users <span class="hc">${on} online · ${S.users.length} anggota</span></h1></div>
+  <div class="card ulist big">${userList()}</div><p class="muted small">Klik nama untuk kirim chat whisper (pesan pribadi).</p>`;
+}
+
+// ---------- REMINDER ----------
+function vReminder() {
+  const R = S.rem, first = new Date(R.y, R.m, 1), start = addDays(first, -((first.getDay() + 6) % 7));
+  const rems = live('reminder'), byDate = {};
+  for (const r of rems) if (r.data.date) (byDate[r.data.date] ||= []).push(r);
+  const td = today(); let cells = '';
+  const weeks = Math.ceil(((first.getDay() + 6) % 7 + new Date(R.y, R.m + 1, 0).getDate()) / 7);
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(start, i), ds = ymd(d), list = (byDate[ds] || []).sort((a, b) => (a.data.time || '99').localeCompare(b.data.time || '99'));
+    cells += `<button type="button" class="day ${d.getMonth() !== R.m ? 'out' : ''} ${ds === td ? 'today' : ''} ${ds === R.sel ? 'sel' : ''} ${d.getDay() === 0 ? 'sun' : ''}" data-a="remDay" data-d="${ds}">
+      <span class="dn">${d.getDate()}</span>
+      ${list.length ? `<span class="dots">${list.slice(0, 4).map(r => `<i style="--c:${PALETTE[r.data.color]?.[1] || PALETTE.blue[1]}" class="${r.data.done ? 'dn-ok' : ''}"></i>`).join('')}${list.length > 4 ? '<em>+' + (list.length - 4) + '</em>' : ''}</span>
+      <span class="evs">${list.slice(0, 3).map(r => `<span class="ev ${r.data.done ? 'ok' : ''}" style="--c:${PALETTE[r.data.color]?.[1] || PALETTE.blue[1]}">${r.data.time ? r.data.time + ' ' : ''}${esc(r.data.title)}</span>`).join('')}${list.length > 3 ? `<span class="more">+${list.length - 3} lagi</span>` : ''}</span>` : ''}
+    </button>`;
+  }
+  const yrs = []; for (let y = now0.getFullYear() - 5; y <= now0.getFullYear() + 5; y++) yrs.push(y);
+  if (!yrs.includes(R.y)) yrs.push(R.y);
+  // list
+  let list = rems.slice();
+  if (R.sel) list = list.filter(r => r.data.date === R.sel);
+  else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); }
+  if (R.st === 'open') list = list.filter(r => !r.data.done); else if (R.st === 'done') list = list.filter(r => r.data.done);
+  if (R.who) list = list.filter(r => r.owner === R.who);
+  const key = r => (r.data.date || '9999') + ' ' + (r.data.time || '99:99');
+  list.sort((a, b) => (a.data.done - b.data.done) || (a.data.done ? (b.data.doneAt || 0) - (a.data.doneAt || 0) : key(a).localeCompare(key(b))));
+  const counts = { all: rems.length, open: rems.filter(r => !r.data.done).length, done: rems.filter(r => r.data.done).length };
+  const owners = [...new Set(rems.map(r => r.owner))];
+  const addDate = R.addDate || R.sel || td;
+  return `<div class="head"><h1>⏰ Reminder</h1><div class="tools"><button type="button" class="btn sm" data-a="remToday">Hari ini</button></div></div>
+  <section class="card cal">
+    <div class="cal-h" id="cal-h">
+      <button type="button" class="ib big" data-a="remMon" data-n="-1" title="Bulan sebelumnya">‹</button>
+      <div class="cal-t"><select id="rem-m" data-ch="remM" data-keep="0">${MONTHS.map((m, i) => `<option value="${i}" ${i === R.m ? 'selected' : ''}>${m}</option>`).join('')}</select>
+      <select id="rem-y" data-ch="remY" data-keep="0">${yrs.sort().map(y => `<option ${y === R.y ? 'selected' : ''}>${y}</option>`).join('')}</select></div>
+      <button type="button" class="ib big" data-a="remMon" data-n="1" title="Bulan berikutnya">›</button>
+    </div>
+    <div class="cal-g wk">${['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => `<span>${d}</span>`).join('')}</div>
+    <div class="cal-g days" id="cal-days">${cells}</div>
+  </section>
+  <form class="card qadd" id="rem-add">
+    <input id="ra-title" placeholder="➕ Tulis reminder baru…" maxlength="200" required>
+    <input id="ra-date" type="date" value="${addDate}" data-keep="0" data-ch="raDate" required>
+    <input id="ra-time" type="time" title="Jam (opsional)">
+    <select id="ra-color" title="Warna">${Object.entries(PALETTE).map(([k, [n]]) => `<option value="${k}">${n}</option>`).join('')}</select>
+    <input id="ra-note" placeholder="Catatan (opsional)" maxlength="2000">
+    <button class="btn primary" type="submit">Tambah</button>
+  </form>
+  <div class="lhead">
+    <div class="chips">
+      ${[['open', 'Belum selesai'], ['done', 'Selesai'], ['all', 'Semua']].map(([k, l]) => `<button type="button" class="chip ${R.st === k ? 'on' : ''}" data-a="remSt" data-k="${k}">${l} <small>${counts[k]}</small></button>`).join('')}
+      ${R.sel ? `<button type="button" class="chip on acc" data-a="remDay" data-d="${R.sel}">📅 ${dText(R.sel)} ✕</button>`
+    : `<select id="rem-scope" data-ch="remScope" data-keep="0" class="chip-sel"><option value="all" ${R.scope === 'all' ? 'selected' : ''}>Semua tanggal</option><option value="month" ${R.scope === 'month' ? 'selected' : ''}>${MONTHS[R.m]} ${R.y}</option></select>`}
+      <select id="rem-who" data-ch="remWho" data-keep="0" class="chip-sel"><option value="">Semua pembuat</option>${owners.map(o => `<option value="${esc(o)}" ${R.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select>
+    </div>
+  </div>
+  <div class="rlist">${list.length ? list.map(remRow).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Belum ada reminder.'}</p>`}</div>`;
+}
+function remRow(r) {
+  const d = r.data, c = PALETTE[d.color]?.[1] || PALETTE.blue[1], td = today();
+  const overdue = !d.done && d.date && (d.date < td || (d.date === td && d.time && d.time < hm(Date.now())));
+  return `<div class="rrow ${d.done ? 'done' : ''}" style="--c:${c}">
+    <button type="button" class="rchk" data-a="remDone" data-id="${r.id}" title="${d.done ? 'Tandai belum selesai' : 'Tandai selesai'}">${d.done ? '✓' : ''}</button>
+    <div class="rb">
+      <div class="rt">${esc(d.title)}</div>
+      ${d.note ? `<div class="rn">${linkify(d.note)}</div>` : ''}
+      <div class="rm">
+        <span class="due ${overdue ? 'late' : ''}">📅 ${d.date ? dText(d.date) : '—'}${d.time ? ' · ' + d.time : ''}${overdue ? ' · terlambat' : ''}</span>
+        <span>✍️ Dibuat ${av(r.owner, 'xs')} <b>${esc(uname(r.owner))}</b> · ${dtText(r.created)}</span>
+        ${d.done ? `<span class="okm">✅ Selesai oleh ${av(d.doneBy, 'xs')} <b>${esc(uname(d.doneBy))}</b> · ${dtText(d.doneAt)}</span>` : ''}
+      </div>
+    </div>
+    ${canEdit(r) ? `<div class="ra"><button type="button" class="ib" data-a="remEdit" data-id="${r.id}" title="Ubah">✏️</button><button type="button" class="ib" data-a="remDel" data-id="${r.id}" title="Hapus">🗑</button></div>` : ''}
+  </div>`;
+}
+function remDialog(r) {
+  const d = r.data;
+  openDlg(`<form class="dlg" id="rem-edit" data-id="${r.id}"><h2>Ubah reminder</h2>
+    <label>Judul<input id="re-title" value="${esc(d.title)}" maxlength="200" required></label>
+    <div class="row2"><label>Tanggal<input id="re-date" type="date" value="${esc(d.date)}" required></label><label>Jam<input id="re-time" type="time" value="${esc(d.time || '')}"></label></div>
+    <label>Warna<span class="swatches">${Object.entries(PALETTE).map(([k, [n, h]]) => `<label class="sw" title="${n}"><input type="radio" name="re-color" value="${k}" ${(d.color || 'blue') === k ? 'checked' : ''}><i style="--c:${h}"></i></label>`).join('')}</span></label>
+    <label>Catatan<textarea id="re-note" rows="4" maxlength="2000">${esc(d.note || '')}</textarea></label>
+    <p class="muted small">Dibuat oleh ${esc(uname(r.owner))} · ${dtText(r.created)}</p>
+    <div class="dlg-f"><button type="button" class="btn danger" data-a="remDel" data-id="${r.id}">Hapus</button><span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
+  </form>`);
+}
+
+// ---------- CHAT ----------
+const convOf = m => m.to ? 'w:' + (m.owner === S.me.name ? m.to : m.owner) : 'g';
+const convName = c => c === 'g' ? '🌐 Global Chat' : '🤫 ' + uname(c.slice(2));
+function convs() {
+  const map = new Map([['g', { c: 'g', last: 0, n: 0 }]]);
+  for (const m of live('msg')) { const c = convOf(m), x = map.get(c) || { c, last: 0, n: 0 }; x.last = Math.max(x.last, m.created); x.n++; map.set(c, x); }
+  if (S.chat.conv !== 'g' && !map.has(S.chat.conv)) map.set(S.chat.conv, { c: S.chat.conv, last: Date.now(), n: 0 });
+  return [...map.values()].sort((a, b) => (a.c === 'g' ? -1 : b.c === 'g' ? 1 : b.last - a.last));
+}
+function markRead() {
+  const c = S.chat.conv, msgs = live('msg').filter(m => convOf(m) === c && m.owner !== S.me.name);
+  const last = Math.max(0, ...msgs.map(m => m.created)), read = prefData().read || {};
+  if (last > (read[c] || 0)) { savePref({ read: { ...read, [c]: last } }); renderNav(); renderUsers(); if (S.view === 'chat') renderMain(); }
+}
+function vChat() {
+  const c = S.chat.conv, per = badges().per;
+  const all = live('msg').filter(m => convOf(m) === c).sort((a, b) => a.created - b.created || a.id.localeCompare(b.id));
+  const msgs = all.slice(-S.chat.limit);
+  let out = '', lastDay = '', lastWho = '', lastT = 0;
+  for (const m of msgs) {
+    const day = ymd(new Date(m.created));
+    if (day !== lastDay) { out += `<div class="dsep"><span>${day === today() ? 'Hari ini' : day === ymd(addDays(new Date(), -1)) ? 'Kemarin' : dText(day)}</span></div>`; lastDay = day; lastWho = ''; }
+    const mine = m.owner === S.me.name, cont = lastWho === m.owner && m.created - lastT < 5 * 60e3;
+    out += `<div class="msg ${mine ? 'mine' : ''} ${cont ? 'cont' : ''} ${m.to ? 'wh' : ''}">
+      ${mine ? '' : `<span class="mav">${cont ? '' : av(m.owner)}</span>`}
+      <div class="bub">
+        ${cont ? '' : `<div class="mh"><b style="color:${ucolor(m.owner)}">${esc(uname(m.owner))}</b>${m.to ? ` <span class="whl">🤫 whisper${mine ? ' ke ' + esc(uname(m.to)) : ''}</span>` : ''}</div>`}
+        ${m.data.text ? `<div class="mt">${linkify(m.data.text)}</div>` : ''}
+        ${filesHtml(m.data.files)}
+        <div class="mf"><span title="${dtText(m.created)}">${hm(m.created)}</span>${mine || isAdmin() ? `<button type="button" class="mdel" data-a="msgDel" data-id="${m.id}" title="Hapus pesan">🗑</button>` : ''}</div>
+      </div></div>`;
+    lastWho = m.owner; lastT = m.created;
+  }
+  const others = S.users.filter(u => u.name !== S.me.name);
+  const cl = convs();
+  const convBtns = cl.map(x => `<button type="button" class="conv ${x.c === c ? 'on' : ''}" data-a="conv" data-c="${esc(x.c)}">${x.c === 'g' ? '<span class="av gl">🌐</span>' : `<span class="avw">${av(x.c.slice(2))}<i class="st ${online(user(x.c.slice(2))) ? 'on' : ''}"></i></span>`}<span class="cn">${esc(x.c === 'g' ? 'Global Chat' : uname(x.c.slice(2)))}<small>${x.c === 'g' ? 'Semua anggota' : 'Whisper · pribadi'}</small></span>${per[x.c] ? `<span class="n hot">${per[x.c]}</span>` : ''}</button>`).join('');
+  return `<div class="chat">
+    <aside class="convs"><div class="cv-h"><b>Percakapan</b></div><div class="cv-l">${convBtns}</div>
+      <label class="cv-new">🤫 Whisper baru<select id="wh-new" data-ch="whNew" data-keep="0"><option value="">Pilih anggota…</option>${others.map(u => `<option value="${esc(u.name)}">${esc(uname(u.name))} (@${esc(u.name)})</option>`).join('')}</select></label>
+    </aside>
+    <section class="cpane">
+      <div class="c-h"><select class="m-conv" id="m-conv" data-ch="convSel" data-keep="0">${cl.map(x => `<option value="${esc(x.c)}" ${x.c === c ? 'selected' : ''}>${esc(convName(x.c))}${per[x.c] ? ` (${per[x.c]})` : ''}</option>`).join('')}<option value="+">＋ Whisper baru…</option></select>
+        <b class="d-conv">${esc(convName(c))}</b><span class="muted small">${c === 'g' ? `${S.users.length} anggota · ${S.users.filter(online).length} online` : `${online(user(c.slice(2))) ? '● Online' : user(c.slice(2)) ? lastSeenText(user(c.slice(2))) : ''} · hanya kalian berdua yang bisa melihat`}</span></div>
+      <div class="c-list" id="c-list" data-scroll="chat">${all.length > msgs.length ? `<button type="button" class="btn sm more" data-a="chatMore">Muat pesan lebih lama (${all.length - msgs.length})</button>` : ''}${out || `<p class="empty">${c === 'g' ? 'Belum ada pesan. Sapa timmu! 👋' : 'Belum ada whisper. Pesan di sini hanya terlihat oleh kalian berdua.'}</p>`}</div>
+      <form class="composer ${c !== 'g' ? 'whm' : ''}" id="composer">
+        ${c !== 'g' ? `<div class="wh-bar">🤫 Whisper ke <b>${esc(uname(c.slice(2)))}</b> — orang lain tidak bisa melihat <button type="button" class="mini" data-a="conv" data-c="g">Kembali ke Global</button></div>` : ''}
+        <div class="pend" id="pend">${pendHtml()}</div>
+        <div class="c-row">
+          <label class="ib attach" title="Lampirkan gambar / file">📎<input type="file" id="c-file" multiple hidden data-ch="cFile"></label>
+          <button type="button" class="ib" data-a="whPick" title="Whisper ke anggota">🤫</button>
+          <textarea id="c-text" rows="1" placeholder="${c === 'g' ? 'Tulis pesan ke semua… (link, gambar, file)' : 'Tulis whisper…'}" data-ch="cText"></textarea>
+          <button class="btn primary send" type="submit" ${S.chat.sending ? 'disabled' : ''}>${S.chat.sending ? '⏳' : 'Kirim'}</button>
+        </div>
+      </form>
+    </section>
+  </div>`;
+}
+function pendHtml() { return S.chat.files.map((f, i) => `<span class="pf">${f.thumb ? `<img src="${f.thumb}" alt="">` : fileIcon(f.mime)} ${esc(f.name)} <small>${fsize(f.size)}</small><button type="button" class="ib" data-a="pendDel" data-i="${i}">✕</button></span>`).join(''); }
+async function addPending(files) {
+  for (const f of files) { try { S.chat.files.push(await prepFile(f)); } catch (e) { toast(esc(e.message), 'warn'); } }
+  const p = $('#pend'); if (p) p.innerHTML = pendHtml();
+}
+async function sendMsg() {
+  const t = $('#c-text'), text = t.value.trim(); if ((!text && !S.chat.files.length) || S.chat.sending) return;
+  const c = S.chat.conv, to = c === 'g' ? null : c.slice(2);
+  S.chat.sending = true; renderMain();
+  try {
+    const files = []; for (const f of S.chat.files) files.push(await uploadFile(f));
+    create('msg', { text: text.slice(0, 20000), files, ...(to ? { to } : {}) }, { to, quiet: 1 });
+    S.chat.files = []; const pe = $('#pend'); if (pe) pe.innerHTML = ''; const tt = $('#c-text'); if (tt) { tt.value = ''; autoGrow(tt); }
+  } catch (e) { toast('Gagal mengirim: ' + esc(e.message), 'warn'); }
+  S.chat.sending = false; render(); const l = $('#c-list'); if (l) l.scrollTop = l.scrollHeight; $('#c-text')?.focus();
+  markRead();
+}
+
+// ---------- TASK ----------
+const pins = () => prefData().pins || [];
+const comments = id => live('comment').filter(c => c.data.task === id).sort((a, b) => a.created - b.created);
+function routineToday() {
+  const d = new Date(), dow = (d.getDay() + 6) % 7 + 1, ds = ymd(d);
+  return live('task').filter(t => t.data.routine?.on && !t.data.archived && (t.data.routine.days || []).includes(dow))
+    .map(t => ({ t, done: !!S.items.get(ckId(t.id, ds))?.data.on && !S.items.get(ckId(t.id, ds))?.deleted }));
+}
+const ckId = (tid, ds) => 'ck-' + tid + '-' + ds;
+function taskList() {
+  const T = S.task, me = S.me.name, P = pins(), q = T.q.trim().toLowerCase();
+  let l = live('task');
+  if (T.tab === 'archive') l = l.filter(t => t.data.archived); else l = l.filter(t => !t.data.archived);
+  if (T.tab === 'pin') l = l.filter(t => P.includes(t.id));
+  if (T.tab === 'mine') l = l.filter(t => t.owner === me);
+  if (T.tab === 'assigned') l = l.filter(t => t.data.assign === me);
+  if (T.tab === 'done') l = l.filter(t => t.data.status === 'done');
+  if (T.tab === 'all') l = l.filter(t => t.data.status !== 'done' || P.includes(t.id));
+  if (T.who) l = l.filter(t => t.owner === T.who);
+  if (q) l = l.filter(t => [t.data.title, t.data.body, t.data.link, ...(t.data.items || []).map(i => i.t)].join(' ').toLowerCase().includes(q));
+  return l.sort((a, b) => (P.includes(b.id) - P.includes(a.id)) || b.updated - a.updated);
+}
+function vTask() {
+  const T = S.task, links = live('link').sort((a, b) => a.created - b.created), P = pins(), me = S.me.name;
+  const all = live('task').filter(t => !t.data.archived);
+  const n = { all: all.filter(t => t.data.status !== 'done' || P.includes(t.id)).length, pin: all.filter(t => P.includes(t.id)).length, routine: all.filter(t => t.data.routine?.on).length, mine: all.filter(t => t.owner === me).length, assigned: all.filter(t => t.data.assign === me).length, done: all.filter(t => t.data.status === 'done').length, archive: live('task').filter(t => t.data.archived).length };
+  const tabs = [['all', '📋 Aktif'], ['pin', '📌 Disematkan'], ['routine', '🔁 Rutin mingguan'], ['assigned', '🙋 Untukku'], ['mine', '✍️ Buatanku'], ['done', '✔ Selesai'], ['archive', '🗄 Arsip']];
+  const owners = [...new Set(live('task').map(t => t.owner))];
+  return `<div class="head"><h1>✅ Task</h1><div class="tools"><button type="button" class="btn primary" data-a="taskNew">＋ Task baru</button></div></div>
+  <section class="card links">
+    <div class="lk-h"><b>🔗 Link kerja</b><span class="muted small">Spreadsheet, Docs, Drive, dll — terlihat semua anggota</span></div>
+    <div class="lk-l">${links.map(l => `<span class="lk"><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link.</span>'}</div>
+    <form class="lk-add" id="link-add"><input id="lk-url" placeholder="Tempel link (https://docs.google.com/…)" required><input id="lk-title" placeholder="Nama link (opsional)" maxlength="80"><button class="btn" type="submit">＋ Link</button></form>
+  </section>
+  <div class="ttabs"><div class="chips scroll">${tabs.map(([k, l]) => `<button type="button" class="chip ${T.tab === k ? 'on' : ''}" data-a="taskTab" data-k="${k}">${l} <small>${n[k]}</small></button>`).join('')}</div>
+    ${T.tab !== 'routine' ? `<div class="tf"><input id="t-q" placeholder="🔍 Cari task…" data-ch="taskQ" value="${esc(T.q)}"><select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button></div>` : ''}
+  </div>
+  ${T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
+    ${l.length ? `<div class="grid ${T.layout}">${l.map(taskCard).join('')}</div>` : '<p class="empty">Tidak ada task di sini.</p>'}`; })()}`;
+}
+function taskCard(t) {
+  const d = t.data, P = pins(), cc = comments(t.id).length, col = NOTE_COLORS[d.color]?.[1];
+  const items = d.items || [], doneN = items.filter(i => i.d).length;
+  const late = d.due && d.status !== 'done' && d.due < today();
+  return `<article class="ncard ${col && d.color ? 'col' : ''} st-${d.status || 'todo'}" style="${col && d.color ? '--nc:' + col : ''}" data-a="taskOpen" data-id="${t.id}" tabindex="0">
+    <div class="nh"><h3>${esc(d.title || 'Tanpa judul')}</h3><button type="button" class="ib ${P.includes(t.id) ? 'on' : ''}" data-a="taskPin" data-id="${t.id}" title="${P.includes(t.id) ? 'Lepas sematan' : 'Sematkan / favorit'}">${P.includes(t.id) ? '★' : '☆'}</button></div>
+    ${d.body ? `<div class="nb">${linkify(d.body.slice(0, 600))}</div>` : ''}
+    ${items.length ? `<div class="cl">${items.slice(0, 6).map((it, i) => `<div class="cli ${it.d ? 'dn' : ''}"><button type="button" class="cb" data-a="taskItem" data-id="${t.id}" data-i="${i}">${it.d ? '☑' : '☐'}</button><span>${esc(it.t)}</span></div>`).join('')}${items.length > 6 ? `<span class="muted small">+${items.length - 6} item</span>` : ''}</div>` : ''}
+    ${d.link ? `<a class="tlink" href="${esc(d.link)}" target="_blank" rel="noopener" data-a="stop">🔗 ${esc(host(d.link))}</a>` : ''}
+    <div class="nf">
+      <button type="button" class="stb st-${d.status || 'todo'}" data-a="taskStatus" data-id="${t.id}" title="Ubah status">${STATUS[d.status || 'todo'][1]} ${STATUS[d.status || 'todo'][0]}</button>
+      ${d.routine?.on ? `<span class="tag">🔁 ${(d.routine.days || []).map(x => DSH[x % 7]).join(',')}</span>` : ''}
+      ${d.due ? `<span class="tag ${late ? 'late' : ''}">📅 ${dShort(d.due)}</span>` : ''}
+      ${d.assign ? `<span class="tag">🙋 ${esc(uname(d.assign))}</span>` : ''}
+      ${items.length ? `<span class="tag">☑ ${doneN}/${items.length}</span>` : ''}
+      ${cc ? `<span class="tag">💬 ${cc}</span>` : ''}
+      <span class="sp"></span><span class="who">${av(t.owner, 'xs')} ${esc(uname(t.owner))}</span><span class="muted">${ago(t.updated)}</span>
+    </div>
+  </article>`;
+}
+function vRoutine() {
+  const ws = addDays(weekStart(new Date()), S.task.week * 7), days = [...Array(7)].map((_, i) => addDays(ws, i)), td = today();
+  const list = live('task').filter(t => t.data.routine?.on && !t.data.archived).sort((a, b) => (a.data.title || '').localeCompare(b.data.title || ''));
+  let tot = 0, ok = 0;
+  const rows = list.map(t => `<tr><th><button type="button" class="linkish" data-a="taskOpen" data-id="${t.id}">${esc(t.data.title || 'Tanpa judul')}</button><small>${esc(uname(t.owner))}${t.data.assign ? ' → ' + esc(uname(t.data.assign)) : ''}</small></th>${days.map((d, i) => {
+    const ds = ymd(d), sch = (t.data.routine.days || []).includes(i + 1); if (!sch) return `<td class="na ${ds === td ? 'td' : ''}"></td>`;
+    const ck = S.items.get(ckId(t.id, ds)), on = ck && !ck.deleted && ck.data.on; tot++; if (on) ok++;
+    return `<td class="${ds === td ? 'td' : ''}"><button type="button" class="rck ${on ? 'on' : ''} ${!on && ds < td ? 'miss' : ''}" data-a="routineCk" data-id="${t.id}" data-d="${ds}" title="${on ? `Selesai oleh ${uname(ck.data.by)} · ${dtText(ck.data.at)}` : 'Tandai selesai'}">${on ? '✓' : ''}</button>${on ? `<small>${esc(uname(ck.data.by).split(' ')[0])}<br>${hm(ck.data.at)}</small>` : ''}</td>`;
+  }).join('')}</tr>`).join('');
+  return `<section class="card routine">
+    <div class="rt-h"><button type="button" class="ib big" data-a="weekNav" data-n="-1">‹</button><div><b>${dShort(ymd(days[0]))} – ${dShort(ymd(days[6]))}</b><small class="muted">${S.task.week === 0 ? 'Minggu ini' : S.task.week < 0 ? `${-S.task.week} minggu lalu` : `${S.task.week} minggu lagi`} · ${ok}/${tot} selesai</small></div><button type="button" class="ib big" data-a="weekNav" data-n="1">›</button>${S.task.week ? '<button type="button" class="btn sm" data-a="weekNav" data-n="0">Minggu ini</button>' : ''}<span class="sp"></span><button type="button" class="btn sm primary" data-a="taskNew" data-routine="1">＋ Task rutin</button></div>
+    <div class="prog"><i style="width:${tot ? ok / tot * 100 : 0}%"></i></div>
+    ${list.length ? `<div class="tbl-wrap"><table class="rtbl"><thead><tr><th>Pekerjaan rutin</th>${days.map(d => `<th class="${ymd(d) === td ? 'td' : ''}">${DSH[d.getDay()]}<small>${d.getDate()}/${d.getMonth() + 1}</small></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`
+      : '<p class="empty">Belum ada pekerjaan rutin. Buat task lalu aktifkan “Rutin mingguan” dan pilih harinya.</p>'}
+  </section>`;
+}
+function openTask(id, opts = {}) {
+  const t = id ? S.items.get(id) : null;
+  S.dlg = { type: 'task', id, routine: !!opts.routine };
+  if (S.view !== 'task' && !id) go('task');
+  const d = t?.data || { title: '', body: '', items: [], color: '', status: 'todo', due: '', assign: '', link: '', routine: { on: !!opts.routine, days: [] } };
+  const ro = t && !canEdit(t), others = S.users;
+  const dis = ro ? 'disabled' : '';
+  openDlg(`<form class="dlg ted ${d.color ? 'col' : ''}" id="task-form" style="${d.color ? '--nc:' + NOTE_COLORS[d.color][1] : ''}">
+    <div class="ed-bar"><b>${t ? (ro ? 'Task' : 'Ubah task') : 'Task baru'}</b><span class="sp"></span>${t ? `<button type="button" class="ib ${pins().includes(t.id) ? 'on' : ''}" data-a="taskPin" data-id="${t.id}" title="Sematkan / favorit">${pins().includes(t.id) ? '★' : '☆'}</button>` : ''}<button type="button" class="ib" data-a="close" title="Tutup">✕</button></div>
+    <input id="tf-title" class="e-title" placeholder="Judul task" value="${esc(d.title)}" maxlength="300" ${dis}>
+    <textarea id="tf-body" class="e-body" placeholder="Tulis detail task… (link otomatis bisa diklik)" ${dis}>${esc(d.body || '')}</textarea>
+    ${ro && d.body ? `<div class="nb ro-body">${linkify(d.body)}</div>` : ''}
+    <div class="cl-ed" id="tf-items">${(d.items || []).map((it, i) => clRow(it, i, ro)).join('')}</div>
+    ${ro ? '' : '<button type="button" class="btn sm" data-a="clAdd">＋ Item checklist</button>'}
+    <div class="tgrid">
+      <label>Status<select id="tf-status">${Object.entries(STATUS).map(([k, [l, ic]]) => `<option value="${k}" ${(d.status || 'todo') === k ? 'selected' : ''}>${ic} ${l}</option>`).join('')}</select></label>
+      <label>Tenggat<input id="tf-due" type="date" value="${esc(d.due || '')}" ${dis}></label>
+      <label>Ditugaskan ke<select id="tf-assign" ${dis}><option value="">— Tidak ada —</option>${others.map(u => `<option value="${esc(u.name)}" ${d.assign === u.name ? 'selected' : ''}>${esc(uname(u.name))}</option>`).join('')}</select></label>
+      <label>Link (Spreadsheet/Docs)<input id="tf-link" placeholder="https://…" value="${esc(d.link || '')}" ${dis}></label>
+    </div>
+    ${d.link ? `<a class="tlink" href="${esc(d.link)}" target="_blank" rel="noopener">🔗 Buka ${esc(host(d.link))}</a>` : ''}
+    <div class="colors">${Object.entries(NOTE_COLORS).map(([k, [n, h]]) => `<label class="sw note" title="${n}"><input type="radio" name="tf-color" data-ch="tfColor" value="${k}" ${(d.color || '') === k ? 'checked' : ''} ${dis}><i style="--c:${h}"></i></label>`).join('')}</div>
+    <div class="rt-box"><label class="chk-l"><input type="checkbox" id="tf-rt" ${d.routine?.on ? 'checked' : ''} ${dis}> 🔁 Pekerjaan rutin mingguan (berulang tiap minggu)</label>
+      <div class="days-pick">${[1, 2, 3, 4, 5, 6, 7].map(x => `<label><input type="checkbox" name="tf-day" value="${x}" ${(d.routine?.days || []).includes(x) ? 'checked' : ''} ${dis}><span>${DSH[x % 7]}</span></label>`).join('')}</div></div>
+    ${t ? `<p class="muted small">Dibuat oleh <b>${esc(uname(t.owner))}</b> · ${dtText(t.created)} · diubah ${ago(t.updated)}${d.statusBy ? ` · status oleh ${esc(uname(d.statusBy))} ${ago(d.statusAt)}` : ''}</p>` : ''}
+    <div class="dlg-f">${t && canEdit(t) ? `<button type="button" class="btn danger" data-a="taskDel" data-id="${t.id}">Hapus</button><button type="button" class="btn" data-a="taskArch" data-id="${t.id}">${d.archived ? 'Keluarkan dari arsip' : 'Arsipkan'}</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Tutup</button><button class="btn primary" type="submit">${t ? 'Simpan' : 'Buat task'}</button></div>
+    ${t ? `<section class="cmts"><h3>💬 Komentar</h3><div id="cm-list">${cmtHtml(t.id)}</div>
+      <div class="cm-add"><textarea id="cm-text" rows="2" placeholder="Tulis komentar…"></textarea><button type="button" class="btn primary" data-a="cmtAdd" data-id="${t.id}">Kirim</button></div></section>` : ''}
+  </form>`, 'wide');
+  if (ro) $('#tf-body').style.display = 'none';
+  if (!t) $('#tf-title').focus();
+}
+const clRow = (it, i, ro) => `<div class="cli-ed"><input type="checkbox" class="tf-d" ${it.d ? 'checked' : ''}><input class="tf-t" value="${esc(it.t)}" placeholder="Item…" ${ro ? 'disabled' : ''}>${ro ? '' : '<button type="button" class="ib" data-a="clDel" title="Hapus item">✕</button>'}</div>`;
+function cmtHtml(id) {
+  const l = comments(id);
+  return l.length ? l.map(c => `<div class="cmt">${av(c.owner)}<div><div class="ch"><b>${esc(uname(c.owner))}</b><span class="muted small">${dtText(c.created)}</span>${canEdit(c) ? `<button type="button" class="mini" data-a="cmtDel" data-id="${c.id}">hapus</button>` : ''}</div><div class="ct">${linkify(c.data.text)}</div></div></div>`).join('') : '<p class="muted small">Belum ada komentar.</p>';
+}
+function readTaskForm() {
+  const f = $('#task-form');
+  return {
+    title: $('#tf-title').value.trim(), body: $('#tf-body').value, status: $('#tf-status').value, due: $('#tf-due').value, assign: $('#tf-assign').value,
+    link: normUrl($('#tf-link').value), color: $('input[name=tf-color]:checked', f)?.value || '',
+    items: $$('.cli-ed', f).map(r => ({ t: $('.tf-t', r).value.trim(), d: $('.tf-d', r).checked })).filter(x => x.t),
+    routine: { on: $('#tf-rt').checked, days: $$('input[name=tf-day]:checked', f).map(x => Number(x.value)) }
+  };
+}
+
+// ---------- CASH (kasbon) ----------
+const cats = () => live('cashcat').sort((a, b) => (a.data.archived - b.data.archived) || (a.data.name || '').localeCompare(b.data.name || ''));
+const catName = id => S.items.get(id)?.data.name || '(kategori terhapus)';
+const catColor = id => PALETTE[S.items.get(id)?.data.color]?.[1] || PALETTE.green[1];
+const cashTx = () => live('cash').sort((a, b) => (a.data.date || '').localeCompare(b.data.date || '') || a.created - b.created);
+function catTotals(catId, from, to) { // from/to ymd, to exclusive; returns {open, in, out, close, n}
+  let open = 0, inn = 0, out = 0, n = 0;
+  for (const t of cashTx()) {
+    if (catId && t.data.cat !== catId) continue;
+    const v = t.data.type === 'in' ? t.data.amount : -t.data.amount;
+    if (from && t.data.date < from) { open += v; continue; }
+    if (to && t.data.date >= to) continue;
+    n++; if (v > 0) inn += v; else out -= v;
+  }
+  return { open, in: inn, out, close: open + inn - out, n };
+}
+function periodRange(p, ref, from, to) { // → [start, end) as ymd, '' = open
+  const d = pYmd(ref || today());
+  if (p === 'week') { const s = weekStart(d); return [ymd(s), ymd(addDays(s, 7))]; }
+  if (p === 'month') return [ymd(new Date(d.getFullYear(), d.getMonth(), 1)), ymd(new Date(d.getFullYear(), d.getMonth() + 1, 1))];
+  if (p === 'year') return [`${d.getFullYear()}-01-01`, `${d.getFullYear() + 1}-01-01`];
+  if (p === 'range') return [from || '', to ? ymd(addDays(pYmd(to), 1)) : ''];
+  return ['', ''];
+}
+function periodLabel(p, ref, from, to) {
+  const [s, e] = periodRange(p, ref, from, to), d = pYmd(ref || today());
+  if (p === 'all') return 'Semua data (dari awal)';
+  if (p === 'month') return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  if (p === 'year') return `Tahun ${d.getFullYear()}`;
+  if (p === 'week') return `Minggu ${dShort(s)} – ${dShort(ymd(addDays(pYmd(e), -1)))}`;
+  return `${s ? dShort(s) : 'awal'} – ${e ? dShort(ymd(addDays(pYmd(e), -1))) : 'sekarang'}`;
+}
+function shiftRef(p, ref, n) { const d = pYmd(ref); if (p === 'week') return ymd(addDays(d, 7 * n)); if (p === 'month') return ymd(new Date(d.getFullYear(), d.getMonth() + n, 1)); if (p === 'year') return ymd(new Date(d.getFullYear() + n, 0, 1)); return ref; }
+const PERIODS = { all: 'Semua', week: 'Mingguan', month: 'Bulanan', year: 'Tahunan', range: 'Rentang' };
+function vCash() {
+  const C = S.cash, cl = cats(), [s, e] = periodRange(C.p, C.ref, C.from, C.to);
+  const cards = cl.filter(c => !c.data.archived || C.cat === c.id).map(c => { const t = catTotals(c.id); return `<button type="button" class="kcard ${C.cat === c.id ? 'on' : ''}" style="--c:${catColor(c.id)}" data-a="cashCat" data-id="${c.id}">
+      <span class="kh"><b>${esc(c.data.name)}</b>${canEdit(c) ? `<span class="ib sm" data-a="catEdit" data-id="${c.id}" title="Ubah kategori">✏️</span>` : ''}</span>
+      <span class="ks ${t.close < 0 ? 'neg' : ''}">${money(t.close)}</span><span class="kl">sisa kasbon</span>
+      <span class="kio"><span class="in">▲ ${money(t.in)}</span><span class="out">▼ ${money(t.out)}</span></span>
+      ${c.data.note ? `<span class="kn">${esc(c.data.note)}</span>` : ''}</button>`; }).join('');
+  let tx = cashTx().filter(t => (!C.cat || t.data.cat === C.cat) && (!s || t.data.date >= s) && (!e || t.data.date < e) && (!C.who || t.owner === C.who));
+  const q = C.q.trim().toLowerCase(); if (q) tx = tx.filter(t => ((t.data.note || '') + ' ' + catName(t.data.cat) + ' ' + uname(t.owner)).toLowerCase().includes(q));
+  const tin = tx.filter(t => t.data.type === 'in').reduce((a, t) => a + t.data.amount, 0), tout = tx.filter(t => t.data.type === 'out').reduce((a, t) => a + t.data.amount, 0);
+  const groups = {}; for (const t of tx.slice().reverse()) (groups[t.data.date] ||= []).push(t);
+  const owners = [...new Set(live('cash').map(t => t.owner))];
+  return `<div class="head"><h1>💰 Cash · Kasbon</h1><div class="tools"><button type="button" class="btn in-b" data-a="cashNew" data-t="in">＋ Uang masuk</button><button type="button" class="btn out-b" data-a="cashNew" data-t="out">－ Uang keluar</button><button type="button" class="btn" data-a="report">📄 Laporan / Export</button></div></div>
+  <div class="kgrid">${cards}<button type="button" class="kcard add" data-a="catNew"><span class="plus">＋</span><span>Kategori kasbon</span><small class="muted">mis. Kasbon A, Operasional, Proyek B</small></button></div>
+  ${cl.length ? '' : '<p class="muted small">Buat kategori kasbon dulu. Setiap kategori punya saldo sendiri: uang masuk kategori A hanya berkurang oleh pengeluaran kategori A.</p>'}
+  <section class="card cflt">
+    <select id="c-cat" data-ch="cashCatSel" data-keep="0"><option value="">Semua kategori</option>${cl.map(c => `<option value="${c.id}" ${C.cat === c.id ? 'selected' : ''}>${esc(c.data.name)}${c.data.archived ? ' (arsip)' : ''}</option>`).join('')}</select>
+    <select id="c-p" data-ch="cashP" data-keep="0">${Object.entries(PERIODS).map(([k, l]) => `<option value="${k}" ${C.p === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    ${['week', 'month', 'year'].includes(C.p) ? `<span class="pnav"><button type="button" class="ib" data-a="cashNav" data-n="-1">‹</button><b>${esc(periodLabel(C.p, C.ref))}</b><button type="button" class="ib" data-a="cashNav" data-n="1">›</button></span>` : ''}
+    ${C.p === 'range' ? `<input type="date" id="c-from" data-ch="cashFrom" data-keep="0" value="${C.from}"><span>–</span><input type="date" id="c-to" data-ch="cashTo" data-keep="0" value="${C.to}">` : ''}
+    <select id="c-who" data-ch="cashWho" data-keep="0"><option value="">Semua pencatat</option>${owners.map(o => `<option value="${esc(o)}" ${C.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select>
+    <input id="c-q" placeholder="🔍 Cari keterangan…" data-ch="cashQ" value="${esc(C.q)}">
+  </section>
+  <div class="csum"><span>Periode: <b>${esc(periodLabel(C.p, C.ref, C.from, C.to))}</b>${C.cat ? ` · ${esc(catName(C.cat))}` : ''}</span><span class="in">Masuk ${money(tin)}</span><span class="out">Keluar ${money(tout)}</span><span>Selisih <b>${money(tin - tout)}</b></span><span class="muted">${tx.length} transaksi</span></div>
+  <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, l]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${money(l.reduce((a, t) => a + (t.data.type === 'in' ? t.data.amount : -t.data.amount), 0))}</span></div>
+    ${l.map(t => `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="cashEdit" data-id="${t.id}"` : ''}><span class="tic ${t.data.type}">${t.data.type === 'in' ? '▲' : '▼'}</span>
+      <span class="ti"><b>${esc(t.data.note || (t.data.type === 'in' ? 'Uang masuk' : 'Uang keluar'))}</b><small><span class="kc" style="--c:${catColor(t.data.cat)}">${esc(catName(t.data.cat))}</span> · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}${t.data.file ? ' · 📎 bukti' : ''}</small>${t.data.file ? filesHtml([t.data.file]) : ''}</span>
+      <span class="ta ${t.data.type}">${t.data.type === 'in' ? '+' : '−'}${money(t.data.amount)}</span></div>`).join('')}</div>`).join('') : '<p class="empty">Belum ada transaksi di periode ini.</p>'}</div>`;
+}
+function cashDialog(t, type) {
+  const d = t?.data || { type: type || 'out', cat: S.cash.cat || cats().find(c => !c.data.archived)?.id || '', amount: '', date: today(), note: '' };
+  const cl = cats().filter(c => !c.data.archived || c.id === d.cat);
+  if (!cl.length) { toast('Buat kategori kasbon dulu.', 'warn'); return catDialog(); }
+  S.dlg = { type: 'cash', id: t?.id || null, file: d.file || null, newFile: null };
+  openDlg(`<form class="dlg" id="cash-form"><h2>${t ? 'Ubah transaksi' : 'Transaksi kasbon'}</h2>
+    <div class="seg"><label><input type="radio" name="cf-type" value="in" ${d.type === 'in' ? 'checked' : ''}><span class="in">▲ Uang masuk</span></label><label><input type="radio" name="cf-type" value="out" ${d.type === 'out' ? 'checked' : ''}><span class="out">▼ Uang keluar</span></label></div>
+    <label>Kategori kasbon<select id="cf-cat">${cl.map(c => `<option value="${c.id}" ${d.cat === c.id ? 'selected' : ''}>${esc(c.data.name)} — sisa ${money(catTotals(c.id).close)}</option>`).join('')}</select></label>
+    <div class="row2"><label>Jumlah (Rp)<input id="cf-amt" inputmode="numeric" placeholder="0" value="${d.amount ? num(d.amount) : ''}" data-ch="amt" required></label><label>Tanggal<input id="cf-date" type="date" value="${esc(d.date)}" required></label></div>
+    <label>Keterangan<input id="cf-note" maxlength="300" value="${esc(d.note || '')}" placeholder="mis. Beli ATK, Transfer dari kantor"></label>
+    <label>Bukti / nota (opsional)<span class="filep"><input type="file" id="cf-file" accept="image/*,application/pdf" data-ch="cfFile"><span id="cf-fname" class="muted small">${d.file ? '📎 ' + esc(d.file.name) : ''}</span></span></label>
+    ${t ? `<p class="muted small">Dicatat oleh ${esc(uname(t.owner))} · ${dtText(t.created)}${t.updated !== t.created ? ' · diubah ' + ago(t.updated) : ''}</p>` : ''}
+    <div class="dlg-f">${t ? `<button type="button" class="btn danger" data-a="cashDel" data-id="${t.id}">Hapus</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit" id="cf-save">Simpan</button></div>
+  </form>`);
+  if (!t) $('#cf-amt').focus();
+}
+function catDialog(c) {
+  const d = c?.data || { name: '', color: 'green', note: '', archived: false };
+  S.dlg = { type: 'cat', id: c?.id || null };
+  const used = c ? live('cash').filter(t => t.data.cat === c.id).length : 0;
+  openDlg(`<form class="dlg" id="cat-form"><h2>${c ? 'Ubah kategori kasbon' : 'Kategori kasbon baru'}</h2>
+    <label>Nama<input id="kc-name" value="${esc(d.name)}" maxlength="60" placeholder="mis. Kasbon A" required></label>
+    <label>Warna<span class="swatches">${Object.entries(PALETTE).map(([k, [n, h]]) => `<label class="sw" title="${n}"><input type="radio" name="kc-color" value="${k}" ${d.color === k ? 'checked' : ''}><i style="--c:${h}"></i></label>`).join('')}</span></label>
+    <label>Keterangan<input id="kc-note" value="${esc(d.note || '')}" maxlength="200" placeholder="mis. Untuk keperluan proyek A"></label>
+    ${c ? `<label class="chk-l"><input type="checkbox" id="kc-arch" ${d.archived ? 'checked' : ''}> Arsipkan (sembunyikan dari pilihan)</label><p class="muted small">${used} transaksi · sisa ${money(catTotals(c.id).close)}</p>` : ''}
+    <div class="dlg-f">${c ? `<button type="button" class="btn danger" data-a="catDel" data-id="${c.id}">Hapus</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
+  </form>`);
+  $('#kc-name').focus();
+}
+// report / export
+function reportData() {
+  const R = S.rep, [s, e] = periodRange(R.p, R.ref, R.from, R.to);
+  const list = R.cat ? cats().filter(c => c.id === R.cat) : cats();
+  const sections = list.map(c => {
+    const tot = catTotals(c.id, s, e); let bal = tot.open;
+    const rows = cashTx().filter(t => t.data.cat === c.id && (!s || t.data.date >= s) && (!e || t.data.date < e)).map(t => { bal += t.data.type === 'in' ? t.data.amount : -t.data.amount; return { t, bal }; });
+    return { c, tot, rows };
+  }).filter(x => R.cat || x.rows.length || x.tot.open);
+  const sum = sections.reduce((a, x) => ({ open: a.open + x.tot.open, in: a.in + x.tot.in, out: a.out + x.tot.out, close: a.close + x.tot.close, n: a.n + x.tot.n }), { open: 0, in: 0, out: 0, close: 0, n: 0 });
+  return { s, e, label: periodLabel(R.p, R.ref, R.from, R.to), sections, sum };
+}
+function reportDialog() {
+  S.rep ||= { cat: S.cash.cat, p: 'all', ref: today(), from: '', to: '' };
+  S.dlg = { type: 'report' };
+  openDlg(`<div class="dlg" id="rep"><h2>📄 Laporan kasbon</h2><div id="rep-body">${reportBody()}</div>
+    <div class="dlg-f wrap"><button type="button" class="btn" data-a="close">Tutup</button><span class="sp"></span><button type="button" class="btn" data-a="repPrint">🖨 Cetak</button><button type="button" class="btn" data-a="repXlsx">📗 Excel</button><button type="button" class="btn primary" data-a="repPdf">📕 PDF</button></div></div>`, 'wide');
+}
+function reportBody() {
+  const R = S.rep, D = reportData();
+  return `<div class="rep-f">
+    <label>Kategori<select id="rp-cat" data-ch="repCat"><option value="">Semua kategori</option>${cats().map(c => `<option value="${c.id}" ${R.cat === c.id ? 'selected' : ''}>${esc(c.data.name)}</option>`).join('')}</select></label>
+    <label>Periode<select id="rp-p" data-ch="repP">${[['all', 'Semua data (awal – akhir)'], ['week', 'Mingguan'], ['month', 'Bulanan'], ['year', 'Tahunan'], ['range', 'Rentang tanggal']].map(([k, l]) => `<option value="${k}" ${R.p === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    ${R.p === 'week' ? `<label>Minggu yang memuat tanggal<input type="date" id="rp-ref" data-ch="repRef" value="${R.ref}"></label>` : ''}
+    ${R.p === 'month' ? `<label>Bulan<input type="month" id="rp-ref" data-ch="repRef" value="${R.ref.slice(0, 7)}"></label>` : ''}
+    ${R.p === 'year' ? `<label>Tahun<input type="number" id="rp-ref" data-ch="repRef" min="2000" max="2100" value="${R.ref.slice(0, 4)}"></label>` : ''}
+    ${R.p === 'range' ? `<label>Dari<input type="date" id="rp-from" data-ch="repFrom" value="${R.from}"></label><label>Sampai<input type="date" id="rp-to" data-ch="repTo" value="${R.to}"></label>` : ''}
+  </div>
+  <p class="muted small">Periode: <b>${esc(D.label)}</b> · ${D.sum.n} transaksi</p>
+  <div class="tbl-wrap"><table class="rtab"><thead><tr><th>Kategori</th><th>Saldo awal</th><th>Masuk</th><th>Keluar</th><th>Sisa akhir</th></tr></thead><tbody>
+    ${D.sections.map(x => `<tr><td><span class="kc" style="--c:${catColor(x.c.id)}">${esc(x.c.data.name)}</span></td><td>${money(x.tot.open)}</td><td class="in">${money(x.tot.in)}</td><td class="out">${money(x.tot.out)}</td><td><b>${money(x.tot.close)}</b></td></tr>`).join('') || '<tr><td colspan="5" class="muted">Tidak ada data.</td></tr>'}
+    ${D.sections.length > 1 ? `<tr class="tot"><td>Total</td><td>${money(D.sum.open)}</td><td>${money(D.sum.in)}</td><td>${money(D.sum.out)}</td><td>${money(D.sum.close)}</td></tr>` : ''}
+  </tbody></table></div>
+  <p class="muted small">Saldo tiap kategori dihitung terpisah. PDF/Excel/Cetak berisi ringkasan + rincian transaksi per kategori dengan saldo berjalan.</p>`;
+}
+const repName = ext => { const D = reportData(); return `Laporan-Kasbon-${S.rep.cat ? slug(catName(S.rep.cat)) : 'Semua'}-${slug(D.label)}.${ext}`; };
+function reportPdf() {
+  const D = reportData(), d = PDF.doc(), M = 40, R = d.W - M, GRAY = [90, 90, 90], LINE = [205, 205, 205], HEAD = [232, 241, 237], GRN = [22, 120, 80], RED = [190, 50, 50];
+  let y = M;
+  d.text(M, y + 18, 'Laporan Kasbon', 20, { bold: true }); y += 28;
+  d.text(M, y + 10, `Virtual Work AHG · ${D.label} · dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`, 9.5, { color: GRAY }); y += 24;
+  const boxes = [['Saldo awal', money(D.sum.open), [0, 0, 0]], ['Masuk', money(D.sum.in), GRN], ['Keluar', money(D.sum.out), RED], ['Sisa akhir', money(D.sum.close), [0, 0, 0]]], bw = (R - M - 24) / 4;
+  boxes.forEach(([k, v, c], i) => { const x = M + i * (bw + 8); d.box(x, y, bw, 44, LINE); d.text(x + 8, y + 15, k, 8.5, { color: GRAY }); d.text(x + 8, y + 34, PDF.fit(v, 12.5, bw - 14, true), 12.5, { bold: true, color: c }); });
+  y += 60;
+  const need = h => { if (y + h > d.H - M - 14) { d.add(); y = M; return true; } return false; };
+  const table = (cols, rows, size = 9) => {
+    const rh = size + 7.5;
+    const head = () => { d.rect(M, y, R - M, rh, HEAD); let x = M; cols.forEach(c => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, c.t, size, { bold: true, align: c.align }); x += c.w; }); y += rh; };
+    head();
+    for (const r of rows) { if (need(rh)) head(); let x = M; cols.forEach((c, i) => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, PDF.fit(r.cells[i] ?? '', size, c.w - 10, r.bold), size, { bold: r.bold, align: c.align, color: r.colors?.[i] }); x += c.w; }); if (r.bold) d.line(M, y, R, y, [0, 0, 0], 0.9); y += rh; d.line(M, y, R, y, LINE, 0.4); }
+  };
+  need(50); d.text(M, y + 12, 'Ringkasan per kategori', 12.5, { bold: true }); y += 20;
+  table([{ t: 'Kategori', w: R - M - 4 * 92 }, { t: 'Saldo awal', w: 92, align: 'right' }, { t: 'Masuk', w: 92, align: 'right' }, { t: 'Keluar', w: 92, align: 'right' }, { t: 'Sisa akhir', w: 92, align: 'right' }],
+    [...D.sections.map(x => ({ cells: [x.c.data.name, money(x.tot.open), money(x.tot.in), money(x.tot.out), money(x.tot.close)], colors: [null, null, GRN, RED, null] })),
+     ...(D.sections.length > 1 ? [{ bold: true, cells: ['Total', money(D.sum.open), money(D.sum.in), money(D.sum.out), money(D.sum.close)] }] : [])]);
+  y += 18;
+  for (const x of D.sections) {
+    need(70); d.text(M, y + 12, `Kategori: ${x.c.data.name}`, 12.5, { bold: true }); d.text(R, y + 12, `Saldo awal ${money(x.tot.open)} · sisa ${money(x.tot.close)}`, 9.5, { color: GRAY, align: 'right' }); y += 20;
+    const fw = R - M - (62 + 80 + 78 + 78 + 84);
+    table([{ t: 'Tanggal', w: 62 }, { t: 'Keterangan', w: fw }, { t: 'Oleh', w: 80 }, { t: 'Masuk', w: 78, align: 'right' }, { t: 'Keluar', w: 78, align: 'right' }, { t: 'Saldo', w: 84, align: 'right' }],
+      [{ cells: ['', 'Saldo awal', '', '', '', money(x.tot.open)] },
+       ...x.rows.map(({ t, bal }) => ({ cells: [dShort(t.data.date), t.data.note || '', uname(t.owner), t.data.type === 'in' ? money(t.data.amount) : '', t.data.type === 'out' ? money(t.data.amount) : '', money(bal)], colors: [null, null, null, GRN, RED, null] })),
+       { bold: true, cells: ['Total', '', '', money(x.tot.in), money(x.tot.out), money(x.tot.close)] }], 8.5);
+    y += 18;
+  }
+  d.eachPage((i, n) => { d.line(M, d.H - 28, R, d.H - 28, LINE, 0.4); d.text(M, d.H - 16, 'Virtual Work AHG · Laporan Kasbon', 8, { color: GRAY }); d.text(R, d.H - 16, `Halaman ${i} / ${n}`, 8, { color: GRAY, align: 'right' }); });
+  saveBytes(d.build(), repName('pdf'), 'application/pdf');
+}
+function reportXlsx() {
+  const D = reportData(), names = new Set();
+  const sheetName = n => { let s = String(n).replace(/[\\/?*[\]:]/g, ' ').slice(0, 28) || 'Kategori', b = s, i = 2; while (names.has(s.toLowerCase())) s = b.slice(0, 25) + ' ' + i++; names.add(s.toLowerCase()); return s; };
+  names.add('ringkasan'); names.add('semua transaksi');
+  const sheets = [{ name: 'Ringkasan', widths: [28, 16, 16, 16, 16, 12], rows: [[{ v: 'Laporan Kasbon — Virtual Work AHG', s: 6 }], [`Periode: ${D.label}`], [`Dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`], [],
+    ['Kategori', 'Saldo awal', 'Masuk', 'Keluar', 'Sisa akhir', 'Transaksi'].map(v => ({ v, s: 1 })),
+    ...D.sections.map(x => [x.c.data.name, { v: x.tot.open, s: 2 }, { v: x.tot.in, s: 2 }, { v: x.tot.out, s: 2 }, { v: x.tot.close, s: 3 }, x.tot.n]),
+    [{ v: 'Total', s: 1 }, { v: D.sum.open, s: 3 }, { v: D.sum.in, s: 3 }, { v: D.sum.out, s: 3 }, { v: D.sum.close, s: 3 }, { v: D.sum.n, s: 1 }]] }];
+  for (const x of D.sections) sheets.push({ name: sheetName(x.c.data.name), widths: [12, 40, 18, 15, 15, 16, 18], rows: [[{ v: x.c.data.name, s: 6 }], [`Periode: ${D.label}`], [],
+    ['Tanggal', 'Keterangan', 'Oleh', 'Masuk', 'Keluar', 'Saldo', 'Dicatat'].map(v => ({ v, s: 1 })),
+    ['', 'Saldo awal', '', '', '', { v: x.tot.open, s: 2 }],
+    ...x.rows.map(({ t, bal }) => [{ v: pYmd(t.data.date), s: 7 }, t.data.note || '', uname(t.owner), t.data.type === 'in' ? { v: t.data.amount, s: 2 } : '', t.data.type === 'out' ? { v: t.data.amount, s: 2 } : '', { v: bal, s: 2 }, { v: new Date(t.created), s: 4 }]),
+    [{ v: 'Total', s: 1 }, '', '', { v: x.tot.in, s: 3 }, { v: x.tot.out, s: 3 }, { v: x.tot.close, s: 3 }]] });
+  const allRows = D.sections.flatMap(x => x.rows.map(r => ({ ...r, c: x.c }))).sort((a, b) => a.t.data.date.localeCompare(b.t.data.date) || a.t.created - b.t.created);
+  sheets.push({ name: 'Semua transaksi', widths: [12, 18, 40, 18, 15, 15, 18], rows: [['Tanggal', 'Kategori', 'Keterangan', 'Oleh', 'Masuk', 'Keluar', 'Dicatat'].map(v => ({ v, s: 1 })),
+    ...allRows.map(({ t, c }) => [{ v: pYmd(t.data.date), s: 7 }, c.data.name, t.data.note || '', uname(t.owner), t.data.type === 'in' ? { v: t.data.amount, s: 2 } : '', t.data.type === 'out' ? { v: t.data.amount, s: 2 } : '', { v: new Date(t.created), s: 4 }])] });
+  saveBytes(XLSX.build(sheets), repName('xlsx'), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+function reportPrint() {
+  const D = reportData();
+  $('#print-area').innerHTML = `<h1>Laporan Kasbon</h1><p>Virtual Work AHG · ${esc(D.label)} · dicetak ${dtText(Date.now())} oleh ${esc(uname(S.me.name))}</p>
+    <table><thead><tr><th>Kategori</th><th>Saldo awal</th><th>Masuk</th><th>Keluar</th><th>Sisa akhir</th></tr></thead><tbody>${D.sections.map(x => `<tr><td>${esc(x.c.data.name)}</td><td>${money(x.tot.open)}</td><td>${money(x.tot.in)}</td><td>${money(x.tot.out)}</td><td><b>${money(x.tot.close)}</b></td></tr>`).join('')}
+    ${D.sections.length > 1 ? `<tr class="tot"><td>Total</td><td>${money(D.sum.open)}</td><td>${money(D.sum.in)}</td><td>${money(D.sum.out)}</td><td>${money(D.sum.close)}</td></tr>` : ''}</tbody></table>
+    ${D.sections.map(x => `<h2>${esc(x.c.data.name)}</h2><table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Oleh</th><th>Masuk</th><th>Keluar</th><th>Saldo</th></tr></thead><tbody>
+      <tr><td></td><td>Saldo awal</td><td></td><td></td><td></td><td>${money(x.tot.open)}</td></tr>
+      ${x.rows.map(({ t, bal }) => `<tr><td>${dShort(t.data.date)}</td><td>${esc(t.data.note || '')}</td><td>${esc(uname(t.owner))}</td><td>${t.data.type === 'in' ? money(t.data.amount) : ''}</td><td>${t.data.type === 'out' ? money(t.data.amount) : ''}</td><td>${money(bal)}</td></tr>`).join('')}
+      <tr class="tot"><td>Total</td><td></td><td></td><td>${money(x.tot.in)}</td><td>${money(x.tot.out)}</td><td>${money(x.tot.close)}</td></tr></tbody></table>`).join('')}`;
+  window.print();
+}
+
+// ---------- ADMIN ----------
+function vAdmin() {
+  const count = (n, k) => live(k).filter(i => i.owner === n).length;
+  const list = [...S.users].sort((a, b) => (a.role === 'admin' ? -1 : b.role === 'admin' ? 1 : a.name.localeCompare(b.name)));
+  return `<div class="head"><h1>👑 Panel Admin <span class="hc">${S.users.length} akun</span></h1></div>
+  <p class="muted small">Admin bisa melihat & mengubah semua data (reminder, task, cash, chat global), mereset password, dan menghapus user. Whisper tetap pribadi antara pengirim dan penerima.</p>
+  <div class="card tbl-wrap"><table class="atbl"><thead><tr><th>User</th><th>Status</th><th>Bergabung</th><th>Reminder</th><th>Task</th><th>Cash</th><th>Pesan</th><th></th></tr></thead><tbody>
+  ${list.map(u => `<tr><td><span class="uc">${av(u.name)}<span><b>${esc(uname(u.name))}</b><small>@${esc(u.name)}${u.role === 'admin' ? ' · Admin' : ''}</small></span></span></td>
+    <td>${lastSeenText(u)}${u.reset ? '<br><small class="warn-t">password direset — login berikutnya membuat password baru</small>' : ''}</td><td>${u.created ? dtText(Date.parse(u.created) + S.skew) : ''}</td>
+    <td>${count(u.name, 'reminder')}</td><td>${count(u.name, 'task')}</td><td>${count(u.name, 'cash')}</td><td>${count(u.name, 'msg')}</td>
+    <td class="acts">${u.role === 'admin' ? '' : `<button type="button" class="btn sm" data-a="whisper" data-u="${esc(u.name)}">🤫</button><button type="button" class="btn sm" data-a="admReset" data-u="${esc(u.name)}">Reset password</button><button type="button" class="btn sm danger" data-a="admDel" data-u="${esc(u.name)}">Hapus</button>`}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+async function adminAct(action, name, purge) {
+  try { const r = await rpc('ahg_admin', { p_token: S.token, p_action: action, p_target: name, p_purge: !!purge }); if (!r?.ok) throw new Error(r?.err || 'gagal'); toast(action === 'reset' ? `Password <b>${esc(name)}</b> direset. Login berikutnya dengan password apa pun akan menjadi password barunya.` : `User <b>${esc(name)}</b> dihapus.`, 'info', null, 9000); ping(); syncNow(); }
+  catch (e) { toast('Gagal: ' + esc(e.message), 'warn'); }
+}
+
+// ---------- PROFILE ----------
+function profileDialog() {
+  S.dlg = { type: 'profile' };
+  const t = theme(), np = notifyPref(), u = S.me;
+  openDlg(`<div class="dlg prof"><div class="ed-bar"><b>Profil</b><span class="sp"></span><button type="button" class="ib" data-a="close">✕</button></div>
+    <div class="pf-top">${av(u.name, 'xl')}<div><b class="big">${esc(uname(u.name))}</b><div class="muted small">@${esc(u.name)} · ${u.role === 'admin' ? 'Admin' : 'Anggota'} · bergabung ${u.created ? dShort(ymd(new Date(u.created))) : '—'}</div></div></div>
+    <form id="pf-form" class="sect"><h3>Nama tampilan & warna</h3>
+      <div class="row2"><input id="pf-disp" value="${esc(u.display || u.name)}" maxlength="40" placeholder="Nama tampilan"><button class="btn" type="submit">Simpan</button></div>
+      <div class="swatches">${AV_COLORS.map(c => `<label class="sw"><input type="radio" name="pf-color" value="${c}" ${(u.color || ucolor(u.name)) === c ? 'checked' : ''}><i style="--c:${c}"></i></label>`).join('')}</div></form>
+    <form id="pw-form" class="sect"><h3>🔑 Ganti password</h3>
+      <input id="pw-old" type="password" autocomplete="current-password" placeholder="Password lama" required>
+      <div class="row2"><input id="pw-new" type="password" autocomplete="new-password" placeholder="Password baru (min. 4)" required><input id="pw-new2" type="password" autocomplete="new-password" placeholder="Ulangi password baru" required></div>
+      <p class="err" id="pw-err"></p><button class="btn" type="submit">Ganti password</button><p class="muted small">Perangkat lain yang sedang masuk akan otomatis keluar.</p></form>
+    <div class="sect"><h3>🎨 Tema</h3>
+      <div class="seg">${[['auto', 'Otomatis'], ['light', '☀ Terang'], ['dark', '🌙 Gelap']].map(([k, l]) => `<label><input type="radio" name="th-mode" value="${k}" data-ch="thMode" ${t.mode === k ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>
+      <div class="swatches">${Object.entries(ACCENTS).map(([c, n]) => `<label class="sw" title="${n}"><input type="radio" name="th-acc" value="${c}" data-ch="thAcc" ${t.accent === c ? 'checked' : ''}><i style="--c:${c}"></i></label>`).join('')}</div>
+      <label>Ukuran tampilan<select data-ch="thScale" id="th-scale">${[[90, 'Kecil'], [100, 'Normal'], [110, 'Besar'], [120, 'Sangat besar']].map(([v, l]) => `<option value="${v}" ${t.scale === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+    <div class="sect"><h3>🔔 Notifikasi</h3>
+      <label class="chk-l"><input type="checkbox" data-ch="npSound" ${np.sound ? 'checked' : ''}> Suara saat ada pesan / reminder</label>
+      <label class="chk-l"><input type="checkbox" data-ch="npBrowser" ${np.browser && 'Notification' in window && Notification.permission === 'granted' ? 'checked' : ''}> Notifikasi browser (pop-up sistem)</label>
+      <label>Alarm reminder<select data-ch="npRem" id="np-rem"><option value="all" ${np.rem === 'all' ? 'selected' : ''}>Semua reminder tim</option><option value="mine" ${np.rem === 'mine' ? 'selected' : ''}>Hanya reminder buatanku</option><option value="off" ${np.rem === 'off' ? 'selected' : ''}>Mati</option></select></label></div>
+    <div class="sect"><p class="muted small"><span class="sync"></span> · versi ${BUILD}</p></div>
+    <div class="dlg-f">${isAdmin() ? '<button type="button" class="btn" data-a="go" data-v="admin">👑 Panel Admin</button>' : ''}<span class="sp"></span><button type="button" class="btn danger" data-a="logout">Keluar</button></div>
+  </div>`);
+  showSync();
+}
+
+// ---------- dialogs ----------
+const dlg = () => $('#dlg');
+function openDlg(html, cls = '') { const d = dlg(); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); }
+function closeAll() { for (const id of ['dlg', 'viewer', 'cfm']) { const d = $('#' + id); if (d?.open) d.close(); } S.dlg = null; }
+function refreshDialog() { // live updates inside an open dialog
+  if (!dlg().open || !S.dlg) return;
+  if (S.dlg.type === 'task' && S.dlg.id) { const l = $('#cm-list'); if (l) { const h = cmtHtml(S.dlg.id); if (l.innerHTML !== h) { l.innerHTML = h; } } }
+  if (S.dlg.type === 'report') { const b = $('#rep-body'); if (b && !b.contains(document.activeElement)) b.innerHTML = reportBody(); }
+}
+function confirmDlg(html, ok = 'Ya', danger = true, extra = '') { // resolves on the button click itself (the dialog 'close' event can be deferred)
+  return new Promise(res => {
+    const d = $('#cfm'); let done = false;
+    const end = v => { if (done) return; done = true; if (d.open) d.close(); res(v ? { ok: true, form: d } : null); };
+    d.innerHTML = `<form class="dlg"><p>${html}</p>${extra}<div class="dlg-f"><span class="sp"></span><button type="button" class="btn" data-v="no">Batal</button><button type="submit" class="btn ${danger ? 'danger-f' : 'primary'}">${ok}</button></div></form>`;
+    $('form', d).onsubmit = ev => { ev.preventDefault(); ev.stopPropagation(); end(true); };
+    $('[data-v=no]', d).onclick = ev => { ev.stopPropagation(); end(false); };
+    d.oncancel = () => end(false); d.onclose = () => end(false);
+    d.showModal(); $('button[type=submit]', d).focus();
+  });
+}
+async function viewFile(id, name, mime) {
+  try {
+    toast('Memuat ' + esc(name) + '…', 'info', null, 1500);
+    const url = await fileUrl(id);
+    if (/^image\//.test(mime)) {
+      const v = $('#viewer'); v.innerHTML = `<div class="vw"><div class="vw-h"><b>${esc(name)}</b><span class="sp"></span><button type="button" class="btn sm" data-a="dl" data-url="${url}" data-name="${esc(name)}">⬇ Unduh</button><button type="button" class="ib" data-a="vclose">✕</button></div><img src="${url}" alt="${esc(name)}"></div>`; v.showModal();
+    } else saveAs(url, name);
+  } catch (e) { toast(esc(e.message), 'warn'); }
+}
+
+// ---------- actions ----------
+const A = {
+  pwShow() { const p = $('#l-pass'); p.type = p.type === 'password' ? 'text' : 'password'; },
+  go: el => { if (dlg().open) closeAll(); go(el.dataset.v); },
+  profile: () => profileDialog(),
+  logout: () => logout(),
+  close: () => closeAll(),
+  vclose: () => $('#viewer').close(),
+  stop: () => {},
+  dl: el => saveAs(el.dataset.url, el.dataset.name),
+  openFile: el => viewFile(el.dataset.id, el.dataset.name, el.dataset.mime),
+  whisper: el => { closeAll(); S.chat.conv = 'w:' + el.dataset.u; go('chat'); setTimeout(() => $('#c-text')?.focus(), 50); },
+  // reminder
+  remMon: el => { const d = new Date(S.rem.y, S.rem.m + Number(el.dataset.n), 1); S.rem.y = d.getFullYear(); S.rem.m = d.getMonth(); S.rem.sel = ''; S.rem.addDate = ''; renderMain(); },
+  remToday: () => { const n = new Date(); S.rem.y = n.getFullYear(); S.rem.m = n.getMonth(); S.rem.sel = today(); S.rem.addDate = ''; renderMain(); },
+  remDay: el => { const d = el.dataset.d; S.rem.sel = S.rem.sel === d ? '' : d; S.rem.addDate = ''; const p = pYmd(d); if (p.getMonth() !== S.rem.m) { S.rem.m = p.getMonth(); S.rem.y = p.getFullYear(); } renderMain(); },
+  remSt: el => { S.rem.st = el.dataset.k; renderMain(); },
+  remDone: el => { const r = S.items.get(el.dataset.id); if (!r) return; const done = !r.data.done; patch(r.id, { done, doneBy: done ? S.me.name : '', doneAt: done ? srvNow() : 0 }); },
+  remEdit: el => remDialog(S.items.get(el.dataset.id)),
+  remDel: async el => { const r = S.items.get(el.dataset.id); if (r && await confirmDlg(`Hapus reminder <b>${esc(r.data.title)}</b>?`, 'Hapus')) { closeAll(); remove(r.id); } },
+  // chat
+  conv: el => { S.chat.conv = el.dataset.c; S.chat.limit = 200; renderMain(); markRead(); renderNav(); $('#c-text')?.focus(); },
+  chatMore: () => { S.chat.limit += 300; renderMain(); },
+  msgDel: async el => { if (await confirmDlg('Hapus pesan ini untuk semua orang?', 'Hapus')) remove(el.dataset.id); },
+  pendDel: el => { S.chat.files.splice(Number(el.dataset.i), 1); $('#pend').innerHTML = pendHtml(); },
+  whPick: () => { const s = $('#wh-new'); if (s && s.offsetParent) { s.focus(); try { s.showPicker?.(); } catch {} } else { const m = $('#m-conv'); m.value = '+'; m.dispatchEvent(new Event('change', { bubbles: true })); } },
+  // task
+  taskNew: el => openTask(null, { routine: el.dataset.routine === '1' || S.task.tab === 'routine' }),
+  taskOpen: el => openTask(el.dataset.id),
+  taskTab: el => { S.task.tab = el.dataset.k; renderMain(); },
+  taskLayout: () => { S.task.layout = S.task.layout === 'grid' ? 'list' : 'grid'; LS.set('task.layout', S.task.layout); renderMain(); },
+  taskPin: el => { const id = el.dataset.id, P = pins(); savePref({ pins: P.includes(id) ? P.filter(x => x !== id) : [...P, id] }); render(); if (S.dlg?.type === 'task') { el.classList.toggle('on'); el.textContent = el.classList.contains('on') ? '★' : '☆'; } },
+  taskStatus: el => { const t = S.items.get(el.dataset.id); const nx = { todo: 'doing', doing: 'done', done: 'todo' }[t.data.status || 'todo']; patch(t.id, { status: nx, statusBy: S.me.name, statusAt: srvNow() }); toast(`Status “${esc(t.data.title || 'Tanpa judul')}” → ${STATUS[nx][0]}`, 'info', null, 2500); },
+  taskItem: el => { const t = S.items.get(el.dataset.id), items = (t.data.items || []).map((x, i) => i === Number(el.dataset.i) ? { ...x, d: !x.d } : x); patch(t.id, { items }); },
+  taskDel: async el => { const t = S.items.get(el.dataset.id); if (await confirmDlg(`Hapus task <b>${esc(t.data.title || 'Tanpa judul')}</b> beserta komentarnya?`, 'Hapus')) { closeAll(); comments(t.id).forEach(c => remove(c.id)); remove(t.id); } },
+  taskArch: el => { const t = S.items.get(el.dataset.id); patch(t.id, { archived: !t.data.archived }); closeAll(); toast(t.data.archived ? 'Task dikeluarkan dari arsip.' : 'Task diarsipkan.', 'info', null, 2500); },
+  clAdd: () => { const box = $('#tf-items'); box.insertAdjacentHTML('beforeend', clRow({ t: '', d: false }, 0, false)); $$('.tf-t', box).at(-1).focus(); },
+  clDel: el => el.closest('.cli-ed').remove(),
+  cmtAdd: el => { const t = $('#cm-text'), v = t.value.trim(); if (!v) return; create('comment', { task: el.dataset.id, text: v.slice(0, 5000) }); t.value = ''; refreshDialog(); },
+  cmtDel: async el => { if (await confirmDlg('Hapus komentar ini?', 'Hapus')) { remove(el.dataset.id); refreshDialog(); } },
+  routineCk: el => { const id = ckId(el.dataset.id, el.dataset.d), c = S.items.get(id), on = !(c && !c.deleted && c.data.on);
+    if (c) put({ ...c, deleted: false, data: { ...c.data, on, by: S.me.name, at: srvNow() } }); else put({ id, kind: 'check', owner: S.me.name, to: null, data: { task: el.dataset.id, date: el.dataset.d, on: true, by: S.me.name, at: srvNow() }, created: 0, updated: 0, deleted: false }); },
+  weekNav: el => { const n = Number(el.dataset.n); S.task.week = n === 0 ? 0 : S.task.week + n; renderMain(); },
+  linkDel: async el => { const l = S.items.get(el.dataset.id); if (await confirmDlg(`Hapus link <b>${esc(l.data.title || l.data.url)}</b>?`, 'Hapus')) remove(l.id); },
+  // cash
+  cashNew: el => cashDialog(null, el.dataset.t),
+  cashEdit: el => cashDialog(S.items.get(el.dataset.id)),
+  cashCat: el => { S.cash.cat = S.cash.cat === el.dataset.id ? '' : el.dataset.id; renderMain(); },
+  catNew: () => catDialog(),
+  catEdit: (el, ev) => { ev.stopPropagation(); catDialog(S.items.get(el.dataset.id)); },
+  catDel: async el => { const c = S.items.get(el.dataset.id), n = live('cash').filter(t => t.data.cat === c.id).length;
+    if (n) { toast(`Kategori masih punya ${n} transaksi. Hapus/pindahkan transaksinya dulu, atau arsipkan kategorinya.`, 'warn', null, 8000); return; }
+    if (await confirmDlg(`Hapus kategori <b>${esc(c.data.name)}</b>?`, 'Hapus')) { closeAll(); remove(c.id); if (S.cash.cat === c.id) S.cash.cat = ''; } },
+  cashNav: el => { S.cash.ref = shiftRef(S.cash.p, S.cash.ref, Number(el.dataset.n)); renderMain(); },
+  cashDel: async el => { const t = S.items.get(el.dataset.id); if (await confirmDlg(`Hapus transaksi ${money(t.data.amount)} <b>${esc(t.data.note || '')}</b>?`, 'Hapus')) { closeAll(); remove(t.id); } },
+  report: () => reportDialog(),
+  repPdf: () => reportPdf(), repXlsx: () => reportXlsx(), repPrint: () => reportPrint(),
+  // admin
+  admReset: async el => { const n = el.dataset.u; if (await confirmDlg(`Reset password <b>${esc(n)}</b>? User akan keluar dari semua perangkat; login berikutnya dengan password apa pun menjadi password barunya.`, 'Reset')) adminAct('reset', n); },
+  admDel: async el => { const n = el.dataset.u; const r = await confirmDlg(`Hapus user <b>${esc(n)}</b>? Akun & sesi dihapus (nama bisa dipakai daftar lagi).`, 'Hapus user', true, `<label class="chk-l"><input type="checkbox" id="cf-purge"> Hapus juga semua data buatannya (reminder, task, cash, pesan)</label>`); if (r) adminAct('delete', n, $('#cf-purge')?.checked); }
+};
+const CH = { // change / input handlers
+  remM: el => { S.rem.m = Number(el.value); S.rem.sel = ''; renderMain(); },
+  remY: el => { S.rem.y = Number(el.value); S.rem.sel = ''; renderMain(); },
+  remScope: el => { S.rem.scope = el.value; renderMain(); },
+  remWho: el => { S.rem.who = el.value; renderMain(); },
+  raDate: el => { S.rem.addDate = el.value; },
+  convSel: el => { if (el.value === '+') { const others = S.users.filter(u => u.name !== S.me.name); pickUser(others); return; } S.chat.conv = el.value; renderMain(); markRead(); renderNav(); },
+  whNew: el => { if (el.value) { S.chat.conv = 'w:' + el.value; renderMain(); markRead(); $('#c-text')?.focus(); } },
+  cFile: el => { addPending([...el.files]); el.value = ''; },
+  cText: (el, ev) => { if (ev.type === 'input') autoGrow(el); },
+  taskQ: (el, ev) => { if (ev.type === 'input') { S.task.q = el.value; renderMain(); } },
+  taskWho: el => { S.task.who = el.value; renderMain(); },
+  cashCatSel: el => { S.cash.cat = el.value; renderMain(); },
+  cashP: el => { S.cash.p = el.value; S.cash.ref = today(); renderMain(); },
+  cashFrom: el => { S.cash.from = el.value; renderMain(); }, cashTo: el => { S.cash.to = el.value; renderMain(); },
+  cashWho: el => { S.cash.who = el.value; renderMain(); },
+  cashQ: (el, ev) => { if (ev.type === 'input') { S.cash.q = el.value; renderMain(); } },
+  amt: (el, ev) => { if (ev.type !== 'input') return; const n = parseNum(el.value); el.value = n ? num(n) : ''; },
+  cfFile: async el => { const f = el.files[0]; if (!f) return; try { S.dlg.newFile = await prepFile(f); $('#cf-fname').textContent = '📎 ' + S.dlg.newFile.name + ' (' + fsize(S.dlg.newFile.size) + ')'; } catch (e) { toast(esc(e.message), 'warn'); el.value = ''; } },
+  repCat: el => { S.rep.cat = el.value; repRefresh(); }, repP: el => { S.rep.p = el.value; S.rep.ref = today(); repRefresh(); },
+  repRef: el => { const v = el.value; if (!v) return; S.rep.ref = S.rep.p === 'month' ? v + '-01' : S.rep.p === 'year' ? (v.length === 4 ? v + '-01-01' : S.rep.ref) : v; repRefresh(); },
+  repFrom: el => { S.rep.from = el.value; repRefresh(); }, repTo: el => { S.rep.to = el.value; repRefresh(); },
+  tfColor: el => { const f = $('#task-form'), c = NOTE_COLORS[el.value]?.[1]; f.classList.toggle('col', !!el.value); f.style.setProperty('--nc', c || 'transparent'); },
+  thMode: el => setTheme({ mode: el.value }), thAcc: el => setTheme({ accent: el.value }), thScale: el => setTheme({ scale: Number(el.value) }),
+  npSound: el => LS.set('notify', JSON.stringify({ ...notifyPref(), sound: el.checked })),
+  npRem: el => LS.set('notify', JSON.stringify({ ...notifyPref(), rem: el.value })),
+  npBrowser: async el => {
+    if (el.checked) {
+      if (!('Notification' in window)) { toast('Browser ini tidak mendukung notifikasi.', 'warn'); el.checked = false; return; }
+      const p = await Notification.requestPermission(); if (p !== 'granted') { toast('Izin notifikasi ditolak browser.', 'warn'); el.checked = false; return; }
+    }
+    LS.set('notify', JSON.stringify({ ...notifyPref(), browser: el.checked }));
+  }
+};
+function repRefresh() { const b = $('#rep-body'); if (b) b.innerHTML = reportBody(); }
+async function pickUser(list) {
+  const r = await confirmDlg('🤫 Whisper ke siapa?', 'Mulai whisper', false, `<select id="pk-user" class="full">${list.map(u => `<option value="${esc(u.name)}">${esc(uname(u.name))} (@${esc(u.name)})</option>`).join('')}</select>`);
+  const v = r ? $('#pk-user').value : ''; if (v) { S.chat.conv = 'w:' + v; markRead(); } renderMain(); renderNav();
+}
+
+// ---------- events ----------
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a]'); if (!el) return;
+  if (el.tagName === 'A' && el.dataset.a === 'stop') return;
+  const a = ev.target.closest('a[href]'); if (a && a !== el && el.contains(a)) return; // links inside cards open normally
+  const fn = A[el.dataset.a]; if (!fn) return;
+  if (el.closest('.ncard') && el !== el.closest('.ncard')) ev.stopPropagation();
+  ev.preventDefault(); fn(el, ev);
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && ev.target.matches?.('.ncard')) A.taskOpen(ev.target);
+  if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing && ev.target.id === 'c-text' && !matchMedia('(pointer:coarse)').matches) { ev.preventDefault(); sendMsg(); }
+  if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey) && ev.target.id === 'cm-text') { ev.preventDefault(); $('[data-a=cmtAdd]')?.click(); }
+});
+for (const type of ['change', 'input']) document.addEventListener(type, ev => {
+  const el = ev.target.closest?.('[data-ch]'); if (!el) return;
+  const fn = CH[el.dataset.ch]; if (!fn) return;
+  const isText = el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|search|)$/.test(el.type) && el.inputMode !== 'numeric');
+  if (type === 'input' && !isText && el.dataset.ch !== 'amt') return; // selects/dates/checkboxes: change only
+  if (type === 'change' && (isText || el.dataset.ch === 'amt')) return;
+  fn(el, ev);
+});
+document.addEventListener('paste', ev => {
+  if (S.view !== 'chat' || !S.me || dlg().open) return;
+  const files = [...(ev.clipboardData?.files || [])]; if (files.length) { ev.preventDefault(); addPending(files); }
+});
+document.addEventListener('dragover', ev => { if (S.view === 'chat' && S.me) ev.preventDefault(); });
+document.addEventListener('drop', ev => { if (S.view === 'chat' && S.me && ev.dataTransfer?.files?.length) { ev.preventDefault(); addPending([...ev.dataTransfer.files]); } });
+let swipeX = null; // swipe the calendar to change month
+document.addEventListener('touchstart', ev => { swipeX = ev.target.closest?.('#cal-days') ? [ev.touches[0].clientX, ev.touches[0].clientY] : null; }, { passive: true });
+document.addEventListener('touchend', ev => { if (!swipeX) return; const dx = ev.changedTouches[0].clientX - swipeX[0], dy = ev.changedTouches[0].clientY - swipeX[1]; swipeX = null; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) A.remMon({ dataset: { n: dx < 0 ? 1 : -1 } }); }, { passive: true });
+
+document.addEventListener('submit', async ev => {
+  const f = ev.target; if (f.closest('#cfm')) return; ev.preventDefault();
+  if (f.id === 'login-form') {
+    const b = $('#l-btn'); b.disabled = true; b.textContent = 'Masuk…'; $('#l-err').textContent = '';
+    try { await login($('#l-user').value, $('#l-pass').value, $('#l-rem').checked); } catch (e) { b.disabled = false; b.textContent = 'Masuk'; $('#l-err').textContent = e.message; $('#l-pass').select(); }
+  } else if (f.id === 'rem-add') {
+    const title = $('#ra-title').value.trim(); if (!title) return;
+    create('reminder', { title, date: $('#ra-date').value || today(), time: $('#ra-time').value, color: $('#ra-color').value, note: $('#ra-note').value.trim(), done: false, doneBy: '', doneAt: 0 }, { quiet: 1 });
+    $('#ra-title').value = ''; $('#ra-note').value = ''; $('#ra-time').value = ''; renderMain(); $('#ra-title').focus();
+    toast('Reminder ditambahkan.', 'info', null, 2000);
+  } else if (f.id === 'rem-edit') {
+    patch(f.dataset.id, { title: $('#re-title').value.trim(), date: $('#re-date').value, time: $('#re-time').value, color: $('input[name=re-color]:checked', f)?.value || 'blue', note: $('#re-note').value.trim() }); closeAll();
+  } else if (f.id === 'composer') sendMsg();
+  else if (f.id === 'link-add') {
+    const url = normUrl($('#lk-url').value); if (!/^https?:\/\/[^\s]+\.[^\s]+/.test(url)) { toast('Link tidak valid.', 'warn'); return; }
+    create('link', { url, title: $('#lk-title').value.trim() }); $('#lk-url').value = ''; $('#lk-title').value = ''; renderMain();
+  } else if (f.id === 'task-form') {
+    const id = S.dlg?.id, t = id ? S.items.get(id) : null, v = readTaskForm();
+    if (v.routine.on && !v.routine.days.length) { toast('Pilih hari untuk pekerjaan rutin.', 'warn'); return; }
+    if (!v.title && !v.body.trim() && !v.items.length) { toast('Task masih kosong.', 'warn'); return; }
+    if (!t) create('task', { ...v, statusBy: S.me.name, statusAt: srvNow(), archived: false });
+    else if (canEdit(t)) put({ ...t, data: { ...t.data, ...v, ...(v.status !== t.data.status ? { statusBy: S.me.name, statusAt: srvNow() } : {}) } });
+    else { // non-owner: only status + checklist ticks
+      const p = { items: (t.data.items || []).map((x, i) => ({ ...x, d: $$('.cli-ed .tf-d', f)[i]?.checked ?? x.d })) };
+      if (v.status !== t.data.status) Object.assign(p, { status: v.status, statusBy: S.me.name, statusAt: srvNow() });
+      patch(t.id, p);
+    }
+    closeAll(); toast(t ? 'Task disimpan.' : 'Task dibuat.', 'info', null, 2000);
+  } else if (f.id === 'cash-form') {
+    const amount = parseNum($('#cf-amt').value), cat = $('#cf-cat').value, type = $('input[name=cf-type]:checked', f).value;
+    if (!amount) { toast('Isi jumlah uang.', 'warn'); return; }
+    const btn = $('#cf-save'); btn.disabled = true; btn.textContent = 'Menyimpan…';
+    let file = S.dlg.file;
+    try { if (S.dlg.newFile) file = await uploadFile(S.dlg.newFile); } catch (e) { toast('Upload bukti gagal: ' + esc(e.message), 'warn'); btn.disabled = false; btn.textContent = 'Simpan'; return; }
+    const data = { type, cat, amount, date: $('#cf-date').value || today(), note: $('#cf-note').value.trim(), ...(file ? { file } : {}) };
+    const t = S.dlg.id ? S.items.get(S.dlg.id) : null;
+    if (t) put({ ...t, data }); else create('cash', data);
+    closeAll(); toast(`${type === 'in' ? 'Uang masuk' : 'Uang keluar'} ${money(amount)} · ${esc(catName(cat))} — sisa ${money(catTotals(cat).close)}`, 'info', null, 4000);
+  } else if (f.id === 'cat-form') {
+    const name = $('#kc-name').value.trim(); if (!name) return;
+    const data = { name, color: $('input[name=kc-color]:checked', f)?.value || 'green', note: $('#kc-note').value.trim(), archived: !!$('#kc-arch')?.checked };
+    const c = S.dlg.id ? S.items.get(S.dlg.id) : null;
+    if (c) put({ ...c, data: { ...c.data, ...data } }); else create('cashcat', data);
+    closeAll();
+  } else if (f.id === 'pf-form') {
+    try { const r = await rpc('ahg_profile', { p_token: S.token, p_display: $('#pf-disp').value, p_color: $('input[name=pf-color]:checked', f)?.value || '' }); if (r?.ok) { S.me = r.me; toast('Profil disimpan.', 'info', null, 2000); ping(); await syncNow(); render(); profileDialog(); } } catch (e) { toast('Gagal: ' + esc(e.message), 'warn'); }
+  } else if (f.id === 'pw-form') {
+    const n1 = $('#pw-new').value, n2 = $('#pw-new2').value, err = $('#pw-err'); err.textContent = '';
+    if (n1 !== n2) { err.textContent = 'Password baru tidak sama.'; return; }
+    try { const r = await rpc('ahg_pass', { p_token: S.token, p_old: $('#pw-old').value, p_new: n1 }); if (!r?.ok) { err.textContent = r?.err === 'wrong' ? 'Password lama salah.' : r?.err === 'pass' ? 'Password baru minimal 4 karakter.' : 'Gagal.'; return; } f.reset(); toast('Password diganti.', 'info'); }
+    catch (e) { err.textContent = 'Gagal: ' + e.message; }
+  }
+});
+for (const id of ['dlg', 'viewer']) document.getElementById(id).addEventListener('click', ev => { if (ev.target === ev.currentTarget) ev.currentTarget.close(); });
+dlg().addEventListener('close', () => { S.dlg = null; dlg().className = ''; });
+
+// ---------- loops + boot ----------
+async function checkUpdate() { // phones keep old copies; load the newer build when nothing is being edited
+  if (dlg().open || S.queue.size || document.activeElement?.value) return;
+  try {
+    const r = await fetch(location.pathname + '?_=' + Date.now(), { cache: 'no-store' }); const m = /const BUILD = '([^']+)'/.exec(await r.text());
+    if (m && m[1] !== BUILD && m[1] !== '__BUILD__' && SS.get('reloaded') !== m[1]) { SS.set('reloaded', m[1]); location.replace(location.pathname + '?v=' + m[1]); }
+  } catch {}
+}
+setInterval(tickClock, 1000);
+let lastPoll = 0;
+setInterval(() => { if (!S.token) return; const gap = document.hidden ? 30000 : 12000; if (Date.now() - lastPoll >= gap) { lastPoll = Date.now(); syncNow(); } }, 3000);
+setInterval(checkDue, 30000);
+setInterval(checkUpdate, 10 * 60e3);
+setInterval(() => { if (S.me && !dlg().open && !document.activeElement?.matches?.('input,textarea,select')) render(); }, 60000); // refresh "x mnt lalu"
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token) { syncNow(); if (S.view === 'chat') markRead(); } });
+window.addEventListener('pagehide', () => { if (S.token) rpc('ahg_away', { p_token: S.token, p_logout: false }, { keepalive: true, once: true }).catch(() => {}); });
+window.addEventListener('online', () => syncNow());
+window.addEventListener('focus', () => syncNow());
+
+function boot() {
+  applyTheme(); checkUpdate();
+  let s = null; try { s = JSON.parse(LS.get('session') || SS.get('session') || 'null'); } catch {}
+  if (s?.token && s?.name) { S.token = s.token; S.me = { name: s.name, role: s.name === 'admin' ? 'admin' : 'user', display: s.name }; start(); }
+  else render();
+}
+boot();
+</script>
+</body>
+</html>
