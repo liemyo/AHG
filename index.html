@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>/* phones: whole app at 90% (layout widens to fill the screen); max-scale stops iOS zooming into inputs */
-if (Math.min(screen.width, screen.height) <= 820) document.querySelector('meta[name=viewport]').content = 'width=device-width, initial-scale=0.9, minimum-scale=0.9, maximum-scale=0.9, viewport-fit=cover';
+<script>/* phones: whole app at 81% (layout widens to fill the screen); max-scale stops iOS zooming into inputs */
+if (Math.min(screen.width, screen.height) <= 820) document.querySelector('meta[name=viewport]').content = 'width=device-width, initial-scale=0.81, minimum-scale=0.81, maximum-scale=0.81, viewport-fit=cover';
 try { const t = JSON.parse(localStorage.getItem('ahg.theme') || '{}'); if (t.mode && t.mode !== 'auto') document.documentElement.dataset.theme = t.mode; if (t.accent) document.documentElement.style.setProperty('--acc', t.accent); } catch {}</script>
 <title>Virtual Work AHG</title>
 <meta name="description" content="Virtual Work AHG — reminder, global chat, task dan kasbon tim, sinkron real time di HP dan laptop.">
@@ -246,8 +246,10 @@ main[data-view=chat]{padding-bottom:18px}
 .attach{cursor:pointer}
 .send{height:40px}
 /* task */
-.links{padding:12px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
-.lk-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.links{padding:4px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.links.open{padding-bottom:12px}
+.lk-h{display:flex;gap:10px;align-items:center;border:0;background:none;color:var(--text);cursor:pointer;padding:8px 0;font-size:14.5px;text-align:left}
+.lk-h .tg{font-size:17px;font-weight:700;color:var(--muted)}
 .lk-l{display:flex;flex-wrap:wrap;gap:6px}
 .lk{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;background:var(--soft);max-width:100%}
 .lk a{display:inline-flex;align-items:center;gap:6px;padding:5px 4px 5px 10px;text-decoration:none;color:var(--text);font-weight:600;font-size:13px;min-width:0}
@@ -257,8 +259,9 @@ main[data-view=chat]{padding-bottom:18px}
 .lk:hover{border-color:var(--acc)}
 .lk-add{display:grid;grid-template-columns:2fr 1fr auto;gap:8px}
 .ttabs{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
-.tf{display:flex;gap:8px;align-items:center}
-.tf input{flex:1}
+.tf{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.tf .t-q{flex:1}
+.t-tab{font-weight:700}
 .quick{width:100%;margin:0 0 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:11px 16px;display:flex;align-items:center;color:var(--muted);cursor:text;font-weight:600;text-align:left}
 .quick span{margin-left:auto;font-size:18px;color:var(--acc)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;align-items:stretch}
@@ -450,6 +453,9 @@ main[data-view=chat]{padding-bottom:18px}
   .c-list{padding:10px 8px}
   .msg{max-width:92%}
   .att-img img{max-width:200px}
+  .tf{display:grid;grid-template-columns:1fr 1fr auto}
+  .tf.rt{grid-template-columns:1fr}
+  .tf .t-q{grid-column:1/-1}
   .lk-add{grid-template-columns:1fr 1fr}
   .lk-add #lk-url{grid-column:1/-1}
   .grid{grid-template-columns:1fr 1fr;gap:8px}
@@ -576,7 +582,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-085941';
+const BUILD = '20261004-090502';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -631,7 +637,7 @@ const S = {
   view: 'reminder',
   rem: { cal: false, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
-  task: { tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
+  task: { links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
   cash: { cat: '', p: 'month', ref: today(), from: '', to: '', q: '', who: '' },
   rep: null, sync: { busy: false, again: false, at: null, err: '' }, dlg: null
 };
@@ -1193,13 +1199,15 @@ function vTask() {
   const tabs = [['all', '📋 Aktif'], ['pin', '📌 Disematkan'], ['routine', '🔁 Rutin mingguan'], ['assigned', '🙋 Untukku'], ['mine', '✍️ Buatanku'], ['done', '✔ Selesai'], ['archive', '🗄 Arsip']];
   const owners = [...new Set(live('task').map(t => t.owner))];
   return `<div class="head"><h1>✅ Task</h1><div class="tools"><button type="button" class="btn primary" data-a="taskNew">＋ Task baru</button></div></div>
-  <section class="card links">
-    <div class="lk-h"><b>🔗 Link kerja</b><span class="muted small">Spreadsheet, Docs, Drive, dll — terlihat semua anggota</span></div>
-    <div class="lk-l">${links.map(l => `<span class="lk"><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link.</span>'}</div>
-    <form class="lk-add" id="link-add"><input id="lk-url" placeholder="Tempel link (https://docs.google.com/…)" required><input id="lk-title" placeholder="Nama link (opsional)" maxlength="80"><button class="btn" type="submit">＋ Link</button></form>
+  <section class="card links ${T.links ? 'open' : ''}">
+    <button type="button" class="lk-h" data-a="linksTog"><b>🔗 Link kerja</b><span class="muted small">${links.length} link</span><span class="sp"></span><span class="tg">${T.links ? '⌃' : '⌄'}</span></button>
+    ${T.links ? `<div class="lk-l">${links.map(l => `<span class="lk"><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link. Spreadsheet, Docs, Drive, dll — terlihat semua anggota.</span>'}</div>
+    <form class="lk-add" id="link-add"><input id="lk-url" placeholder="Tempel link (https://docs.google.com/…)" required><input id="lk-title" placeholder="Nama link (opsional)" maxlength="80"><button class="btn" type="submit">＋ Link</button></form>` : ''}
   </section>
-  <div class="ttabs"><div class="chips scroll">${tabs.map(([k, l]) => `<button type="button" class="chip ${T.tab === k ? 'on' : ''}" data-a="taskTab" data-k="${k}">${l} <small>${n[k]}</small></button>`).join('')}</div>
-    ${T.tab !== 'routine' ? `<div class="tf"><input id="t-q" placeholder="🔍 Cari task…" data-ch="taskQ" value="${esc(T.q)}"><select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button></div>` : ''}
+  <div class="tf ${T.tab === 'routine' ? 'rt' : ''}">
+    <select id="t-tab" data-ch="taskTabSel" data-keep="0" class="t-tab">${tabs.map(([k, l]) => `<option value="${k}" ${T.tab === k ? 'selected' : ''}>${l} (${n[k]})</option>`).join('')}</select>
+    ${T.tab !== 'routine' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
+    <input id="t-q" class="t-q" placeholder="🔍 Cari task…" data-ch="taskQ" value="${esc(T.q)}">` : ''}
   </div>
   ${T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
     ${l.length ? `<div class="grid ${T.layout}">${l.map(taskCard).join('')}</div>` : '<p class="empty">Tidak ada task di sini.</p>'}`; })()}`;
@@ -1582,6 +1590,7 @@ const A = {
   // task
   taskNew: el => openTask(null, { routine: el.dataset.routine === '1' || S.task.tab === 'routine' }),
   taskOpen: el => openTask(el.dataset.id),
+  linksTog: () => { S.task.links = !S.task.links; renderMain(); },
   taskTab: el => { S.task.tab = el.dataset.k; renderMain(); },
   taskLayout: () => { S.task.layout = S.task.layout === 'grid' ? 'list' : 'grid'; LS.set('task.layout', S.task.layout); renderMain(); },
   taskPin: el => { const id = el.dataset.id, P = pins(); savePref({ pins: P.includes(id) ? P.filter(x => x !== id) : [...P, id] }); render(); if (S.dlg?.type === 'task') { el.classList.toggle('on'); el.textContent = el.classList.contains('on') ? '★' : '☆'; } },
@@ -1625,6 +1634,7 @@ const CH = { // change / input handlers
   cFile: el => { addPending([...el.files]); el.value = ''; },
   cText: (el, ev) => { if (ev.type === 'input') autoGrow(el); },
   taskQ: (el, ev) => { if (ev.type === 'input') { S.task.q = el.value; renderMain(); } },
+  taskTabSel: el => { S.task.tab = el.value; renderMain(); },
   taskWho: el => { S.task.who = el.value; renderMain(); },
   cashCatSel: el => { S.cash.cat = el.value; renderMain(); },
   cashP: el => { S.cash.p = el.value; S.cash.ref = today(); renderMain(); },
