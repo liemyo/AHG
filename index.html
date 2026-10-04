@@ -392,6 +392,23 @@ main[data-view=chat]{padding-bottom:18px}
 .uc span{display:flex;flex-direction:column;line-height:1.25}
 .uc small{color:var(--muted)}
 .acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+/* unit */
+.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:8px}
+.ucard{display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;color:var(--text);box-shadow:var(--shadow)}
+.ucard.on{border-color:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 40%,transparent)}
+.ub{font-weight:800;font-size:13px;color:var(--acc)}
+.uv{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.uv small,.ta small{font-size:12px;color:var(--muted);font-weight:700}
+.ubadge{flex:none;min-width:44px;height:30px;padding:0 6px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:12px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
+.ubadge.u-AMP{background:color-mix(in srgb,#64748b 22%,transparent);color:#94a3b8}
+.ubadge.u-CMP{background:color-mix(in srgb,#3b82f6 18%,transparent);color:#60a5fa}
+.ubadge.u-PCP{background:color-mix(in srgb,#f59e0b 18%,transparent);color:#f59e0b}
+.ubadge.u-SCP{background:color-mix(in srgb,#a16207 22%,transparent);color:#d97706}
+.un{color:var(--text)!important;opacity:.85}
+.volin{display:flex!important;flex-direction:row!important;align-items:center;gap:8px}
+.volin input{flex:1}
+.volin b{min-width:40px;font-size:15px}
+.dlg [hidden]{display:none!important}
 /* profile */
 .prof{gap:14px}
 .pf-top{display:flex;gap:14px;align-items:center}
@@ -436,8 +453,8 @@ main[data-view=chat]{padding-bottom:18px}
   .me-btn{padding:3px}
   .side{display:none}
   main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
-  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
-  .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
+  .bnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
   .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
   .bnav .ic{font-size:20px;position:relative;line-height:1.2}
   .bnav .dot{position:absolute;top:-4px;left:62%;font-style:normal;font-size:10px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--muted);color:#fff;display:grid;place-items:center}
@@ -593,7 +610,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-091852';
+const BUILD = '20261004-095117';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -642,7 +659,7 @@ const NOTE_COLORS = { '': ['Tanpa warna', 'transparent'], red: ['Merah', '#f28b8
 const ACCENTS = { '#1a8566': 'Hijau AHG', '#2563eb': 'Biru', '#7c3aed': 'Ungu', '#db2777': 'Pink', '#e07b00': 'Oranye', '#dc2626': 'Merah', '#0d9488': 'Toska', '#475569': 'Abu' };
 const AV_COLORS = ['#1a8566', '#2563eb', '#7c3aed', '#db2777', '#e07b00', '#dc2626', '#0d9488', '#475569', '#9333ea', '#0891b2'];
 const STATUS = { todo: ['Belum', '○'], doing: ['Proses', '◐'], done: ['Selesai', '●'] };
-const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
+const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
 
 // ---------- state ----------
 const now0 = new Date();
@@ -652,6 +669,7 @@ const S = {
   rem: { cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
   task: { links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
+  unit: { cat: 'produksi', p: 'month', ref: today(), from: '', to: '', bc: '', u: '', q: '' },
   cash: { cat: '', p: 'month', ref: today(), from: '', to: '', q: '', who: '' },
   rep: null, sync: { busy: false, again: false, at: null, err: '' }, dlg: null
 };
@@ -953,11 +971,11 @@ function badges() {
 }
 function renderNav() {
   const b = badges(), on = S.users.filter(online).length;
-  const items = ['reminder', 'chat', 'task', 'cash', 'users', ...(isAdmin() ? ['admin'] : [])];
+  const items = ['reminder', 'chat', 'task', 'cash', 'unit', 'users', ...(isAdmin() ? ['admin'] : [])];
   const n = { reminder: b.rem, chat: b.chat, task: b.task, users: on };
   setHTML($('#side'), items.map(v => `<button type="button" class="nav ${S.view === v ? 'on' : ''} nv-${v}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}</span><span class="lb">${VIEWS[v][1]}</span>${n[v] ? `<span class="n ${v === 'chat' ? 'hot' : v === 'users' ? 'grn' : ''}">${n[v]}</span>` : ''}</button>`).join('')
     + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
-  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
+  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
   setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
@@ -979,7 +997,7 @@ function keep(root, fn) {
 }
 function renderMain() {
   const m = $('#main'); if (!m) return;
-  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
+  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
   const sameChat = S.view === 'chat' && m.dataset.view === 'chat' && m.dataset.conv === S.chat.conv && $('#composer', m);
   if (sameChat) { // keep the composer (typing, IME, file picker) — refresh only lists and header
     const tmp = document.createElement('div'); tmp.innerHTML = html;
@@ -1529,6 +1547,74 @@ function reportPrint() {
   window.print();
 }
 
+// ---------- UNIT (aktivitas unit basecamp) ----------
+const UNIT_CATS = { produksi: '🏗 Produksi' };
+const BASECAMPS = ['Bugel', 'Tempuran', 'Jogoresan'];
+const PROD_UNITS = { AMP: ['Asphalt Mixing Plant', 'ton'], CMP: ['Concrete Mixing Plant', 'm3'], PCP: ['Precast Plant', 'pcs'], SCP: ['Stone Crusher Plant', 'ton'] };
+const PCP_SIZES = ['U-Ditch (50x70x120 t.15)'];
+const unitOpts = type => live('unitopt').filter(o => o.data.type === type).sort((a, b) => (a.data.name || '').localeCompare(b.data.name || ''));
+const basecamps = () => [...new Set([...BASECAMPS, ...unitOpts('basecamp').map(o => o.data.name)])];
+const prodUnits = () => { const m = Object.fromEntries(Object.entries(PROD_UNITS).map(([k, [n, sat]]) => [k, { name: n, sat }])); for (const o of unitOpts('unit')) if (!m[o.data.name]) m[o.data.name] = { name: o.data.desc || '', sat: o.data.sat || '' }; return m; };
+const pcpSizes = () => [...new Set([...PCP_SIZES, ...unitOpts('size').map(o => o.data.name)])];
+const vol = n => Number(n || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+const parseVol = s => { s = String(s ?? '').trim().replace(/\s/g, ''); if (/,/.test(s)) s = s.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); const n = Number(s); return isFinite(n) ? n : 0; };
+const unitTx = () => live('unit').sort((a, b) => (b.data.date || '').localeCompare(a.data.date || '') || b.created - a.created);
+function vUnit() {
+  const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to), q = U.q.trim().toLowerCase(), pu = prodUnits();
+  let l = unitTx().filter(t => (t.data.cat || 'produksi') === U.cat && (!s || t.data.date >= s) && (!e || t.data.date < e) && (!U.bc || t.data.basecamp === U.bc) && (!U.u || t.data.unit === U.u));
+  if (q) l = l.filter(t => [t.data.unit, t.data.basecamp, t.data.size, t.data.note, uname(t.owner)].join(' ').toLowerCase().includes(q));
+  const tot = {}; for (const t of l) { const k = t.data.unit + '|' + (t.data.sat || ''); (tot[k] ||= { unit: t.data.unit, sat: t.data.sat, v: 0, n: 0, bc: new Set() }); tot[k].v += Number(t.data.volume) || 0; tot[k].n++; tot[k].bc.add(t.data.basecamp); }
+  const groups = {}; for (const t of l) (groups[t.data.date] ||= []).push(t);
+  return `<div class="head"><h1>🏭 Unit <span class="hc">aktivitas unit basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="unitNew">＋ Input produksi</button></div></div>
+  <section class="card cflt">
+    <select id="u-cat" data-ch="unitCat" data-keep="0">${Object.entries(UNIT_CATS).map(([k, l]) => `<option value="${k}" ${U.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <select id="u-p" data-ch="unitP" data-keep="0">${Object.entries(PERIODS).map(([k, l]) => `<option value="${k}" ${U.p === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    ${['week', 'month', 'year'].includes(U.p) ? `<span class="pnav"><button type="button" class="ib" data-a="unitNav" data-n="-1">‹</button><b>${esc(periodLabel(U.p, U.ref))}</b><button type="button" class="ib" data-a="unitNav" data-n="1">›</button></span>` : ''}
+    ${U.p === 'range' ? `<input type="date" id="u-from" data-ch="unitFrom" data-keep="0" value="${U.from}"><span>–</span><input type="date" id="u-to" data-ch="unitTo" data-keep="0" value="${U.to}">` : ''}
+    <select id="u-bc" data-ch="unitBc" data-keep="0"><option value="">Semua basecamp</option>${basecamps().map(b => `<option ${U.bc === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>
+    <select id="u-u" data-ch="unitU" data-keep="0"><option value="">Semua unit</option>${Object.keys(pu).map(k => `<option value="${esc(k)}" ${U.u === k ? 'selected' : ''}>${esc(k)}</option>`).join('')}</select>
+    <input id="u-q" placeholder="🔍 Cari…" data-ch="unitQ" value="${esc(U.q)}">
+  </section>
+  <div class="ugrid">${Object.values(tot).sort((a, b) => a.unit.localeCompare(b.unit)).map(x => `<button type="button" class="ucard ${U.u === x.unit ? 'on' : ''}" data-a="unitPick" data-u="${esc(x.unit)}"><span class="ub">${esc(x.unit)}</span><span class="uv">${vol(x.v)} <small>${esc(x.sat || '')}</small></span><span class="muted small">${x.n} input · ${esc([...x.bc].join(', '))}</span></button>`).join('') || ''}</div>
+  <p class="muted small">Periode: <b>${esc(periodLabel(U.p, U.ref, U.from, U.to))}</b> · ${l.length} input${U.bc ? ' · ' + esc(U.bc) : ''}</p>
+  <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, g]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${g.length} input</span></div>
+    ${g.map(t => { const x = t.data; return `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
+      <span class="ti"><b>${esc(pu[x.unit]?.name || x.unit)}${x.size ? ' · ' + esc(x.size) : ''}</b><small>📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${linkify(x.note)}</small>` : ''}</span>
+      <span class="ta">${vol(x.volume)} <small>${esc(x.sat || '')}</small></span></div>`; }).join('')}</div>`).join('') : '<p class="empty">Belum ada input produksi di periode ini.</p>'}</div>`;
+}
+function unitDialog(t) {
+  const d = t?.data || { cat: 'produksi', date: today(), basecamp: S.unit.bc || '', unit: S.unit.u || '', volume: '', sat: '', size: '', note: '' };
+  S.dlg = { type: 'unit', id: t?.id || null };
+  const pu = prodUnits(), bcs = basecamps(), sizes = pcpSizes();
+  openDlg(`<form class="dlg" id="unit-form"><h2>${t ? 'Ubah input produksi' : '🏗 Input produksi'}</h2>
+    <div class="row2"><label>Tanggal<input id="uf-date" type="date" value="${esc(d.date)}" required></label>
+      <label>Lokasi basecamp<select id="uf-bc" data-ch="ufBc" required><option value="">Pilih basecamp…</option>${bcs.map(b => `<option ${d.basecamp === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}<option value="+">＋ Lainnya…</option></select></label></div>
+    <label id="uf-bc-new-l" hidden>Nama basecamp baru<input id="uf-bc-new" maxlength="60" placeholder="mis. Kulon Progo"></label>
+    <label>Unit produksi<select id="uf-unit" data-ch="ufUnit" required><option value="">Pilih unit produksi…</option>${Object.entries(pu).map(([k, v]) => `<option value="${esc(k)}" ${d.unit === k ? 'selected' : ''}>${esc(k)}${v.name ? ' — ' + esc(v.name) : ''} (${esc(v.sat || '-')})</option>`).join('')}<option value="+">＋ Lainnya…</option></select></label>
+    <div class="row2" id="uf-unit-new" hidden><label>Nama unit<input id="uf-un-name" maxlength="20" placeholder="mis. BP"></label><label>Satuan<input id="uf-un-sat" maxlength="12" placeholder="mis. m3 / ton / pcs"></label></div>
+    <div id="uf-pcp" ${d.unit === 'PCP' ? '' : 'hidden'}><label>Ukuran / spesifikasi<select id="uf-size" data-ch="ufSize">${sizes.map(z => `<option ${d.size === z ? 'selected' : ''}>${esc(z)}</option>`).join('')}<option value="+">＋ Tambah ukuran…</option></select></label>
+      <label id="uf-size-new-l" hidden>Ukuran baru<input id="uf-size-new" maxlength="80" placeholder="mis. U-Ditch (60x80x120 t.15)"></label></div>
+    <label>Volume produksi<span class="volin"><input id="uf-vol" inputmode="decimal" placeholder="0" value="${d.volume !== '' && d.volume != null ? esc(String(d.volume).replace('.', ',')) : ''}" required><b id="uf-sat">${esc(d.sat || pu[d.unit]?.sat || '')}</b></span></label>
+    <label>Keterangan (opsional)<input id="uf-note" maxlength="300" value="${esc(d.note || '')}" placeholder="mis. shift pagi, proyek X"></label>
+    ${t ? `<p class="muted small">Dicatat oleh ${esc(uname(t.owner))} · ${dtText(t.created)}</p>` : ''}
+    <div class="dlg-f">${t ? `<button type="button" class="btn danger" data-a="unitDel" data-id="${t.id}">Hapus</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
+  </form>`);
+}
+async function saveUnitForm(f) {
+  const pu = prodUnits(); let bc = $('#uf-bc').value, unit = $('#uf-unit').value, sat = '', size = '';
+  if (bc === '+') { bc = $('#uf-bc-new').value.trim(); if (!bc) return toast('Isi nama basecamp baru.', 'warn'); if (!basecamps().includes(bc)) create('unitopt', { type: 'basecamp', name: bc }, { quiet: 1 }); }
+  if (!bc) return toast('Pilih lokasi basecamp.', 'warn');
+  if (unit === '+') { unit = $('#uf-un-name').value.trim().toUpperCase(); sat = $('#uf-un-sat').value.trim(); if (!unit || !sat) return toast('Isi nama unit dan satuannya.', 'warn'); if (!pu[unit]) create('unitopt', { type: 'unit', name: unit, sat }, { quiet: 1 }); }
+  else sat = pu[unit]?.sat || '';
+  if (!unit) return toast('Pilih unit produksi.', 'warn');
+  if (unit === 'PCP') { size = $('#uf-size').value; if (size === '+') { size = $('#uf-size-new').value.trim(); if (!size) return toast('Isi ukuran baru.', 'warn'); if (!pcpSizes().includes(size)) create('unitopt', { type: 'size', name: size }, { quiet: 1 }); } }
+  const volume = parseVol($('#uf-vol').value); if (!(volume > 0)) return toast('Isi volume produksi.', 'warn');
+  const data = { cat: 'produksi', date: $('#uf-date').value || today(), basecamp: bc, unit, sat, volume, size, note: $('#uf-note').value.trim() };
+  const t = S.dlg.id ? S.items.get(S.dlg.id) : null;
+  if (t) put({ ...t, data }); else create('unit', data);
+  closeAll(); toast(`Produksi ${esc(unit)} ${vol(volume)} ${esc(sat)} · ${esc(bc)} tersimpan.`, 'info', null, 3000);
+}
+
 // ---------- ADMIN ----------
 function vAdmin() {
   const count = (n, k) => live(k).filter(i => i.owner === n).length;
@@ -1664,6 +1750,10 @@ const A = {
   cashNav: el => { S.cash.ref = shiftRef(S.cash.p, S.cash.ref, Number(el.dataset.n)); renderMain(); },
   cashDel: async el => { const t = S.items.get(el.dataset.id); if (await confirmDlg(`Hapus transaksi ${money(t.data.amount)} <b>${esc(t.data.note || '')}</b>?`, 'Hapus')) { closeAll(); remove(t.id); } },
   report: () => reportDialog(),
+  unitNew: () => unitDialog(null), unitEdit: el => unitDialog(S.items.get(el.dataset.id)),
+  unitDel: async el => { const t = S.items.get(el.dataset.id); if (await confirmDlg(`Hapus input produksi ${esc(t.data.unit)} ${vol(t.data.volume)} ${esc(t.data.sat || '')}?`, 'Hapus')) { closeAll(); remove(t.id); } },
+  unitNav: el => { S.unit.ref = shiftRef(S.unit.p, S.unit.ref, Number(el.dataset.n)); renderMain(); },
+  unitPick: el => { S.unit.u = S.unit.u === el.dataset.u ? '' : el.dataset.u; renderMain(); },
   repPdf: () => reportPdf(), repXlsx: () => reportXlsx(), repPrint: () => reportPrint(),
   // admin
   admReset: async el => { const n = el.dataset.u; if (await confirmDlg(`Reset password <b>${esc(n)}</b>? User akan keluar dari semua perangkat; login berikutnya dengan password apa pun menjadi password barunya.`, 'Reset')) adminAct('reset', n); },
@@ -1689,6 +1779,13 @@ const CH = { // change / input handlers
   cashQ: (el, ev) => { if (ev.type === 'input') { S.cash.q = el.value; renderMain(); } },
   amt: (el, ev) => { if (ev.type !== 'input') return; const n = parseNum(el.value); el.value = n ? num(n) : ''; },
   cfFile: async el => { const f = el.files[0]; if (!f) return; try { S.dlg.newFile = await prepFile(f); $('#cf-fname').textContent = '📎 ' + S.dlg.newFile.name + ' (' + fsize(S.dlg.newFile.size) + ')'; } catch (e) { toast(esc(e.message), 'warn'); el.value = ''; } },
+  unitCat: el => { S.unit.cat = el.value; renderMain(); }, unitP: el => { S.unit.p = el.value; S.unit.ref = today(); renderMain(); },
+  unitFrom: el => { S.unit.from = el.value; renderMain(); }, unitTo: el => { S.unit.to = el.value; renderMain(); },
+  unitBc: el => { S.unit.bc = el.value; renderMain(); }, unitU: el => { S.unit.u = el.value; renderMain(); },
+  unitQ: (el, ev) => { if (ev.type === 'input') { S.unit.q = el.value; renderMain(); } },
+  ufBc: el => { $('#uf-bc-new-l').hidden = el.value !== '+'; if (el.value === '+') $('#uf-bc-new').focus(); },
+  ufUnit: el => { const v = el.value, pu = prodUnits(); $('#uf-unit-new').hidden = v !== '+'; $('#uf-pcp').hidden = v !== 'PCP'; $('#uf-sat').textContent = v === '+' ? '' : (pu[v]?.sat || ''); if (v === '+') $('#uf-un-name').focus(); },
+  ufSize: el => { $('#uf-size-new-l').hidden = el.value !== '+'; if (el.value === '+') $('#uf-size-new').focus(); },
   repCat: el => { S.rep.cat = el.value; repRefresh(); }, repP: el => { S.rep.p = el.value; S.rep.ref = today(); repRefresh(); },
   repRef: el => { const v = el.value; if (!v) return; S.rep.ref = S.rep.p === 'month' ? v + '-01' : S.rep.p === 'year' ? (v.length === 4 ? v + '-01-01' : S.rep.ref) : v; repRefresh(); },
   repFrom: el => { S.rep.from = el.value; repRefresh(); }, repTo: el => { S.rep.to = el.value; repRefresh(); },
@@ -1781,6 +1878,7 @@ document.addEventListener('submit', async ev => {
     const t = S.dlg.id ? S.items.get(S.dlg.id) : null;
     if (t) put({ ...t, data }); else create('cash', data);
     closeAll(); toast(`${type === 'in' ? 'Uang masuk' : 'Uang keluar'} ${money(amount)} · ${esc(catName(cat))} — sisa ${money(catTotals(cat).close)}`, 'info', null, 4000);
+  } else if (f.id === 'unit-form') { saveUnitForm(f);
   } else if (f.id === 'cat-form') {
     const name = $('#kc-name').value.trim(); if (!name) return;
     const data = { name, color: $('input[name=kc-color]:checked', f)?.value || 'green', note: $('#kc-note').value.trim(), archived: !!$('#kc-arch')?.checked };
