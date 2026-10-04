@@ -122,6 +122,11 @@ main{grid-area:main;min-width:0;padding:18px 24px 100px}
 .chip.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--card));color:var(--acc)}
 .chip-sel{border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600}
 /* reminder */
+.hb-tog{display:flex;align-items:center;width:100%;border:0;background:none;cursor:pointer;padding:6px 0;margin:0 0 10px;color:var(--muted)}
+.hb-tog::before,.hb-tog::after{content:'';flex:1;height:1px;background:var(--line)}
+.hb-tog span{padding:0 14px;font-size:18px;line-height:1;font-weight:700}
+.hb-tog:hover{color:var(--acc)}
+.hb-tog:hover::before,.hb-tog:hover::after{background:color-mix(in srgb,var(--acc) 50%,var(--line))}
 .cal{padding:12px 14px 14px;margin-bottom:14px}
 .cal-h{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
 .cal-t{display:flex;gap:6px}
@@ -571,7 +576,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-083850';
+const BUILD = '20261004-085941';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -624,7 +629,7 @@ const now0 = new Date();
 const S = {
   token: '', me: null, users: [], skew: 0, items: new Map(), seq: 0, queue: new Set(), loaded: false,
   view: 'reminder',
-  rem: { y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
+  rem: { cal: false, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
   task: { tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
   cash: { cat: '', p: 'month', ref: today(), from: '', to: '', q: '', who: '' },
@@ -706,7 +711,8 @@ async function syncNow() {
       if (who !== S.token) return;
       if (!r?.ok) { if (r?.err === 'auth') return authLost(); throw new Error('server menolak'); }
       if (r.me) { S.skew = Date.now() - Date.parse(r.me.last_seen); S.me = r.me; }
-      if (JSON.stringify(r.users) !== JSON.stringify(S.users)) { S.users = r.users || []; changed = true; }
+      const us = (r.users || []).filter(u => r.me?.role === 'admin' || u.role !== 'admin'); // admin presence stays hidden from users
+      if (JSON.stringify(us) !== JSON.stringify(S.users)) { S.users = us; changed = true; }
       for (const x of r.rows || []) {
         const it = { id: x.id, kind: x.kind, owner: x.owner, to: x.to || null, data: x.data || {}, created: Number(x.created), updated: Number(x.updated), deleted: !!x.deleted, seq: Number(x.seq) };
         const cur = S.items.get(it.id);
@@ -1025,7 +1031,8 @@ function vReminder() {
   const owners = [...new Set(rems.map(r => r.owner))];
   const addDate = R.addDate || R.sel || td;
   return `<div class="head"><h1>⏰ Reminder</h1><div class="tools"><button type="button" class="btn sm" data-a="remToday">Hari ini</button></div></div>
-  <section class="card cal">
+  <button type="button" class="hb-tog" data-a="calTog" title="${R.cal ? 'Sembunyikan kalender' : 'Tampilkan kalender'}"><span>${R.cal ? '⌃' : '⌄'}</span></button>
+  ${R.cal ? `<section class="card cal">
     <div class="cal-h" id="cal-h">
       <button type="button" class="ib big" data-a="remMon" data-n="-1" title="Bulan sebelumnya">‹</button>
       <div class="cal-t"><select id="rem-m" data-ch="remM" data-keep="0">${MONTHS.map((m, i) => `<option value="${i}" ${i === R.m ? 'selected' : ''}>${m}</option>`).join('')}</select>
@@ -1034,7 +1041,7 @@ function vReminder() {
     </div>
     <div class="cal-g wk">${['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => `<span>${d}</span>`).join('')}</div>
     <div class="cal-g days" id="cal-days">${cells}</div>
-  </section>
+  </section>` : ''}
   <form class="card qadd" id="rem-add">
     <input id="ra-title" placeholder="➕ Tulis reminder baru…" maxlength="200" required>
     <input id="ra-date" type="date" value="${addDate}" data-keep="0" data-ch="raDate" required>
@@ -1561,6 +1568,7 @@ const A = {
   remMon: el => { const d = new Date(S.rem.y, S.rem.m + Number(el.dataset.n), 1); S.rem.y = d.getFullYear(); S.rem.m = d.getMonth(); S.rem.sel = ''; S.rem.addDate = ''; renderMain(); },
   remToday: () => { const n = new Date(); S.rem.y = n.getFullYear(); S.rem.m = n.getMonth(); S.rem.sel = today(); S.rem.addDate = ''; renderMain(); },
   remDay: el => { const d = el.dataset.d; S.rem.sel = S.rem.sel === d ? '' : d; S.rem.addDate = ''; const p = pYmd(d); if (p.getMonth() !== S.rem.m) { S.rem.m = p.getMonth(); S.rem.y = p.getFullYear(); } renderMain(); },
+  calTog: () => { S.rem.cal = !S.rem.cal; renderMain(); },
   remSt: el => { S.rem.st = el.dataset.k; renderMain(); },
   remDone: el => { const r = S.items.get(el.dataset.id); if (!r) return; const done = !r.data.done; patch(r.id, { done, doneBy: done ? S.me.name : '', doneAt: done ? srvNow() : 0 }); },
   remEdit: el => remDialog(S.items.get(el.dataset.id)),
