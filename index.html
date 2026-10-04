@@ -105,8 +105,8 @@ main{grid-area:main;min-width:0;padding:18px 24px 100px}
 .ui small{font-size:12px;color:var(--muted)}
 .ui small b,.adm{font-size:10.5px}
 .adm{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc);border-radius:99px;padding:1px 6px}
-.wh{opacity:0;font-size:14px}
-.urow:hover .wh{opacity:.8}
+.wh-ic{opacity:0;font-size:14px}
+.urow:hover .wh-ic{opacity:.8}
 .bnav{display:none}
 .head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .head h1{margin:0;font-size:24px}
@@ -237,6 +237,17 @@ main[data-view=chat]{padding-bottom:18px}
 .composer.whm{background:color-mix(in srgb,#8b5cf6 7%,var(--card))}
 .wh-bar{font-size:12.5px;color:#7c3aed;font-weight:600}
 .pend{display:flex;flex-wrap:wrap;gap:6px}
+.mention{font-weight:700;color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);border-radius:6px;padding:0 4px}
+.mention.me{color:#b45309;background:color-mix(in srgb,#f59e0b 22%,transparent)}
+.msg.ment .bub{border-color:#f59e0b;box-shadow:0 0 0 1px #f59e0b}
+.composer{position:relative}
+.mpop{position:absolute;left:10px;right:10px;bottom:calc(100% - 4px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:4px;display:flex;flex-direction:column;max-height:300px;overflow:auto}
+.mpop[hidden]{display:none}
+.mi{display:flex;align-items:center;gap:10px;border:0;background:none;padding:7px 8px;border-radius:9px;cursor:pointer;text-align:left;color:var(--text)}
+.mi span:last-child{display:flex;flex-direction:column;line-height:1.25}
+.mi small{color:var(--muted);font-size:12px}
+.mi.on,.mi:hover{background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.ib.at{font-weight:800;font-size:18px}
 .pend:empty{display:none}
 .pf{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:3px 4px 3px 6px;font-size:12.5px;background:var(--card);max-width:100%}
 .pf img{width:30px;height:30px;object-fit:cover;border-radius:6px}
@@ -582,7 +593,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-091202';
+const BUILD = '20261004-091852';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -619,6 +630,9 @@ const money = n => (n < 0 ? '−Rp' : 'Rp') + num(Math.abs(n));
 const parseNum = s => Number(String(s ?? '').replace(/[^\d]/g, '')) || 0;
 const fsize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(0) + ' KB' : (n / 1048576).toFixed(1).replace('.', ',') + ' MB';
 const linkify = t => esc(t).replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]|www\.[^\s<]+[^\s<.,;:!?)\]'"])/g, u => `<a href="${u.startsWith('www.') ? 'https://' + u : u}" target="_blank" rel="noopener">${u}</a>`);
+const MENTION_RE = /(^|[\s(])@([a-z0-9._-]{3,32})\b/g;
+const mentionsOf = t => [...new Set([...String(t || '').toLowerCase().matchAll(MENTION_RE)].map(m => m[2]).filter(n => n === 'semua' || user(n)))];
+const withMentions = html => html.replace(/(^|[\s(])@([a-z0-9._-]{3,32})\b/g, (all, pre, n) => (n === 'semua' || user(n)) ? `${pre}<span class="mention ${n === S.me?.name || n === 'semua' ? 'me' : ''}">@${esc(n === 'semua' ? 'semua' : uname(n))}</span>` : all);
 const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 const normUrl = u => { u = String(u || '').trim(); if (!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; };
 const slug = s => String(s).normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40) || 'semua';
@@ -814,7 +828,9 @@ function notifyNew(it) {
   if (it.owner === S.me.name) return;
   if (it.kind === 'msg') {
     const conv = convOf(it), viewing = S.view === 'chat' && S.chat.conv === conv && !document.hidden;
-    if (viewing) return;
+    const ment = (it.data.mentions || []).some(x => x === S.me.name || (x === 'semua' && !it.to));
+    if (viewing && !ment) return;
+    if (ment) { toast(`📣 <b>${esc(uname(it.owner))}</b> menandai kamu: ${esc((it.data.text || '').slice(0, 120))}`, 'msg', () => { S.chat.conv = conv; go('chat'); }, 10000); beep(); sysNotify(uname(it.owner) + ' menandai kamu', (it.data.text || '').slice(0, 120)); return; }
     const who = uname(it.owner), txt = (it.data.text || (it.data.files?.length ? '📎 lampiran' : '')).slice(0, 120);
     toast(`${it.to ? '🤫 ' : '💬 '}<b>${esc(who)}</b>: ${esc(txt)}`, 'msg', () => { S.chat.conv = conv; go('chat'); });
     beep(); sysNotify((it.to ? 'Whisper dari ' : 'Chat: ') + who, txt);
@@ -993,7 +1009,7 @@ function userList(compact) {
     return `<div class="urow ${me ? 'me' : ''}" ${me ? '' : `data-a="whisper" data-u="${esc(u.name)}" title="Whisper ke ${esc(uname(u.name))}"`}>
       <span class="avw">${av(u.name)}<i class="st ${online(u) ? 'on' : ''}"></i></span>
       <span class="ui"><b>${esc(uname(u.name))}${me ? ' <small>(kamu)</small>' : ''}${u.role === 'admin' ? ' <small class="adm">Admin</small>' : ''}</b><small>@${esc(u.name)} · ${lastSeenText(u)}${u.reset ? ' · <span class="warn-t">password direset</span>' : ''}</small></span>
-      ${w ? `<span class="n hot">${w}</span>` : me || compact ? '' : '<span class="wh">🤫</span>'}
+      ${w ? `<span class="n hot">${w}</span>` : me || compact ? '' : '<span class="wh-ic">🤫</span>'}
     </div>`; }).join('');
 }
 function renderUsers() {
@@ -1118,11 +1134,11 @@ function vChat() {
     const day = ymd(new Date(m.created));
     if (day !== lastDay) { out += `<div class="dsep"><span>${day === today() ? 'Hari ini' : day === ymd(addDays(new Date(), -1)) ? 'Kemarin' : dText(day)}</span></div>`; lastDay = day; lastWho = ''; }
     const mine = m.owner === S.me.name, cont = lastWho === m.owner && m.created - lastT < 5 * 60e3;
-    out += `<div class="msg ${mine ? 'mine' : ''} ${cont ? 'cont' : ''} ${m.to ? 'wh' : ''}">
+    out += `<div class="msg ${mine ? 'mine' : ''} ${cont ? 'cont' : ''} ${m.to ? 'wh' : ''} ${!mine && (m.data.mentions || []).some(x => x === S.me.name || x === 'semua') ? 'ment' : ''}">
       ${mine ? '' : `<span class="mav">${cont ? '' : av(m.owner)}</span>`}
       <div class="bub">
         ${cont ? '' : `<div class="mh"><b style="color:${ucolor(m.owner)}">${esc(uname(m.owner))}</b>${m.to ? ` <span class="whl">🤫 whisper${mine ? ' ke ' + esc(uname(m.to)) : ''}</span>` : ''}</div>`}
-        ${m.data.text ? `<div class="mt">${linkify(m.data.text)}</div>` : ''}
+        ${m.data.text ? `<div class="mt">${withMentions(linkify(m.data.text))}</div>` : ''}
         ${filesHtml(m.data.files)}
         <div class="mf"><span title="${dtText(m.created)}">${hm(m.created)}</span>${mine || isAdmin() ? `<button type="button" class="mdel" data-a="msgDel" data-id="${m.id}" title="Hapus pesan">🗑</button>` : ''}</div>
       </div></div>`;
@@ -1142,9 +1158,10 @@ function vChat() {
       <form class="composer ${c !== 'g' ? 'whm' : ''}" id="composer">
         ${c !== 'g' ? `<div class="wh-bar">🤫 Whisper ke <b>${esc(uname(c.slice(2)))}</b> — orang lain tidak bisa melihat <button type="button" class="mini" data-a="conv" data-c="g">Kembali ke Global</button></div>` : ''}
         <div class="pend" id="pend">${pendHtml()}</div>
+        <div class="mpop" id="mpop" hidden></div>
         <div class="c-row">
           <label class="ib attach" title="Lampirkan gambar / file">📎<input type="file" id="c-file" multiple hidden data-ch="cFile"></label>
-          <button type="button" class="ib" data-a="whPick" title="Whisper ke anggota">🤫</button>
+          <button type="button" class="ib at" data-a="atStart" title="Tandai orang (@)">@</button><button type="button" class="ib" data-a="whPick" title="Whisper ke anggota">🤫</button>
           <textarea id="c-text" rows="1" placeholder="${c === 'g' ? 'Tulis pesan ke semua… (link, gambar, file)' : 'Tulis whisper…'}" data-ch="cText"></textarea>
           <button class="btn primary send" type="submit" ${S.chat.sending ? 'disabled' : ''}>${S.chat.sending ? '⏳' : 'Kirim'}</button>
         </div>
@@ -1157,13 +1174,40 @@ async function addPending(files) {
   for (const f of files) { try { S.chat.files.push(await prepFile(f)); } catch (e) { toast(esc(e.message), 'warn'); } }
   const p = $('#pend'); if (p) p.innerHTML = pendHtml();
 }
+const M = { open: false, start: 0, list: [], idx: 0 };
+function mentionCheck(t) {
+  const p = t.selectionStart ?? t.value.length, m = /(^|[\s(])@([\w.-]{0,32})$/.exec(t.value.slice(0, p));
+  if (!m) return mentionClose();
+  const q = m[2].toLowerCase(), conv = S.chat.conv;
+  let list = S.users.filter(u => u.name !== S.me.name && (conv === 'g' || u.name === conv.slice(2)));
+  list = list.filter(u => !q || u.name.includes(q) || (u.display || '').toLowerCase().includes(q)).sort((a, b) => (online(b) - online(a)) || a.name.localeCompare(b.name)).slice(0, 6).map(u => u.name);
+  if (conv === 'g' && 'semua'.startsWith(q)) list.push('semua');
+  if (!list.length) return mentionClose();
+  Object.assign(M, { open: true, start: p - m[2].length - 1, list, idx: Math.min(M.idx, list.length - 1) });
+  const pop = $('#mpop'); pop.hidden = false;
+  pop.innerHTML = list.map((n, i) => `<button type="button" class="mi ${i === M.idx ? 'on' : ''}" data-a="mentionPick" data-u="${esc(n)}">${n === 'semua' ? '<span class="av gl">📣</span><span><b>@semua</b><small>tandai semua anggota</small></span>' : `${av(n)}<span><b>${esc(uname(n))}</b><small>@${esc(n)}${online(user(n)) ? ' · ● online' : ''}</small></span>`}</button>`).join('');
+}
+function mentionClose() { M.open = false; M.idx = 0; const pop = $('#mpop'); if (pop) { pop.hidden = true; pop.innerHTML = ''; } }
+function mentionInsert(n) {
+  const t = $('#c-text'); if (!t || !n) return;
+  const p = t.selectionStart ?? t.value.length, ins = '@' + n + ' ';
+  t.value = t.value.slice(0, M.start) + ins + t.value.slice(p); const c = M.start + ins.length;
+  mentionClose(); t.focus(); t.setSelectionRange(c, c); autoGrow(t);
+}
+function mentionKey(ev) {
+  if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); M.idx = (M.idx + (ev.key === 'ArrowDown' ? 1 : -1) + M.list.length) % M.list.length; mentionCheck(ev.target); return true; }
+  if ((ev.key === 'Enter' || ev.key === 'Tab') && !ev.isComposing) { ev.preventDefault(); mentionInsert(M.list[M.idx]); return true; }
+  if (ev.key === 'Escape') { ev.preventDefault(); mentionClose(); return true; }
+  return false;
+}
 async function sendMsg() {
+  mentionClose();
   const t = $('#c-text'), text = t.value.trim(); if ((!text && !S.chat.files.length) || S.chat.sending) return;
   const c = S.chat.conv, to = c === 'g' ? null : c.slice(2);
   S.chat.sending = true; renderMain();
   try {
     const files = []; for (const f of S.chat.files) files.push(await uploadFile(f));
-    create('msg', { text: text.slice(0, 20000), files, ...(to ? { to } : {}) }, { to, quiet: 1 });
+    create('msg', { text: text.slice(0, 20000), files, mentions: mentionsOf(text), ...(to ? { to } : {}) }, { to, quiet: 1 });
     S.chat.files = []; const pe = $('#pend'); if (pe) pe.innerHTML = ''; const tt = $('#c-text'); if (tt) { tt.value = ''; autoGrow(tt); }
   } catch (e) { toast('Gagal mengirim: ' + esc(e.message), 'warn'); }
   S.chat.sending = false; render(); const l = $('#c-list'); if (l) l.scrollTop = l.scrollHeight; $('#c-text')?.focus();
@@ -1585,6 +1629,8 @@ const A = {
   conv: el => { S.chat.conv = el.dataset.c; S.chat.limit = 200; renderMain(); markRead(); renderNav(); $('#c-text')?.focus(); },
   chatMore: () => { S.chat.limit += 300; renderMain(); },
   msgDel: async el => { if (await confirmDlg('Hapus pesan ini untuk semua orang?', 'Hapus')) remove(el.dataset.id); },
+  atStart: () => { const t = $('#c-text'); if (!t) return; const p = t.selectionStart ?? t.value.length, pre = t.value.slice(0, p); const ins = (pre && !/\s$/.test(pre) ? ' ' : '') + '@'; t.value = pre + ins + t.value.slice(p); t.focus(); t.setSelectionRange(p + ins.length, p + ins.length); mentionCheck(t); },
+  mentionPick: el => mentionInsert(el.dataset.u),
   pendDel: el => { S.chat.files.splice(Number(el.dataset.i), 1); $('#pend').innerHTML = pendHtml(); },
   whPick: () => { const s = $('#wh-new'); if (s && s.offsetParent) { s.focus(); try { s.showPicker?.(); } catch {} } else { const m = $('#m-conv'); m.value = '+'; m.dispatchEvent(new Event('change', { bubbles: true })); } },
   // task
@@ -1632,7 +1678,7 @@ const CH = { // change / input handlers
   convSel: el => { if (el.value === '+') { const others = S.users.filter(u => u.name !== S.me.name); pickUser(others); return; } S.chat.conv = el.value; renderMain(); markRead(); renderNav(); },
   whNew: el => { if (el.value) { S.chat.conv = 'w:' + el.value; renderMain(); markRead(); $('#c-text')?.focus(); } },
   cFile: el => { addPending([...el.files]); el.value = ''; },
-  cText: (el, ev) => { if (ev.type === 'input') autoGrow(el); },
+  cText: (el, ev) => { if (ev.type === 'input') { autoGrow(el); mentionCheck(el); } },
   taskQ: (el, ev) => { if (ev.type === 'input') { S.task.q = el.value; renderMain(); } },
   taskTabSel: el => { S.task.tab = el.value; renderMain(); },
   taskWho: el => { S.task.who = el.value; renderMain(); },
@@ -1675,6 +1721,7 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Enter' && ev.target.matches?.('.ncard')) A.taskOpen(ev.target);
+  if (ev.target.id === 'c-text' && M.open && mentionKey(ev)) return;
   if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing && ev.target.id === 'c-text' && !matchMedia('(pointer:coarse)').matches) { ev.preventDefault(); sendMsg(); }
   if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey) && ev.target.id === 'cm-text') { ev.preventDefault(); $('[data-a=cmtAdd]')?.click(); }
 });
