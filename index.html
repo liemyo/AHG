@@ -409,6 +409,12 @@ main[data-view=chat]{padding-bottom:18px}
 .volin input{flex:1}
 .volin b{min-width:40px;font-size:15px}
 .dlg [hidden]{display:none!important}
+.sz-sel{display:flex;gap:8px;align-items:center}
+.sz-sel select{flex:1;min-width:0}
+.sz-ed{border:1px dashed var(--line);border-radius:12px;padding:6px 10px;margin-top:6px;display:flex;flex-direction:column}
+.sz-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:14px}
+.sz-row:last-child{border-bottom:0}
+.sz-row span{flex:1;overflow-wrap:anywhere}
 /* profile */
 .prof{gap:14px}
 .pf-top{display:flex;gap:14px;align-items:center}
@@ -610,7 +616,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-100141';
+const BUILD = '20261004-100345';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -1556,17 +1562,78 @@ const PCP_SIZES = ['U-Ditch (50x70x120 t.15)'];
 const unitOpts = type => live('unitopt').filter(o => o.data.type === type).sort((a, b) => (a.data.name || '').localeCompare(b.data.name || ''));
 const basecamps = () => [...new Set([...BASECAMPS, ...unitOpts('basecamp').map(o => bcNorm(o.data.name))])];
 const prodUnits = () => { const m = Object.fromEntries(Object.entries(PROD_UNITS).map(([k, [n, sat]]) => [k, { name: n, sat }])); for (const o of unitOpts('unit')) if (!m[o.data.name]) m[o.data.name] = { name: o.data.desc || '', sat: o.data.sat || '' }; return m; };
-const pcpSizes = () => [...new Set([...PCP_SIZES, ...unitOpts('size').map(o => o.data.name)])];
+function pcpSizes() { // latest event per name wins: 'size' = shown, 'sizehide' = deleted from the list
+  const last = new Map(PCP_SIZES.map(n => [n, { t: 0, show: true }]));
+  for (const o of live('unitopt')) if (o.data.type === 'size' || o.data.type === 'sizehide') { const c = last.get(o.data.name); if (!c || o.created >= c.t) last.set(o.data.name, { t: o.created, show: o.data.type === 'size' }); }
+  return [...last].filter(([, v]) => v.show).map(([n]) => n);
+}
+function sizeOptions(sel) { return pcpSizes().map(z => `<option ${sel === z ? 'selected' : ''}>${esc(z)}</option>`).join('') + '<option value="+">＋ Tambah ukuran…</option>'; }
+function sizeEditor() {
+  const el = $('#uf-size-ed'); if (!el) return;
+  const l = pcpSizes();
+  el.innerHTML = l.length ? l.map(z => `<div class="sz-row"><span>${esc(z)}</span><button type="button" class="ib sm" data-a="sizeDel" data-n="${esc(z)}" title="Hapus dari daftar">🗑</button></div>`).join('') : '<p class="muted small">Daftar ukuran kosong.</p>';
+}
 const vol = n => Number(n || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 });
 const parseVol = s => { s = String(s ?? '').trim().replace(/\s/g, ''); if (/,/.test(s)) s = s.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); const n = Number(s); return isFinite(n) ? n : 0; };
 const unitTx = () => live('unit').map(t => ({ ...t, data: { ...t.data, basecamp: bcNorm(t.data.basecamp) } })).sort((a, b) => (b.data.date || '').localeCompare(a.data.date || '') || b.created - a.created);
-function vUnit() {
-  const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to), q = U.q.trim().toLowerCase(), pu = prodUnits();
+function unitList() {
+  const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to), q = U.q.trim().toLowerCase();
   let l = unitTx().filter(t => (t.data.cat || 'produksi') === U.cat && (!s || t.data.date >= s) && (!e || t.data.date < e) && (!U.bc || t.data.basecamp === U.bc) && (!U.u || t.data.unit === U.u));
   if (q) l = l.filter(t => [t.data.unit, t.data.basecamp, t.data.size, t.data.note, uname(t.owner)].join(' ').toLowerCase().includes(q));
+  return l;
+}
+function unitReport() { // filtered list (oldest first) + totals per unit and per basecamp×unit
+  const l = unitList().slice().reverse(), sum = new Map(), byBc = new Map();
+  for (const t of l) { const x = t.data, k = x.unit + '|' + (x.sat || ''), v = Number(x.volume) || 0;
+    const a = sum.get(k) || { unit: x.unit, sat: x.sat || '', v: 0, n: 0, bc: new Set() }; a.v += v; a.n++; a.bc.add(x.basecamp); sum.set(k, a);
+    const kb = x.basecamp + '|' + k, b = byBc.get(kb) || { bc: x.basecamp, unit: x.unit, sat: x.sat || '', v: 0, n: 0 }; b.v += v; b.n++; byBc.set(kb, b); }
+  const U = S.unit, f = [U.bc && 'Basecamp: ' + U.bc, U.u && 'Unit: ' + U.u, U.q.trim() && 'Cari: ' + U.q.trim()].filter(Boolean).join(' · ');
+  return { l, sum: [...sum.values()].sort((a, b) => a.unit.localeCompare(b.unit)), byBc: [...byBc.values()].sort((a, b) => a.bc.localeCompare(b.bc) || a.unit.localeCompare(b.unit)), label: periodLabel(U.p, U.ref, U.from, U.to), filters: f, cat: (UNIT_CATS[U.cat] || U.cat).replace(/^\S+\s/, '') };
+}
+const unitFileName = ext => { const R = unitReport(); return `Laporan-${slug(R.cat)}-${S.unit.bc ? slug(S.unit.bc) + '-' : ''}${S.unit.u ? slug(S.unit.u) + '-' : ''}${slug(R.label)}.${ext}`; };
+function unitPdf() {
+  const R = unitReport(), pu = prodUnits(), d = PDF.doc(), M = 40, W = d.W - M, GRAY = [90, 90, 90], LINE = [205, 205, 205], HEAD = [232, 241, 237];
+  let y = M;
+  d.text(M, y + 18, `Laporan ${R.cat} Unit`, 20, { bold: true }); y += 28;
+  d.text(M, y + 10, `Virtual Work AHG · ${R.label}${R.filters ? ' · ' + R.filters : ''} · dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`, 9.5, { color: GRAY }); y += 26;
+  const need = h => { if (y + h > d.H - M - 14) { d.add(); y = M; return true; } return false; };
+  const table = (cols, rows, size = 9) => {
+    const rh = size + 7.5;
+    const head = () => { d.rect(M, y, W - M, rh, HEAD); let x = M; cols.forEach(c => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, c.t, size, { bold: true, align: c.align }); x += c.w; }); y += rh; };
+    head();
+    for (const r of rows) { if (need(rh)) head(); let x = M; cols.forEach((c, i) => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, PDF.fit(r.cells[i] ?? '', size, c.w - 10, r.bold), size, { bold: r.bold, align: c.align }); x += c.w; }); y += rh; d.line(M, y, W, y, LINE, 0.4); }
+  };
+  const fw = W - M;
+  d.text(M, y + 12, 'Ringkasan per unit', 12.5, { bold: true }); y += 20;
+  table([{ t: 'Unit', w: 60 }, { t: 'Keterangan', w: fw - 60 - 90 - 50 - 60 - 120 }, { t: 'Total volume', w: 90, align: 'right' }, { t: 'Satuan', w: 50 }, { t: 'Input', w: 60, align: 'right' }, { t: 'Basecamp', w: 120 }],
+    R.sum.map(x => ({ cells: [x.unit, pu[x.unit]?.name || '', vol(x.v), x.sat, String(x.n), [...x.bc].join(', ')] })));
+  y += 18;
+  if (R.byBc.length) { need(60); d.text(M, y + 12, 'Per basecamp', 12.5, { bold: true }); y += 20;
+    table([{ t: 'Basecamp', w: fw - 60 - 90 - 50 - 60 }, { t: 'Unit', w: 60 }, { t: 'Total volume', w: 90, align: 'right' }, { t: 'Satuan', w: 50 }, { t: 'Input', w: 60, align: 'right' }],
+      R.byBc.map(x => ({ cells: [x.bc, x.unit, vol(x.v), x.sat, String(x.n)] }))); y += 18; }
+  need(60); d.text(M, y + 12, 'Rincian input', 12.5, { bold: true }); d.text(W, y + 12, `${R.l.length} input`, 9.5, { color: GRAY, align: 'right' }); y += 20;
+  table([{ t: 'Tanggal', w: 62 }, { t: 'Basecamp', w: 82 }, { t: 'Unit', w: 40 }, { t: 'Ukuran', w: 100 }, { t: 'Volume', w: 62, align: 'right' }, { t: 'Sat.', w: 34 }, { t: 'Keterangan', w: fw - 62 - 82 - 40 - 100 - 62 - 34 - 70 }, { t: 'Oleh', w: 70 }],
+    R.l.map(t => ({ cells: [dShort(t.data.date), t.data.basecamp, t.data.unit, t.data.size || '', vol(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner)] })), 8.5);
+  d.eachPage((i, n) => { d.line(M, d.H - 28, W, d.H - 28, LINE, 0.4); d.text(M, d.H - 16, `Virtual Work AHG · Laporan ${R.cat} Unit`, 8, { color: GRAY }); d.text(W, d.H - 16, `Halaman ${i} / ${n}`, 8, { color: GRAY, align: 'right' }); });
+  saveBytes(d.build(), unitFileName('pdf'), 'application/pdf');
+}
+function unitXlsx() {
+  const R = unitReport(), pu = prodUnits(), num2 = v => ({ v: Math.round((Number(v) || 0) * 100) / 100, s: 0 });
+  const sheets = [
+    { name: 'Ringkasan', widths: [12, 26, 16, 10, 10, 34], rows: [[{ v: `Laporan ${R.cat} Unit — Virtual Work AHG`, s: 6 }], [`Periode: ${R.label}${R.filters ? ' · ' + R.filters : ''}`], [`Dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`], [],
+      ['Unit', 'Keterangan', 'Total volume', 'Satuan', 'Input', 'Basecamp'].map(v => ({ v, s: 1 })),
+      ...R.sum.map(x => [x.unit, pu[x.unit]?.name || '', num2(x.v), x.sat, x.n, [...x.bc].join(', ')]), [],
+      ['Basecamp', 'Unit', 'Total volume', 'Satuan', 'Input'].map(v => ({ v, s: 1 })),
+      ...R.byBc.map(x => [x.bc, x.unit, num2(x.v), x.sat, x.n])] },
+    { name: 'Rincian', widths: [12, 18, 8, 30, 12, 8, 36, 16, 18], rows: [['Tanggal', 'Basecamp', 'Unit', 'Ukuran', 'Volume', 'Satuan', 'Keterangan', 'Oleh', 'Dicatat'].map(v => ({ v, s: 1 })),
+      ...R.l.map(t => [{ v: pYmd(t.data.date), s: 7 }, t.data.basecamp, t.data.unit, t.data.size || '', num2(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner), { v: new Date(t.created), s: 4 }])] }];
+  saveBytes(XLSX.build(sheets), unitFileName('xlsx'), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+function vUnit() {
+  const U = S.unit, pu = prodUnits(), l = unitList();
   const tot = {}; for (const t of l) { const k = t.data.unit + '|' + (t.data.sat || ''); (tot[k] ||= { unit: t.data.unit, sat: t.data.sat, v: 0, n: 0, bc: new Set() }); tot[k].v += Number(t.data.volume) || 0; tot[k].n++; tot[k].bc.add(t.data.basecamp); }
   const groups = {}; for (const t of l) (groups[t.data.date] ||= []).push(t);
-  return `<div class="head"><h1>🏭 Unit <span class="hc">aktivitas unit basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="unitNew">＋ Input produksi</button></div></div>
+  return `<div class="head"><h1>🏭 Unit <span class="hc">aktivitas unit basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="unitNew">＋ Input produksi</button><button type="button" class="btn" data-a="unitPdf" title="Unduh laporan PDF sesuai filter">📕 PDF</button><button type="button" class="btn" data-a="unitXlsx" title="Unduh laporan Excel sesuai filter">📗 Excel</button></div></div>
   <section class="card cflt">
     <select id="u-cat" data-ch="unitCat" data-keep="0">${Object.entries(UNIT_CATS).map(([k, l]) => `<option value="${k}" ${U.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
     <select id="u-p" data-ch="unitP" data-keep="0">${Object.entries(PERIODS).map(([k, l]) => `<option value="${k}" ${U.p === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -1594,7 +1661,8 @@ function unitDialog(t) {
     <label id="uf-bc-new-l" hidden>Nama basecamp baru<input id="uf-bc-new" maxlength="60" placeholder="mis. Kulon Progo"></label>
     <label>Unit produksi<select id="uf-unit" data-ch="ufUnit" required><option value="">Pilih unit produksi…</option>${Object.entries(pu).map(([k, v]) => `<option value="${esc(k)}" ${d.unit === k ? 'selected' : ''}>${esc(k)}${v.name ? ' — ' + esc(v.name) : ''} (${esc(v.sat || '-')})</option>`).join('')}<option value="+">＋ Lainnya…</option></select></label>
     <div class="row2" id="uf-unit-new" hidden><label>Nama unit<input id="uf-un-name" maxlength="20" placeholder="mis. BP"></label><label>Satuan<input id="uf-un-sat" maxlength="12" placeholder="mis. m3 / ton / pcs"></label></div>
-    <div id="uf-pcp" ${d.unit === 'PCP' ? '' : 'hidden'}><label>Ukuran / spesifikasi<select id="uf-size" data-ch="ufSize">${sizes.map(z => `<option ${d.size === z ? 'selected' : ''}>${esc(z)}</option>`).join('')}<option value="+">＋ Tambah ukuran…</option></select></label>
+    <div id="uf-pcp" ${d.unit === 'PCP' ? '' : 'hidden'}><label>Ukuran / spesifikasi</label><div class="sz-sel"><select id="uf-size" data-ch="ufSize">${sizeOptions(d.size)}</select><button type="button" class="btn sm" data-a="sizeEdit">✏️ Edit</button></div>
+      <div class="sz-ed" id="uf-size-ed" hidden></div>
       <label id="uf-size-new-l" hidden>Ukuran baru<input id="uf-size-new" maxlength="80" placeholder="mis. U-Ditch (60x80x120 t.15)"></label></div>
     <label>Volume produksi<span class="volin"><input id="uf-vol" inputmode="decimal" placeholder="0" value="${d.volume !== '' && d.volume != null ? esc(String(d.volume).replace('.', ',')) : ''}" required><b id="uf-sat">${esc(d.sat || pu[d.unit]?.sat || '')}</b></span></label>
     <label>Keterangan (opsional)<input id="uf-note" maxlength="300" value="${esc(d.note || '')}" placeholder="mis. shift pagi, proyek X"></label>
@@ -1718,6 +1786,9 @@ const A = {
   chatMore: () => { S.chat.limit += 300; renderMain(); },
   msgDel: async el => { if (await confirmDlg('Hapus pesan ini untuk semua orang?', 'Hapus')) remove(el.dataset.id); },
   atStart: () => { const t = $('#c-text'); if (!t) return; const p = t.selectionStart ?? t.value.length, pre = t.value.slice(0, p); const ins = (pre && !/\s$/.test(pre) ? ' ' : '') + '@'; t.value = pre + ins + t.value.slice(p); t.focus(); t.setSelectionRange(p + ins.length, p + ins.length); mentionCheck(t); },
+  sizeEdit: () => { const e = $('#uf-size-ed'); e.hidden = !e.hidden; if (!e.hidden) sizeEditor(); },
+  sizeDel: async el => { const n = el.dataset.n; if (!await confirmDlg(`Hapus ukuran <b>${esc(n)}</b> dari daftar? Data produksi yang sudah tercatat tidak berubah.`, 'Hapus')) return;
+    create('unitopt', { type: 'sizehide', name: n }, { quiet: 1 }); const s = $('#uf-size'); if (s) { const cur = s.value; s.innerHTML = sizeOptions(cur === n ? '' : cur); } sizeEditor(); toast('Ukuran dihapus dari daftar.', 'info', null, 2000); },
   mentionPick: el => mentionInsert(el.dataset.u),
   pendDel: el => { S.chat.files.splice(Number(el.dataset.i), 1); $('#pend').innerHTML = pendHtml(); },
   whPick: () => { const s = $('#wh-new'); if (s && s.offsetParent) { s.focus(); try { s.showPicker?.(); } catch {} } else { const m = $('#m-conv'); m.value = '+'; m.dispatchEvent(new Event('change', { bubbles: true })); } },
@@ -1754,6 +1825,8 @@ const A = {
   report: () => reportDialog(),
   unitNew: () => unitDialog(null), unitEdit: el => unitDialog(S.items.get(el.dataset.id)),
   unitDel: async el => { const t = S.items.get(el.dataset.id); if (await confirmDlg(`Hapus input produksi ${esc(t.data.unit)} ${vol(t.data.volume)} ${esc(t.data.sat || '')}?`, 'Hapus')) { closeAll(); remove(t.id); } },
+  unitPdf: () => { if (!unitList().length) return toast('Tidak ada data di filter ini.', 'warn'); unitPdf(); },
+  unitXlsx: () => { if (!unitList().length) return toast('Tidak ada data di filter ini.', 'warn'); unitXlsx(); },
   unitNav: el => { S.unit.ref = shiftRef(S.unit.p, S.unit.ref, Number(el.dataset.n)); renderMain(); },
   unitPick: el => { S.unit.u = S.unit.u === el.dataset.u ? '' : el.dataset.u; renderMain(); },
   repPdf: () => reportPdf(), repXlsx: () => reportXlsx(), repPrint: () => reportPrint(),
