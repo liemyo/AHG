@@ -610,7 +610,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-095117';
+const BUILD = '20261004-100141';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -1549,16 +1549,17 @@ function reportPrint() {
 
 // ---------- UNIT (aktivitas unit basecamp) ----------
 const UNIT_CATS = { produksi: '🏗 Produksi' };
-const BASECAMPS = ['Bugel', 'Tempuran', 'Jogoresan'];
+const BASECAMPS = ['Bugel-Klontong', 'Tempuran', 'Jogoresan'];
+const bcNorm = b => ({ Bugel: 'Bugel-Klontong' })[b] || b; // old entries saved as 'Bugel'
 const PROD_UNITS = { AMP: ['Asphalt Mixing Plant', 'ton'], CMP: ['Concrete Mixing Plant', 'm3'], PCP: ['Precast Plant', 'pcs'], SCP: ['Stone Crusher Plant', 'ton'] };
 const PCP_SIZES = ['U-Ditch (50x70x120 t.15)'];
 const unitOpts = type => live('unitopt').filter(o => o.data.type === type).sort((a, b) => (a.data.name || '').localeCompare(b.data.name || ''));
-const basecamps = () => [...new Set([...BASECAMPS, ...unitOpts('basecamp').map(o => o.data.name)])];
+const basecamps = () => [...new Set([...BASECAMPS, ...unitOpts('basecamp').map(o => bcNorm(o.data.name))])];
 const prodUnits = () => { const m = Object.fromEntries(Object.entries(PROD_UNITS).map(([k, [n, sat]]) => [k, { name: n, sat }])); for (const o of unitOpts('unit')) if (!m[o.data.name]) m[o.data.name] = { name: o.data.desc || '', sat: o.data.sat || '' }; return m; };
 const pcpSizes = () => [...new Set([...PCP_SIZES, ...unitOpts('size').map(o => o.data.name)])];
 const vol = n => Number(n || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 });
 const parseVol = s => { s = String(s ?? '').trim().replace(/\s/g, ''); if (/,/.test(s)) s = s.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); const n = Number(s); return isFinite(n) ? n : 0; };
-const unitTx = () => live('unit').sort((a, b) => (b.data.date || '').localeCompare(a.data.date || '') || b.created - a.created);
+const unitTx = () => live('unit').map(t => ({ ...t, data: { ...t.data, basecamp: bcNorm(t.data.basecamp) } })).sort((a, b) => (b.data.date || '').localeCompare(a.data.date || '') || b.created - a.created);
 function vUnit() {
   const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to), q = U.q.trim().toLowerCase(), pu = prodUnits();
   let l = unitTx().filter(t => (t.data.cat || 'produksi') === U.cat && (!s || t.data.date >= s) && (!e || t.data.date < e) && (!U.bc || t.data.basecamp === U.bc) && (!U.u || t.data.unit === U.u));
@@ -1583,7 +1584,8 @@ function vUnit() {
       <span class="ta">${vol(x.volume)} <small>${esc(x.sat || '')}</small></span></div>`; }).join('')}</div>`).join('') : '<p class="empty">Belum ada input produksi di periode ini.</p>'}</div>`;
 }
 function unitDialog(t) {
-  const d = t?.data || { cat: 'produksi', date: today(), basecamp: S.unit.bc || '', unit: S.unit.u || '', volume: '', sat: '', size: '', note: '' };
+  const d = { ...(t?.data || { cat: 'produksi', date: today(), basecamp: S.unit.bc || '', unit: S.unit.u || '', volume: '', sat: '', size: '', note: '' }) };
+  d.basecamp = bcNorm(d.basecamp);
   S.dlg = { type: 'unit', id: t?.id || null };
   const pu = prodUnits(), bcs = basecamps(), sizes = pcpSizes();
   openDlg(`<form class="dlg" id="unit-form"><h2>${t ? 'Ubah input produksi' : '🏗 Input produksi'}</h2>
