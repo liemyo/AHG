@@ -582,7 +582,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-090502';
+const BUILD = '20261004-091202';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -635,7 +635,7 @@ const now0 = new Date();
 const S = {
   token: '', me: null, users: [], skew: 0, items: new Map(), seq: 0, queue: new Set(), loaded: false,
   view: 'reminder',
-  rem: { cal: false, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
+  rem: { cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
   task: { links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
   cash: { cat: '', p: 'month', ref: today(), from: '', to: '', q: '', who: '' },
