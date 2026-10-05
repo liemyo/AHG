@@ -559,6 +559,11 @@ main[data-view=chat]{padding-bottom:18px}
 .re-files .lbl{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
 .rcm>.pend{margin-top:-2px}
 @media (max-width:820px){.qadd .qa-act{grid-column:1/-1}.qadd .qa-act .btn{flex:1}}
+/* export dialogs */
+.xopts{display:flex;flex-direction:column;gap:6px}
+.xo{display:flex!important;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:600}
+.xo:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.xo input{accent-color:var(--acc)}
 </style>
 </head>
 <body>
@@ -655,7 +660,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261005-133622';
+const BUILD = '20261005-135149';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -1121,18 +1126,11 @@ function vReminder() {
   }
   const yrs = []; for (let y = now0.getFullYear() - 5; y <= now0.getFullYear() + 5; y++) yrs.push(y);
   if (!yrs.includes(R.y)) yrs.push(R.y);
-  // list
-  let list = rems.slice();
-  if (R.sel) list = list.filter(r => r.data.date === R.sel);
-  else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); }
-  if (R.st === 'open') list = list.filter(r => !r.data.done); else if (R.st === 'done') list = list.filter(r => r.data.done);
-  if (R.who === '@me') list = list.filter(r => mentionsMe(r) || comments(r.id).some(mentionsMe)); else if (R.who) list = list.filter(r => r.owner === R.who);
-  const key = r => (r.data.date || '9999') + ' ' + (r.data.time || '99:99');
-  list.sort((a, b) => (a.data.done - b.data.done) || (a.data.done ? (b.data.doneAt || 0) - (a.data.doneAt || 0) : key(a).localeCompare(key(b))));
+  const list = remList();
   const counts = { all: rems.length, open: rems.filter(r => !r.data.done).length, done: rems.filter(r => r.data.done).length };
   const owners = [...new Set(rems.map(r => r.owner))];
   const addDate = R.addDate || R.sel || td;
-  return `<div class="head"><h1>⏰ Reminder</h1><div class="tools"><button type="button" class="btn sm" data-a="remToday">Hari ini</button></div></div>
+  return `<div class="head"><h1>⏰ Reminder</h1><div class="tools"><button type="button" class="btn sm" data-a="remExpDlg" title="Unduh daftar reminder PDF / Excel">📤 Export</button><button type="button" class="btn sm" data-a="remToday">Hari ini</button></div></div>
   <button type="button" class="hb-tog" data-a="calTog" title="${R.cal ? 'Sembunyikan kalender' : 'Tampilkan kalender'}"><span>${R.cal ? '⌃' : '⌄'}</span></button>
   ${R.cal ? `<section class="card cal">
     <div class="cal-h" id="cal-h">
@@ -1162,6 +1160,19 @@ function vReminder() {
     </div>
   </div>
   <div class="rlist">${list.length ? list.map(remRow).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Belum ada reminder.'}</p>`}</div>`;
+}
+function remFilter(list, st, who) {
+  if (st === 'open') list = list.filter(r => !r.data.done); else if (st === 'done') list = list.filter(r => r.data.done);
+  if (who === '@me') list = list.filter(r => mentionsMe(r) || comments(r.id).some(mentionsMe)); else if (who) list = list.filter(r => r.owner === who);
+  return list;
+}
+const remKey = r => (r.data.date || '9999') + ' ' + (r.data.time || '99:99');
+function remList() { // what the Reminder page shows
+  const R = S.rem; let list = live('reminder');
+  if (R.sel) list = list.filter(r => r.data.date === R.sel);
+  else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); }
+  list = remFilter(list, R.st, R.who);
+  return list.sort((a, b) => (a.data.done - b.data.done) || (a.data.done ? (b.data.doneAt || 0) - (a.data.doneAt || 0) : remKey(a).localeCompare(remKey(b))));
 }
 function remRow(r) {
   const d = r.data, c = PALETTE[d.color]?.[1] || PALETTE.blue[1], td = today();
@@ -1660,69 +1671,31 @@ function sizeEditor() {
 const vol = n => Number(n || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 });
 const parseVol = s => { s = String(s ?? '').trim().replace(/\s/g, ''); if (/,/.test(s)) s = s.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); const n = Number(s); return isFinite(n) ? n : 0; };
 const unitTx = () => live('unit').map(t => ({ ...t, data: { ...t.data, basecamp: bcNorm(t.data.basecamp) } })).sort((a, b) => (b.data.date || '').localeCompare(a.data.date || '') || b.created - a.created);
-function unitList() {
-  const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to), q = U.q.trim().toLowerCase();
-  return unitBase().filter(t => (!s || t.data.date >= s) && (!e || t.data.date < e));
+function unitList(cat = S.unit.cat) {
+  const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to);
+  return unitBase(cat).filter(t => (!s || t.data.date >= s) && (!e || t.data.date < e));
 }
-function unitBase() { // category + basecamp/unit/kategori/search filters, any date
+function unitBase(cat = S.unit.cat) { // category + basecamp/unit/kategori/search filters, any date
   const U = S.unit, q = U.q.trim().toLowerCase();
-  let l = unitTx().filter(t => (t.data.cat || 'produksi') === U.cat && (!U.bc || t.data.basecamp === U.bc) && (!U.u || t.data.unit === U.u) && (U.cat !== 'stok' || !U.mk || t.data.mcat === U.mk));
+  let l = unitTx().filter(t => (t.data.cat || 'produksi') === cat && (!U.bc || t.data.basecamp === U.bc) && (!U.u || t.data.unit === U.u) && (cat !== 'stok' || !U.mk || t.data.mcat === U.mk));
   if (q) l = l.filter(t => [t.data.unit, t.data.basecamp, t.data.size, t.data.item, t.data.mcat, t.data.note, uname(t.owner)].join(' ').toLowerCase().includes(q));
   return l;
 }
-function unitReport() { // filtered list (oldest first) + totals per unit and per basecamp×unit
-  const l = unitList().slice().reverse(), sum = new Map(), byBc = new Map();
+const catLabel = c => (UNIT_CATS[c] || c).replace(/^\S+\s/, '');
+function unitReport(cat = S.unit.cat) { // filtered list (oldest first) + totals per unit and per basecamp×unit
+  const l = unitList(cat).slice().reverse(), sum = new Map(), byBc = new Map();
   for (const t of l) { const x = t.data, k = x.unit + '|' + (x.sat || ''), v = Number(x.volume) || 0;
     const a = sum.get(k) || { unit: x.unit, sat: x.sat || '', v: 0, n: 0, bc: new Set() }; a.v += v; a.n++; a.bc.add(x.basecamp); sum.set(k, a);
     const kb = x.basecamp + '|' + k, b = byBc.get(kb) || { bc: x.basecamp, unit: x.unit, sat: x.sat || '', v: 0, n: 0 }; b.v += v; b.n++; byBc.set(kb, b); }
   const U = S.unit, f = [U.bc && 'Basecamp: ' + U.bc, U.u && 'Unit: ' + U.u, U.q.trim() && 'Cari: ' + U.q.trim()].filter(Boolean).join(' · ');
-  return { l, sum: [...sum.values()].sort((a, b) => a.unit.localeCompare(b.unit)), byBc: [...byBc.values()].sort((a, b) => a.bc.localeCompare(b.bc) || a.unit.localeCompare(b.unit)), label: periodLabel(U.p, U.ref, U.from, U.to), filters: f, cat: (UNIT_CATS[U.cat] || U.cat).replace(/^\S+\s/, '') };
-}
-const unitFileName = ext => { const R = unitReport(); return `Laporan-${slug(R.cat)}-${S.unit.bc ? slug(S.unit.bc) + '-' : ''}${S.unit.u ? slug(S.unit.u) + '-' : ''}${slug(R.label)}.${ext}`; };
-function unitPdf() {
-  const R = unitReport(), pu = prodUnits(), d = PDF.doc(), M = 40, W = d.W - M, GRAY = [90, 90, 90], LINE = [205, 205, 205], HEAD = [232, 241, 237];
-  let y = M;
-  d.text(M, y + 18, `Laporan ${R.cat} Unit`, 20, { bold: true }); y += 28;
-  d.text(M, y + 10, `Virtual Work AHG · ${R.label}${R.filters ? ' · ' + R.filters : ''} · dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`, 9.5, { color: GRAY }); y += 26;
-  const need = h => { if (y + h > d.H - M - 14) { d.add(); y = M; return true; } return false; };
-  const table = (cols, rows, size = 9) => {
-    const rh = size + 7.5;
-    const head = () => { d.rect(M, y, W - M, rh, HEAD); let x = M; cols.forEach(c => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, c.t, size, { bold: true, align: c.align }); x += c.w; }); y += rh; };
-    head();
-    for (const r of rows) { if (need(rh)) head(); let x = M; cols.forEach((c, i) => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, PDF.fit(r.cells[i] ?? '', size, c.w - 10, r.bold), size, { bold: r.bold, align: c.align }); x += c.w; }); y += rh; d.line(M, y, W, y, LINE, 0.4); }
-  };
-  const fw = W - M;
-  d.text(M, y + 12, 'Ringkasan per unit', 12.5, { bold: true }); y += 20;
-  table([{ t: 'Unit', w: 60 }, { t: 'Keterangan', w: fw - 60 - 90 - 50 - 60 - 120 }, { t: 'Total volume', w: 90, align: 'right' }, { t: 'Satuan', w: 50 }, { t: 'Input', w: 60, align: 'right' }, { t: 'Basecamp', w: 120 }],
-    R.sum.map(x => ({ cells: [x.unit, pu[x.unit]?.name || '', vol(x.v), x.sat, String(x.n), [...x.bc].join(', ')] })));
-  y += 18;
-  if (R.byBc.length) { need(60); d.text(M, y + 12, 'Per basecamp', 12.5, { bold: true }); y += 20;
-    table([{ t: 'Basecamp', w: fw - 60 - 90 - 50 - 60 }, { t: 'Unit', w: 60 }, { t: 'Total volume', w: 90, align: 'right' }, { t: 'Satuan', w: 50 }, { t: 'Input', w: 60, align: 'right' }],
-      R.byBc.map(x => ({ cells: [x.bc, x.unit, vol(x.v), x.sat, String(x.n)] }))); y += 18; }
-  need(60); d.text(M, y + 12, 'Rincian input', 12.5, { bold: true }); d.text(W, y + 12, `${R.l.length} input`, 9.5, { color: GRAY, align: 'right' }); y += 20;
-  table([{ t: 'Tanggal', w: 62 }, { t: 'Basecamp', w: 82 }, { t: 'Unit', w: 40 }, { t: 'Ukuran', w: 100 }, { t: 'Volume', w: 62, align: 'right' }, { t: 'Sat.', w: 34 }, { t: 'Keterangan', w: fw - 62 - 82 - 40 - 100 - 62 - 34 - 70 }, { t: 'Oleh', w: 70 }],
-    R.l.map(t => ({ cells: [dShort(t.data.date), t.data.basecamp, t.data.unit, t.data.size || '', vol(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner)] })), 8.5);
-  d.eachPage((i, n) => { d.line(M, d.H - 28, W, d.H - 28, LINE, 0.4); d.text(M, d.H - 16, `Virtual Work AHG · Laporan ${R.cat} Unit`, 8, { color: GRAY }); d.text(W, d.H - 16, `Halaman ${i} / ${n}`, 8, { color: GRAY, align: 'right' }); });
-  saveBytes(d.build(), unitFileName('pdf'), 'application/pdf');
-}
-function unitXlsx() {
-  const R = unitReport(), pu = prodUnits(), num2 = v => ({ v: Math.round((Number(v) || 0) * 100) / 100, s: 0 });
-  const sheets = [
-    { name: 'Ringkasan', widths: [12, 26, 16, 10, 10, 34], rows: [[{ v: `Laporan ${R.cat} Unit — Virtual Work AHG`, s: 6 }], [`Periode: ${R.label}${R.filters ? ' · ' + R.filters : ''}`], [`Dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`], [],
-      ['Unit', 'Keterangan', 'Total volume', 'Satuan', 'Input', 'Basecamp'].map(v => ({ v, s: 1 })),
-      ...R.sum.map(x => [x.unit, pu[x.unit]?.name || '', num2(x.v), x.sat, x.n, [...x.bc].join(', ')]), [],
-      ['Basecamp', 'Unit', 'Total volume', 'Satuan', 'Input'].map(v => ({ v, s: 1 })),
-      ...R.byBc.map(x => [x.bc, x.unit, num2(x.v), x.sat, x.n])] },
-    { name: 'Rincian', widths: [12, 18, 8, 30, 12, 8, 36, 16, 18], rows: [['Tanggal', 'Basecamp', 'Unit', 'Ukuran', 'Volume', 'Satuan', 'Keterangan', 'Oleh', 'Dicatat'].map(v => ({ v, s: 1 })),
-      ...R.l.map(t => [{ v: pYmd(t.data.date), s: 7 }, t.data.basecamp, t.data.unit, t.data.size || '', num2(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner), { v: new Date(t.created), s: 4 }])] }];
-  saveBytes(XLSX.build(sheets), unitFileName('xlsx'), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  return { l, sum: [...sum.values()].sort((a, b) => a.unit.localeCompare(b.unit)), byBc: [...byBc.values()].sort((a, b) => a.bc.localeCompare(b.bc) || a.unit.localeCompare(b.unit)), label: periodLabel(U.p, U.ref, U.from, U.to), filters: f, cat: catLabel(cat) };
 }
 function vUnit() {
   if (S.unit.cat === 'stok') return vStok();
   const U = S.unit, pu = prodUnits(), l = unitList();
   const tot = {}; for (const t of l) { const k = t.data.unit + '|' + (t.data.sat || ''); (tot[k] ||= { unit: t.data.unit, sat: t.data.sat, v: 0, n: 0, bc: new Set() }); tot[k].v += Number(t.data.volume) || 0; tot[k].n++; tot[k].bc.add(t.data.basecamp); }
   const groups = {}; for (const t of l) (groups[t.data.date] ||= []).push(t);
-  return `<div class="head"><h1>🏭 Unit <span class="hc">aktivitas unit basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="unitNew">＋ Input produksi</button><button type="button" class="btn" data-a="unitPdf" title="Unduh laporan PDF sesuai filter">📕 PDF</button><button type="button" class="btn" data-a="unitXlsx" title="Unduh laporan Excel sesuai filter">📗 Excel</button></div></div>
+  return `<div class="head"><h1>🏭 Unit <span class="hc">aktivitas unit basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="unitNew">＋ Input produksi</button><button type="button" class="btn" data-a="unitExpDlg" title="Unduh laporan PDF / Excel">📤 Export</button></div></div>
   <section class="card cflt">
     <select id="u-cat" data-ch="unitCat" data-keep="0">${Object.entries(UNIT_CATS).map(([k, l]) => `<option value="${k}" ${U.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
     <select id="u-p" data-ch="unitP" data-keep="0">${Object.entries(PERIODS).map(([k, l]) => `<option value="${k}" ${U.p === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -1778,20 +1751,20 @@ async function saveUnitForm(f) {
 const stokKey = x => [x.basecamp, x.unit, x.item, x.sat].join('|');
 function stokData() { // saldo per basecamp×unit×material×satuan up to the period end + movement inside the period
   const U = S.unit, [s, e] = periodRange(U.p, U.ref, U.from, U.to), m = new Map();
-  for (const t of unitBase()) { const x = t.data; if (e && x.date >= e) continue;
+  for (const t of unitBase('stok')) { const x = t.data; if (e && x.date >= e) continue;
     const k = stokKey(x), a = m.get(k) || { bc: x.basecamp, unit: x.unit, item: x.item || '', mcat: x.mcat || '', sat: x.sat || '', saldo: 0, inn: 0, out: 0, last: '' };
     const v = Number(x.volume) || 0, sg = x.dir === 'out' ? -1 : 1; a.saldo += sg * v; if (!a.mcat) a.mcat = x.mcat || '';
     if (!s || x.date >= s) { if (sg > 0) a.inn += v; else a.out += v; }
     if (x.date > a.last) a.last = x.date; m.set(k, a); }
   const rows = [...m.values()].sort((a, b) => a.bc.localeCompare(b.bc) || a.unit.localeCompare(b.unit) || a.mcat.localeCompare(b.mcat) || a.item.localeCompare(b.item));
   const f = [U.bc && 'Basecamp: ' + U.bc, U.u && 'Unit: ' + U.u, U.mk && 'Kategori: ' + U.mk, U.q.trim() && 'Cari: ' + U.q.trim()].filter(Boolean).join(' · ');
-  return { rows, tx: unitList(), label: periodLabel(U.p, U.ref, U.from, U.to), filters: f };
+  return { rows, tx: unitList('stok'), label: periodLabel(U.p, U.ref, U.from, U.to), filters: f };
 }
 const sgn = x => x.dir === 'out' ? '−' : '+';
 function vStok() {
   const U = S.unit, pu = prodUnits(), D = stokData(), l = D.tx;
   const groups = {}; for (const t of l) (groups[t.data.date] ||= []).push(t);
-  return `<div class="head"><h1>🏭 Unit <span class="hc">stock material basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="stokNew">＋ Input stok</button><button type="button" class="btn" data-a="unitPdf" title="Unduh laporan PDF sesuai filter">📕 PDF</button><button type="button" class="btn" data-a="unitXlsx" title="Unduh laporan Excel sesuai filter">📗 Excel</button></div></div>
+  return `<div class="head"><h1>🏭 Unit <span class="hc">stock material basecamp</span></h1><div class="tools"><button type="button" class="btn primary" data-a="stokNew">＋ Input stok</button><button type="button" class="btn" data-a="unitExpDlg" title="Unduh laporan PDF / Excel">📤 Export</button></div></div>
   <section class="card cflt">
     <select id="u-cat" data-ch="unitCat" data-keep="0">${Object.entries(UNIT_CATS).map(([k, l]) => `<option value="${k}" ${U.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
     <select id="u-p" data-ch="unitP" data-keep="0">${Object.entries(PERIODS).map(([k, l]) => `<option value="${k}" ${U.p === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -1858,37 +1831,174 @@ function saveStokForm(f) {
   if (t) put({ ...t, data }); else create('unit', data);
   closeAll(); toast(`Stok ${dir === 'out' ? 'keluar' : 'masuk'} ${esc(item)} ${vol(volume)} ${esc(sat)} · ${esc(bc)} tersimpan.`, 'info', null, 3000);
 }
-const stokFileName = ext => { const D = stokData(); return `Stok-Material-${S.unit.bc ? slug(S.unit.bc) + '-' : ''}${S.unit.u ? slug(S.unit.u) + '-' : ''}${slug(D.label)}.${ext}`; };
-function stokPdf() {
-  const D = stokData(), d = PDF.doc(), M = 40, W = d.W - M, GRAY = [90, 90, 90], LINE = [205, 205, 205], HEAD = [232, 241, 237], fw = W - M;
-  let y = M;
-  d.text(M, y + 18, 'Laporan Stock Material', 20, { bold: true }); y += 28;
-  d.text(M, y + 10, `Virtual Work AHG · ${D.label}${D.filters ? ' · ' + D.filters : ''} · dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`, 9.5, { color: GRAY }); y += 26;
-  const need = h => { if (y + h > d.H - M - 14) { d.add(); y = M; return true; } return false; };
-  const table = (cols, rows, size = 9) => {
-    const rh = size + 7.5;
-    const head = () => { d.rect(M, y, W - M, rh, HEAD); let x = M; cols.forEach(c => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, c.t, size, { bold: true, align: c.align }); x += c.w; }); y += rh; };
-    head();
-    for (const r of rows) { if (need(rh)) head(); let x = M; cols.forEach((c, i) => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, PDF.fit(r.cells[i] ?? '', size, c.w - 10, r.bold), size, { bold: r.bold, align: c.align }); x += c.w; }); y += rh; d.line(M, y, W, y, LINE, 0.4); }
-  };
-  d.text(M, y + 12, 'Saldo stok per akhir periode', 12.5, { bold: true }); y += 20;
-  table([{ t: 'Basecamp', w: 90 }, { t: 'Unit', w: 40 }, { t: 'Kategori', w: 80 }, { t: 'Material', w: fw - 90 - 40 - 80 - 60 - 60 - 64 - 40 }, { t: 'Masuk', w: 60, align: 'right' }, { t: 'Keluar', w: 60, align: 'right' }, { t: 'Saldo', w: 64, align: 'right' }, { t: 'Sat.', w: 40 }],
-    D.rows.map(r => ({ cells: [r.bc, r.unit, r.mcat, r.item, r.inn ? vol(r.inn) : '', r.out ? vol(r.out) : '', vol(r.saldo), r.sat] })));
-  y += 18; need(60); d.text(M, y + 12, 'Rincian transaksi', 12.5, { bold: true }); d.text(W, y + 12, `${D.tx.length} transaksi`, 9.5, { color: GRAY, align: 'right' }); y += 20;
-  table([{ t: 'Tanggal', w: 58 }, { t: 'Jenis', w: 44 }, { t: 'Basecamp', w: 76 }, { t: 'Unit', w: 36 }, { t: 'Material', w: 110 }, { t: 'Jumlah', w: 56, align: 'right' }, { t: 'Sat.', w: 34 }, { t: 'Keterangan', w: fw - 58 - 44 - 76 - 36 - 110 - 56 - 34 - 64 }, { t: 'Oleh', w: 64 }],
-    D.tx.slice().reverse().map(t => ({ cells: [dShort(t.data.date), t.data.dir === 'out' ? 'Keluar' : 'Masuk', t.data.basecamp, t.data.unit, t.data.item || '', vol(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner)] })), 8.5);
-  d.eachPage((i, n) => { d.line(M, d.H - 28, W, d.H - 28, LINE, 0.4); d.text(M, d.H - 16, 'Virtual Work AHG · Laporan Stock Material', 8, { color: GRAY }); d.text(W, d.H - 16, `Halaman ${i} / ${n}`, 8, { color: GRAY, align: 'right' }); });
-  saveBytes(d.build(), stokFileName('pdf'), 'application/pdf');
+// ---------- EXPORT (PDF / Excel) ----------
+const pdfClean = s => String(s ?? '').replace(/[^\n -~ -ÿ–—‘’“”•…€−]/gu, '').replace(/[ \t]+/g, ' ');
+function pdfWrap(str, size, max, bold) { // → lines that fit max width (words broken only when longer than a line)
+  const out = [];
+  for (const para of pdfClean(str).split('\n')) {
+    let line = '';
+    for (const w of para.trim().split(' ')) {
+      const t = line ? line + ' ' + w : w; if (PDF.width(t, size, bold) <= max) { line = t; continue; }
+      if (line) out.push(line); line = w;
+      while (PDF.width(line, size, bold) > max) { let k = line.length; while (k > 1 && PDF.width(line.slice(0, k), size, bold) > max) k--; out.push(line.slice(0, k)); line = line.slice(k); }
+    }
+    out.push(line);
+  }
+  return out;
 }
-function stokXlsx() {
-  const D = stokData(), num2 = v => ({ v: Math.round((Number(v) || 0) * 100) / 100, s: 0 });
-  const sheets = [
-    { name: 'Saldo', widths: [18, 8, 20, 32, 12, 12, 12, 10], rows: [[{ v: 'Laporan Stock Material — Virtual Work AHG', s: 6 }], [`Periode: ${D.label}${D.filters ? ' · ' + D.filters : ''}`], [`Dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`], [],
-      ['Basecamp', 'Unit', 'Kategori', 'Material', 'Masuk', 'Keluar', 'Saldo', 'Satuan'].map(v => ({ v, s: 1 })),
-      ...D.rows.map(r => [r.bc, r.unit, r.mcat, r.item, num2(r.inn), num2(r.out), num2(r.saldo), r.sat])] },
-    { name: 'Rincian', widths: [12, 8, 18, 8, 20, 30, 12, 8, 36, 16, 18], rows: [['Tanggal', 'Jenis', 'Basecamp', 'Unit', 'Kategori', 'Material', 'Jumlah', 'Satuan', 'Keterangan', 'Oleh', 'Dicatat'].map(v => ({ v, s: 1 })),
-      ...D.tx.slice().reverse().map(t => [{ v: pYmd(t.data.date), s: 7 }, t.data.dir === 'out' ? 'Keluar' : 'Masuk', t.data.basecamp, t.data.unit, t.data.mcat || '', t.data.item || '', num2((t.data.dir === 'out' ? -1 : 1) * t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner), { v: new Date(t.created), s: 4 }])] }];
-  saveBytes(XLSX.build(sheets), stokFileName('xlsx'), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+function pdfReport(title, sub) { // A4 report: title, wrapped subtitle, h2, tables (cols may wrap), footer + page numbers
+  const d = PDF.doc(), M = 36, W = d.W - M, fw = W - M, GRAY = [90, 90, 90], LINE = [205, 205, 205], HEAD = [232, 241, 237];
+  let y = M;
+  d.text(M, y + 18, pdfClean(title), 18, { bold: true }); y += 26;
+  for (const l of pdfWrap(sub, 9, fw)) { d.text(M, y + 10, l, 9, { color: GRAY }); y += 12; } y += 10;
+  const P = { fw, GRAY,
+    need(h) { if (y + h > d.H - M - 14) { d.add(); y = M; return true; } return false; },
+    gap(h = 16) { y += h; },
+    h2(t, right) { P.need(60); d.text(M, y + 12, pdfClean(t), 12.5, { bold: true }); if (right) d.text(W, y + 12, pdfClean(right), 9, { color: GRAY, align: 'right' }); y += 20; },
+    note(t, size = 9.5, o = {}) { for (const l of pdfWrap(t, size, fw, o.bold)) { P.need(size + 4); d.text(M, y + size, l, size, o); y += size + 3.5; } },
+    table(cols, rows, size = 9) {
+      const lh = size + 2.5, pad = 7.5;
+      const head = () => { const rh = size + pad; d.rect(M, y, fw, rh, HEAD); let x = M; cols.forEach(c => { d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + rh - 5.5, c.t, size, { bold: true, align: c.align }); x += c.w; }); y += rh; };
+      head();
+      for (const r of rows) {
+        const cells = cols.map((c, i) => c.wrap ? pdfWrap(r.cells[i], size, c.w - 10, r.bold).slice(0, 50) : [PDF.fit(pdfClean(r.cells[i]).replace(/\n/g, ' '), size, c.w - 10, r.bold)]);
+        const n = Math.max(1, ...cells.map(x => x.length)), rh = pad + size + (n - 1) * lh;
+        if (P.need(rh)) head();
+        if (r.fill) d.rect(M, y, fw, rh, r.fill);
+        let x = M; cols.forEach((c, i) => { cells[i].forEach((l, k) => d.text(c.align === 'right' ? x + c.w - 5 : x + 5, y + size + 2 + k * lh, l, size, { bold: r.bold || (c.first && k === 0), color: c.first && k > 0 ? [60, 60, 60] : undefined, align: c.align })); x += c.w; });
+        y += rh; d.line(M, y, W, y, LINE, 0.4);
+      }
+    },
+    save(name, foot) { d.eachPage((i, n) => { d.line(M, d.H - 28, W, d.H - 28, LINE, 0.4); d.text(M, d.H - 16, pdfClean(foot), 8, { color: GRAY }); d.text(W, d.H - 16, `Halaman ${i} / ${n}`, 8, { color: GRAY, align: 'right' }); }); saveBytes(d.build(), name, 'application/pdf'); }
+  };
+  return P;
+}
+const printed = () => `dicetak ${dtText(Date.now())} oleh ${uname(S.me.name)}`;
+const saveXlsx = (sheets, name) => saveBytes(XLSX.build(sheets), name, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+const num2 = v => ({ v: Math.round((Number(v) || 0) * 100) / 100, s: 0 });
+
+// Unit: one section per category; 'all' = every category in one file
+const UNIT_EXP = {
+  produksi: {
+    has: () => unitList('produksi').length > 0,
+    pdf(P) {
+      const R = unitReport('produksi'), pu = prodUnits(), fw = P.fw;
+      P.h2('Produksi — ringkasan per unit');
+      P.table([{ t: 'Unit', w: 50 }, { t: 'Keterangan', w: fw - 50 - 84 - 46 - 44 - 130 }, { t: 'Total volume', w: 84, align: 'right' }, { t: 'Satuan', w: 46 }, { t: 'Input', w: 44, align: 'right' }, { t: 'Basecamp', w: 130, wrap: 1 }],
+        R.sum.map(x => ({ cells: [x.unit, pu[x.unit]?.name || '', vol(x.v), x.sat, String(x.n), [...x.bc].join(', ')] })));
+      P.gap();
+      if (R.byBc.length) { P.h2('Produksi — per basecamp');
+        P.table([{ t: 'Basecamp', w: fw - 50 - 84 - 46 - 44 }, { t: 'Unit', w: 50 }, { t: 'Total volume', w: 84, align: 'right' }, { t: 'Satuan', w: 46 }, { t: 'Input', w: 44, align: 'right' }],
+          R.byBc.map(x => ({ cells: [x.bc, x.unit, vol(x.v), x.sat, String(x.n)] }))); P.gap(); }
+      P.h2('Produksi — rincian input', `${R.l.length} input`);
+      P.table([{ t: 'Tanggal', w: 58 }, { t: 'Basecamp', w: 78 }, { t: 'Unit', w: 36 }, { t: 'Ukuran', w: 96, wrap: 1 }, { t: 'Volume', w: 58, align: 'right' }, { t: 'Sat.', w: 32 }, { t: 'Keterangan', w: fw - 58 - 78 - 36 - 96 - 58 - 32 - 64, wrap: 1 }, { t: 'Oleh', w: 64 }],
+        R.l.map(t => ({ cells: [dShort(t.data.date), t.data.basecamp, t.data.unit, t.data.size || '', vol(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner)] })), 8.5);
+    },
+    xlsx(head) {
+      const R = unitReport('produksi'), pu = prodUnits();
+      return [{ name: 'Produksi Ringkasan', widths: [12, 26, 16, 10, 10, 34], rows: [...head('Produksi'),
+        ['Unit', 'Keterangan', 'Total volume', 'Satuan', 'Input', 'Basecamp'].map(v => ({ v, s: 1 })),
+        ...R.sum.map(x => [x.unit, pu[x.unit]?.name || '', num2(x.v), x.sat, x.n, [...x.bc].join(', ')]), [],
+        ['Basecamp', 'Unit', 'Total volume', 'Satuan', 'Input'].map(v => ({ v, s: 1 })),
+        ...R.byBc.map(x => [x.bc, x.unit, num2(x.v), x.sat, x.n])] },
+      { name: 'Produksi Rincian', widths: [12, 18, 8, 30, 12, 8, 36, 16, 18], rows: [['Tanggal', 'Basecamp', 'Unit', 'Ukuran', 'Volume', 'Satuan', 'Keterangan', 'Oleh', 'Dicatat'].map(v => ({ v, s: 1 })),
+        ...R.l.map(t => [{ v: pYmd(t.data.date), s: 7 }, t.data.basecamp, t.data.unit, t.data.size || '', num2(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner), { v: new Date(t.created), s: 4 }])] }];
+    }
+  },
+  stok: {
+    has: () => stokData().rows.length > 0,
+    pdf(P) {
+      const D = stokData(), fw = P.fw;
+      P.h2('Stock material — saldo per akhir periode');
+      P.table([{ t: 'Basecamp', w: 84 }, { t: 'Unit', w: 38 }, { t: 'Kategori', w: 78 }, { t: 'Material', w: fw - 84 - 38 - 78 - 56 - 56 - 60 - 40, wrap: 1 }, { t: 'Masuk', w: 56, align: 'right' }, { t: 'Keluar', w: 56, align: 'right' }, { t: 'Saldo', w: 60, align: 'right' }, { t: 'Sat.', w: 40 }],
+        D.rows.map(r => ({ cells: [r.bc, r.unit, r.mcat, r.item, r.inn ? vol(r.inn) : '', r.out ? vol(r.out) : '', vol(r.saldo), r.sat] })));
+      P.gap(); P.h2('Stock material — rincian transaksi', `${D.tx.length} transaksi`);
+      P.table([{ t: 'Tanggal', w: 56 }, { t: 'Jenis', w: 42 }, { t: 'Basecamp', w: 74 }, { t: 'Unit', w: 34 }, { t: 'Material', w: 104, wrap: 1 }, { t: 'Jumlah', w: 54, align: 'right' }, { t: 'Sat.', w: 34 }, { t: 'Keterangan', w: fw - 56 - 42 - 74 - 34 - 104 - 54 - 34 - 60, wrap: 1 }, { t: 'Oleh', w: 60 }],
+        D.tx.slice().reverse().map(t => ({ cells: [dShort(t.data.date), t.data.dir === 'out' ? 'Keluar' : 'Masuk', t.data.basecamp, t.data.unit, t.data.item || '', vol(t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner)] })), 8.5);
+    },
+    xlsx(head) {
+      const D = stokData();
+      return [{ name: 'Stok Saldo', widths: [18, 8, 20, 32, 12, 12, 12, 10], rows: [...head('Stock Material'),
+        ['Basecamp', 'Unit', 'Kategori', 'Material', 'Masuk', 'Keluar', 'Saldo', 'Satuan'].map(v => ({ v, s: 1 })),
+        ...D.rows.map(r => [r.bc, r.unit, r.mcat, r.item, num2(r.inn), num2(r.out), num2(r.saldo), r.sat])] },
+      { name: 'Stok Rincian', widths: [12, 8, 18, 8, 20, 30, 12, 8, 36, 16, 18], rows: [['Tanggal', 'Jenis', 'Basecamp', 'Unit', 'Kategori', 'Material', 'Jumlah', 'Satuan', 'Keterangan', 'Oleh', 'Dicatat'].map(v => ({ v, s: 1 })),
+        ...D.tx.slice().reverse().map(t => [{ v: pYmd(t.data.date), s: 7 }, t.data.dir === 'out' ? 'Keluar' : 'Masuk', t.data.basecamp, t.data.unit, t.data.mcat || '', t.data.item || '', num2((t.data.dir === 'out' ? -1 : 1) * t.data.volume), t.data.sat || '', t.data.note || '', uname(t.owner), { v: new Date(t.created), s: 4 }])] }];
+    }
+  }
+};
+const unitFilterText = () => { const U = S.unit; return [U.bc && 'Basecamp: ' + U.bc, U.u && 'Unit: ' + U.u, U.mk && 'Kategori material: ' + U.mk, U.q.trim() && 'Cari: ' + U.q.trim()].filter(Boolean).join(' · '); };
+function unitExpDialog() {
+  const U = S.unit, f = unitFilterText();
+  openDlg(`<form class="dlg" id="unit-exp"><h2>📤 Export laporan Unit</h2>
+    <label>Data yang diexport</label>
+    <div class="xopts">${[...Object.keys(UNIT_CATS).map(k => [k, UNIT_CATS[k]]), ['all', '🗂 Semua (' + Object.keys(UNIT_CATS).map(catLabel).join(' + ') + ')']].map(([k, l]) => `<label class="xo"><input type="radio" name="ux-cat" value="${k}" ${k === U.cat ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div>
+    <p class="muted small">Periode <b>${esc(periodLabel(U.p, U.ref, U.from, U.to))}</b>${f ? ' · ' + esc(f) : ''} — mengikuti filter di halaman Unit. Ubah filternya dulu bila perlu.</p>
+    <div class="dlg-f"><button type="button" class="btn" data-a="close">Batal</button><span class="sp"></span><button type="button" class="btn" data-a="unitExp" data-f="pdf">📕 PDF</button><button type="button" class="btn primary" data-a="unitExp" data-f="xlsx">📗 Excel</button></div>
+  </form>`);
+}
+function unitExport(which, fmt) {
+  const U = S.unit, cats = (which === 'all' ? Object.keys(UNIT_CATS) : [which]).filter(c => UNIT_EXP[c]?.has());
+  if (!cats.length) return toast('Tidak ada data di periode / filter ini.', 'warn');
+  const what = which === 'all' ? 'Unit (' + cats.map(catLabel).join(' & ') + ')' : catLabel(which), label = periodLabel(U.p, U.ref, U.from, U.to), f = unitFilterText();
+  const name = `Laporan-${slug(which === 'all' ? 'Unit-Semua' : catLabel(which))}-${U.bc ? slug(U.bc) + '-' : ''}${U.u ? slug(U.u) + '-' : ''}${slug(label)}.${fmt}`;
+  if (fmt === 'pdf') {
+    const P = pdfReport('Laporan ' + what, `Virtual Work AHG · ${label}${f ? ' · ' + f : ''} · ${printed()}`);
+    cats.forEach((c, i) => { if (i) P.gap(10); UNIT_EXP[c].pdf(P); });
+    P.save(name, 'Virtual Work AHG · Laporan ' + what);
+  } else {
+    const head = t => [[{ v: `Laporan ${t} — Virtual Work AHG`, s: 6 }], [`Periode: ${label}${f ? ' · ' + f : ''}`], [printed()[0].toUpperCase() + printed().slice(1)], []];
+    saveXlsx(cats.flatMap(c => UNIT_EXP[c].xlsx(head)), name);
+  }
+  closeAll(); toast(`Laporan ${esc(what)} (${fmt === 'pdf' ? 'PDF' : 'Excel'}) diunduh.`, 'info', null, 3000);
+}
+
+// Reminder export
+function remExpDialog() {
+  const R = S.rem, owners = [...new Set(live('reminder').map(r => r.owner))];
+  const viewTxt = R.sel ? dText(R.sel) : R.scope === 'month' ? `${MONTHS[R.m]} ${R.y}` : 'semua tanggal';
+  openDlg(`<form class="dlg" id="rem-exp"><h2>📤 Export reminder</h2>
+    <label>Rentang tanggal<select id="rx-range" data-ch="rxRange">
+      <option value="view">Sesuai tampilan (${esc(viewTxt)})</option><option value="month">Bulan ${MONTHS[R.m]} ${R.y}</option><option value="all">Semua tanggal</option><option value="range">Pilih rentang…</option></select></label>
+    <div class="row2" id="rx-rg" hidden><label>Dari<input type="date" id="rx-from" value="${R.y}-${pad(R.m + 1)}-01"></label><label>Sampai<input type="date" id="rx-to" value="${ymd(new Date(R.y, R.m + 1, 0))}"></label></div>
+    <div class="row2"><label>Status<select id="rx-st"><option value="all" ${R.st === 'all' ? 'selected' : ''}>Semua</option><option value="open" ${R.st === 'open' ? 'selected' : ''}>Belum selesai</option><option value="done" ${R.st === 'done' ? 'selected' : ''}>Selesai</option></select></label>
+      <label>Pembuat<select id="rx-who"><option value="">Semua pembuat</option><option value="@me" ${R.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${R.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select></label></div>
+    <label class="chk-l"><input type="checkbox" id="rx-cm" checked> Sertakan komentar</label>
+    <div class="dlg-f"><button type="button" class="btn" data-a="close">Batal</button><span class="sp"></span><button type="button" class="btn" data-a="remExp" data-f="pdf">📕 PDF</button><button type="button" class="btn primary" data-a="remExp" data-f="xlsx">📗 Excel</button></div>
+  </form>`);
+}
+const remStatus = r => { const d = r.data, td = today(); return d.done ? 'Selesai' : d.date && (d.date < td || (d.date === td && d.time && d.time < hm(Date.now()))) ? 'Terlambat' : 'Belum'; };
+function remExport(fmt) {
+  const R = S.rem, range = $('#rx-range').value, st = $('#rx-st').value, who = $('#rx-who').value, withCm = $('#rx-cm').checked;
+  let list = live('reminder'), label;
+  if (range === 'view') { if (R.sel) { list = list.filter(r => r.data.date === R.sel); label = dText(R.sel); } else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); label = `${MONTHS[R.m]} ${R.y}`; } else label = 'Semua tanggal'; }
+  else if (range === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); label = `${MONTHS[R.m]} ${R.y}`; }
+  else if (range === 'range') { const a = $('#rx-from').value, b = $('#rx-to').value; if (!a || !b || a > b) return toast('Rentang tanggal tidak valid.', 'warn'); list = list.filter(r => r.data.date >= a && r.data.date <= b); label = `${dShort(a)} – ${dShort(b)}`; }
+  else label = 'Semua tanggal';
+  list = remFilter(list, st, who).sort((a, b) => remKey(a).localeCompare(remKey(b)));
+  if (!list.length) return toast('Tidak ada reminder di pilihan ini.', 'warn');
+  const f = [st !== 'all' && 'Status: ' + (st === 'open' ? 'belum selesai' : 'selesai'), who && 'Pembuat: ' + (who === '@me' ? 'menandai ' + uname(S.me.name) : uname(who))].filter(Boolean).join(' · ');
+  const n = { done: list.filter(r => r.data.done).length, late: list.filter(r => remStatus(r) === 'Terlambat').length };
+  const files = l => (l || []).map(x => x.name).join(', ');
+  const name = `Reminder-${slug(label)}${who && who !== '@me' ? '-' + slug(who) : ''}.${fmt}`;
+  if (fmt === 'pdf') {
+    const P = pdfReport('Laporan Reminder', `Virtual Work AHG · ${label}${f ? ' · ' + f : ''} · ${printed()}`), fw = P.fw;
+    P.note(`${list.length} reminder · ${n.done} selesai · ${list.length - n.done} belum${n.late ? ` (${n.late} terlambat)` : ''}`, 10, { bold: true }); P.gap(6);
+    P.table([{ t: 'No', w: 24, align: 'right' }, { t: 'Tanggal', w: 66, wrap: 1 }, { t: 'Reminder / catatan', w: fw - 24 - 66 - 58 - 72 - 82, wrap: 1, first: 1 }, { t: 'Status', w: 58 }, { t: 'Dibuat', w: 72, wrap: 1 }, { t: 'Selesai oleh', w: 82, wrap: 1 }],
+      list.map((r, i) => { const d = r.data, cm = withCm ? comments(r.id) : [];
+        const body = [d.title, d.note, d.files?.length && 'Lampiran: ' + files(d.files), ...cm.map(c => `> ${uname(c.owner)} (${dtText(c.created)}): ${c.data.text || ''}${c.data.files?.length ? ' [lampiran: ' + files(c.data.files) + ']' : ''}`)].filter(Boolean).join('\n');
+        return { cells: [String(i + 1), `${dShort(d.date)}${d.time ? '\n' + d.time : ''}`, body, remStatus(r), uname(r.owner), d.done ? `${uname(d.doneBy)}\n${dtText(d.doneAt)}` : ''], fill: d.done ? [240, 247, 242] : undefined }; }), 8.5);
+    P.save(name, 'Virtual Work AHG · Laporan Reminder');
+  } else {
+    const head = [[{ v: 'Laporan Reminder — Virtual Work AHG', s: 6 }], [`Periode: ${label}${f ? ' · ' + f : ''}`], [printed()[0].toUpperCase() + printed().slice(1)], [`${list.length} reminder · ${n.done} selesai · ${list.length - n.done} belum · ${n.late} terlambat`], []];
+    const sheets = [{ name: 'Reminder', widths: [12, 8, 38, 46, 11, 16, 18, 16, 18, 30, 10, 22], rows: [...head,
+      ['Tanggal', 'Jam', 'Reminder', 'Catatan', 'Status', 'Dibuat oleh', 'Dibuat pada', 'Selesai oleh', 'Selesai pada', 'Lampiran', 'Komentar', 'Menandai'].map(v => ({ v, s: 1 })),
+      ...list.map(r => { const d = r.data; return [d.date ? { v: pYmd(d.date), s: 7 } : '', d.time || '', d.title || '', d.note || '', remStatus(r), uname(r.owner), { v: new Date(r.created), s: 4 }, d.done ? uname(d.doneBy) : '', d.done && d.doneAt ? { v: new Date(d.doneAt), s: 4 } : '', files(d.files), comments(r.id).length || '', itemMent(r).map(x => '@' + x).join(' ')]; })] }];
+    if (withCm) { const cl = list.flatMap(r => comments(r.id).map(c => [r, c]));
+      if (cl.length) sheets.push({ name: 'Komentar', widths: [12, 38, 16, 18, 60, 30], rows: [['Tanggal reminder', 'Reminder', 'Oleh', 'Waktu', 'Komentar', 'Lampiran'].map(v => ({ v, s: 1 })),
+        ...cl.map(([r, c]) => [r.data.date ? { v: pYmd(r.data.date), s: 7 } : '', r.data.title || '', uname(c.owner), { v: new Date(c.created), s: 4 }, c.data.text || '', files(c.data.files)])] }); }
+    saveXlsx(sheets, name);
+  }
+  closeAll(); toast(`Reminder (${list.length}) diunduh sebagai ${fmt === 'pdf' ? 'PDF' : 'Excel'}.`, 'info', null, 3000);
 }
 
 // ---------- ADMIN ----------
@@ -2039,8 +2149,10 @@ const A = {
   report: () => reportDialog(),
   unitNew: () => unitDialog(null), unitEdit: el => { const t = S.items.get(el.dataset.id); t?.data.cat === 'stok' ? stokDialog(t) : unitDialog(t); },
   unitDel: async el => { const t = S.items.get(el.dataset.id); if (await confirmDlg(t.data.cat === 'stok' ? `Hapus stok ${t.data.dir === 'out' ? 'keluar' : 'masuk'} ${esc(t.data.item || '')} ${vol(t.data.volume)} ${esc(t.data.sat || '')}?` : `Hapus input produksi ${esc(t.data.unit)} ${vol(t.data.volume)} ${esc(t.data.sat || '')}?`, 'Hapus')) { closeAll(); remove(t.id); } },
-  unitPdf: () => { if (S.unit.cat === 'stok') { if (!stokData().rows.length) return toast('Tidak ada data di filter ini.', 'warn'); return stokPdf(); } if (!unitList().length) return toast('Tidak ada data di filter ini.', 'warn'); unitPdf(); },
-  unitXlsx: () => { if (S.unit.cat === 'stok') { if (!stokData().rows.length) return toast('Tidak ada data di filter ini.', 'warn'); return stokXlsx(); } if (!unitList().length) return toast('Tidak ada data di filter ini.', 'warn'); unitXlsx(); },
+  unitExpDlg: () => unitExpDialog(),
+  unitExp: el => unitExport($('input[name=ux-cat]:checked')?.value || S.unit.cat, el.dataset.f),
+  remExpDlg: () => remExpDialog(),
+  remExp: el => remExport(el.dataset.f),
   stokNew: () => stokDialog(null),
   satEdit: () => { const e = $('#sf-sat-ed'); e.hidden = !e.hidden; if (!e.hidden) satEditor(); },
   satDel: el => { const n = el.dataset.n; create('unitopt', { type: 'satuanhide', name: n }, { quiet: 1 }); const s = $('#sf-sat'); if (s) { const cur = s.value; s.innerHTML = satOptions(cur === n ? '' : cur); } satEditor(); toast('Satuan dihapus dari daftar.', 'info', null, 2000); },
@@ -2059,6 +2171,7 @@ const CH = { // change / input handlers
   raDate: el => { S.rem.addDate = el.value; },
   convSel: el => { if (el.value === '+') { const others = S.users.filter(u => u.name !== S.me.name); pickUser(others); return; } S.chat.conv = el.value; renderMain(); markRead(); renderNav(); },
   whNew: el => { if (el.value) { S.chat.conv = 'w:' + el.value; renderMain(); markRead(); $('#c-text')?.focus(); } },
+  rxRange: el => { $('#rx-rg').hidden = el.value !== 'range'; },
   pfFile: el => { pfAdd(el.dataset.k, [...el.files]); el.value = ''; },
   cFile: el => { addPending([...el.files]); el.value = ''; },
   cText: (el, ev) => { if (ev.type === 'input') { autoGrow(el); mentionCheck(el); } },
