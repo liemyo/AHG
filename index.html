@@ -547,6 +547,18 @@ main[data-view=chat]{padding-bottom:18px}
 .stk .sal.neg{color:var(--red)}
 .ubadge.sm{display:inline-grid;min-width:36px;height:22px;font-size:11px}
 @media (max-width:700px){.stk th:nth-child(3),.stk td:nth-child(3){display:none}.stk td,.stk th{padding:6px 7px}}
+/* @mention outside chat */
+.mpop2{position:absolute;bottom:auto;right:auto;z-index:30;max-height:240px}
+.rrow.ment,.ncard.ment{box-shadow:0 0 0 2px color-mix(in srgb,#f59e0b 55%,transparent),var(--shadow)}
+/* reminder attachments */
+.qa-act{display:flex;gap:6px;align-items:center}
+.qadd>.pend{grid-column:1/-1}
+.qadd .attach,.rcm .attach,.re-files .attach{cursor:pointer;display:inline-grid;place-items:center}
+.rb .atts{margin-top:6px}
+.re-files{display:flex;flex-direction:column;gap:6px}
+.re-files .lbl{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.rcm>.pend{margin-top:-2px}
+@media (max-width:820px){.qadd .qa-act{grid-column:1/-1}.qadd .qa-act .btn{flex:1}}
 </style>
 </head>
 <body>
@@ -643,7 +655,7 @@ const PDF = {
 };
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261005-132846';
+const BUILD = '20261005-133622';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -683,6 +695,10 @@ const linkify = t => esc(t).replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]|www\
 const MENTION_RE = /(^|[\s(])@([a-z0-9._-]{3,32})\b/g;
 const mentionsOf = t => [...new Set([...String(t || '').toLowerCase().matchAll(MENTION_RE)].map(m => m[2]).filter(n => n === 'semua' || user(n)))];
 const withMentions = html => html.replace(/(^|[\s(])@([a-z0-9._-]{3,32})\b/g, (all, pre, n) => (n === 'semua' || user(n)) ? `${pre}<span class="mention ${n === S.me?.name || n === 'semua' ? 'me' : ''}">@${esc(n === 'semua' ? 'semua' : uname(n))}</span>` : all);
+const itemText = it => { const d = it.data || {}; return ({ reminder: [d.title, d.note], task: [d.title, d.body, ...(d.items || []).map(x => x.t)], comment: [d.text], cash: [d.note], unit: [d.note] }[it.kind] || []).join('\n'); };
+const itemMent = it => !it || it.deleted ? [] : it.kind === 'msg' ? (it.data.mentions || []) : mentionsOf(itemText(it));
+const hitsMe = l => l.includes(S.me?.name) || l.includes('semua');
+const mentionsMe = it => it.kind !== 'msg' && hitsMe(itemMent(it));
 const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 const normUrl = u => { u = String(u || '').trim(); if (!u) return ''; return /^https?:\/\//i.test(u) ? u : 'https://' + u; };
 const slug = s => String(s).normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40) || 'semua';
@@ -789,7 +805,9 @@ async function syncNow() {
         const cur = S.items.get(it.id);
         if (!S.queue.has(it.id)) {
           if (!cur || JSON.stringify({ ...cur, lv: 0 }) !== JSON.stringify({ ...it, lv: 0 })) changed = true;
-          if (S.loaded && !cur && !it.deleted) notifyNew(it);
+          const ment = S.loaded && it.kind !== 'msg' && it.owner !== S.me.name && hitsMe(itemMent(it)) && !hitsMe(itemMent(cur));
+          if (S.loaded && !cur && !it.deleted && !ment) notifyNew(it);
+          if (ment) notifyMention(it);
           S.items.set(it.id, it);
         }
         S.seq = Math.max(S.seq, it.seq);
@@ -897,13 +915,21 @@ function notifyNew(it) {
     toast(`✅ <b>${esc(uname(it.owner))}</b> menugaskan task kepadamu: ${esc(it.data.title || '')}`, 'info', () => openTask(it.id)); beep();
   }
 }
+function notifyMention(it) {
+  const d = it.data, who = uname(it.owner), r = it.kind === 'comment' ? S.items.get(d.rem || d.task) : null;
+  const where = { reminder: 'reminder', task: 'task', cash: 'kasbon', unit: d.cat === 'stok' ? 'stok material' : 'input produksi' }[it.kind] || (r?.kind === 'reminder' ? 'komentar reminder' : 'komentar task');
+  const title = it.kind === 'comment' ? (r?.data.title || '') : it.kind === 'reminder' || it.kind === 'task' ? (d.title || '') : (d.item || d.note || '');
+  const go2 = () => { const tgt = it.kind === 'comment' ? r : it; if (!tgt) return; if (tgt.kind === 'reminder') { if (it.kind === 'comment') S.rem.open[tgt.id] = 1; S.rem.sel = ''; S.rem.who = '@me'; go('reminder'); } else if (tgt.kind === 'task') openTask(tgt.id); else go(tgt.kind === 'cash' ? 'cash' : 'unit'); };
+  toast(`📣 <b>${esc(who)}</b> menandai kamu di ${where}${title ? ': “' + esc(title.slice(0, 100)) + '”' : ''}`, 'msg', go2, 10000); beep();
+  sysNotify(who + ' menandai kamu', (where + (title ? ': ' + title : '')).slice(0, 140));
+}
 function checkDue(silent) { // reminder alarms while the page is open; silent = after login, just mark what's already due
   if (!S.me || !S.loaded) return; const np = notifyPref(); if (np.rem === 'off') return;
   const done = jget('due.' + S.me.name, {}), t = Date.now(); let fired = false;
   for (const r of live('reminder')) {
     if (r.data.done || done[r.id] || !r.data.date || (np.rem === 'mine' && r.owner !== S.me.name)) continue;
     const due = pYmd(r.data.date); const [h, m] = (r.data.time || '08:00').split(':').map(Number); due.setHours(h || 0, m || 0);
-    if (due <= t && t - due < 864e5) { done[r.id] = t; fired = true; if (silent) continue; toast(`⏰ Reminder: <b>${esc(r.data.title)}</b>${r.data.time ? ' · ' + r.data.time : ''}`, 'warn', () => go('reminder'), 15000); beep(); sysNotify('Reminder', r.data.title); }
+    if (due <= t && t - due < 864e5) { done[r.id] = t; fired = true; if (silent || r.created > due.getTime()) continue; /* created after its own due time → no alarm */ toast(`⏰ Reminder: <b>${esc(r.data.title)}</b>${r.data.time ? ' · ' + r.data.time : ''}`, 'warn', () => go('reminder'), 15000); beep(); sysNotify('Reminder', r.data.title); }
   }
   if (fired) LS.set('due.' + S.me.name, JSON.stringify(done));
 }
@@ -1090,7 +1116,7 @@ function vReminder() {
     cells += `<button type="button" class="day ${d.getMonth() !== R.m ? 'out' : ''} ${ds === td ? 'today' : ''} ${ds === R.sel ? 'sel' : ''} ${d.getDay() === 0 ? 'sun' : ''}" data-a="remDay" data-d="${ds}">
       <span class="dn">${d.getDate()}</span>
       ${list.length ? `<span class="dots">${list.slice(0, 4).map(r => `<i style="--c:${PALETTE[r.data.color]?.[1] || PALETTE.blue[1]}" class="${r.data.done ? 'dn-ok' : ''}"></i>`).join('')}${list.length > 4 ? '<em>+' + (list.length - 4) + '</em>' : ''}</span>
-      <span class="evs">${list.slice(0, 3).map(r => `<span class="ev ${r.data.done ? 'ok' : ''}" style="--c:${PALETTE[r.data.color]?.[1] || PALETTE.blue[1]}">${r.data.time ? r.data.time + ' ' : ''}${esc(r.data.title)}</span>`).join('')}${list.length > 3 ? `<span class="more">+${list.length - 3} lagi</span>` : ''}</span>` : ''}
+      <span class="evs">${list.slice(0, 3).map(r => `<span class="ev ${r.data.done ? 'ok' : ''}" style="--c:${PALETTE[r.data.color]?.[1] || PALETTE.blue[1]}">${r.data.time ? r.data.time + ' ' : ''}${r.data.files?.length ? '📎' : ''}${esc(r.data.title)}</span>`).join('')}${list.length > 3 ? `<span class="more">+${list.length - 3} lagi</span>` : ''}</span>` : ''}
     </button>`;
   }
   const yrs = []; for (let y = now0.getFullYear() - 5; y <= now0.getFullYear() + 5; y++) yrs.push(y);
@@ -1100,7 +1126,7 @@ function vReminder() {
   if (R.sel) list = list.filter(r => r.data.date === R.sel);
   else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); }
   if (R.st === 'open') list = list.filter(r => !r.data.done); else if (R.st === 'done') list = list.filter(r => r.data.done);
-  if (R.who) list = list.filter(r => r.owner === R.who);
+  if (R.who === '@me') list = list.filter(r => mentionsMe(r) || comments(r.id).some(mentionsMe)); else if (R.who) list = list.filter(r => r.owner === R.who);
   const key = r => (r.data.date || '9999') + ' ' + (r.data.time || '99:99');
   list.sort((a, b) => (a.data.done - b.data.done) || (a.data.done ? (b.data.doneAt || 0) - (a.data.doneAt || 0) : key(a).localeCompare(key(b))));
   const counts = { all: rems.length, open: rems.filter(r => !r.data.done).length, done: rems.filter(r => r.data.done).length };
@@ -1119,19 +1145,20 @@ function vReminder() {
     <div class="cal-g days" id="cal-days">${cells}</div>
   </section>` : ''}
   <form class="card qadd" id="rem-add">
-    <input id="ra-title" placeholder="➕ Tulis reminder baru…" maxlength="200" required>
+    <input id="ra-title" data-men placeholder="➕ Tulis reminder baru… (@ untuk menandai)" maxlength="200" required>
     <input id="ra-date" type="date" value="${addDate}" data-keep="0" data-ch="raDate" required>
     <input id="ra-time" type="time" title="Jam (opsional)">
     <select id="ra-color" title="Warna">${Object.entries(PALETTE).map(([k, [n]]) => `<option value="${k}">${n}</option>`).join('')}</select>
-    <input id="ra-note" placeholder="Catatan (opsional)" maxlength="2000">
-    <button class="btn primary" type="submit">Tambah</button>
+    <input id="ra-note" data-men placeholder="Catatan (opsional, @nama)" maxlength="2000">
+    <span class="qa-act">${attachBtn('ra')}<button class="btn primary" type="submit" id="ra-btn">Tambah</button></span>
+    <div class="pend" data-pf="ra">${pfHtml('ra')}</div>
   </form>
   <div class="lhead">
     <div class="chips">
       ${[['open', 'Belum selesai'], ['done', 'Selesai'], ['all', 'Semua']].map(([k, l]) => `<button type="button" class="chip ${R.st === k ? 'on' : ''}" data-a="remSt" data-k="${k}">${l} <small>${counts[k]}</small></button>`).join('')}
       ${R.sel ? `<button type="button" class="chip on acc" data-a="remDay" data-d="${R.sel}">📅 ${dText(R.sel)} ✕</button>`
     : `<select id="rem-scope" data-ch="remScope" data-keep="0" class="chip-sel"><option value="all" ${R.scope === 'all' ? 'selected' : ''}>Semua tanggal</option><option value="month" ${R.scope === 'month' ? 'selected' : ''}>${MONTHS[R.m]} ${R.y}</option></select>`}
-      <select id="rem-who" data-ch="remWho" data-keep="0" class="chip-sel"><option value="">Semua pembuat</option>${owners.map(o => `<option value="${esc(o)}" ${R.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select>
+      <select id="rem-who" data-ch="remWho" data-keep="0" class="chip-sel"><option value="">Semua pembuat</option><option value="@me" ${R.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${R.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select>
     </div>
   </div>
   <div class="rlist">${list.length ? list.map(remRow).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Belum ada reminder.'}</p>`}</div>`;
@@ -1140,11 +1167,12 @@ function remRow(r) {
   const d = r.data, c = PALETTE[d.color]?.[1] || PALETTE.blue[1], td = today();
   const overdue = !d.done && d.date && (d.date < td || (d.date === td && d.time && d.time < hm(Date.now())));
   const open = !!S.rem.open[r.id], nc = comments(r.id).length;
-  return `<div class="rrow ${d.done ? 'done' : ''}" style="--c:${c}">
+  return `<div class="rrow ${d.done ? 'done' : ''} ${mentionsMe(r) ? 'ment' : ''}" style="--c:${c}">
     <button type="button" class="rchk" data-a="remDone" data-id="${r.id}" title="${d.done ? 'Tandai belum selesai' : 'Tandai selesai'}">${d.done ? '✓' : ''}</button>
     <div class="rb">
-      <div class="rt">${esc(d.title)}</div>
-      ${d.note ? `<div class="rn">${linkify(d.note)}</div>` : ''}
+      <div class="rt">${withMentions(esc(d.title))}</div>
+      ${d.note ? `<div class="rn">${withMentions(linkify(d.note))}</div>` : ''}
+      ${filesHtml(d.files)}
       <div class="rm">
         <span class="due ${overdue ? 'late' : ''}">📅 ${d.date ? dText(d.date) : '—'}${d.time ? ' · ' + d.time : ''}${overdue ? ' · terlambat' : ''}</span>
         <span>✍️ Dibuat ${av(r.owner, 'xs')} <b>${esc(uname(r.owner))}</b> · ${dtText(r.created)}</span>
@@ -1152,18 +1180,21 @@ function remRow(r) {
         <button type="button" class="cm-tog ${open ? 'on' : ''}" data-a="remCm" data-id="${r.id}">💬 ${nc ? nc + ' komentar' : 'Komentar'} ${open ? '⌃' : '⌄'}</button>
       </div>
       ${open ? `<div class="cmts rcm">${cmtHtml(r.id)}
-        <div class="cm-add"><textarea id="rc-${r.id}" rows="1" maxlength="5000" placeholder="Tulis komentar… (Ctrl/⌘+Enter kirim)"></textarea><button type="button" class="btn primary sm" data-a="remCmAdd" data-id="${r.id}">Kirim</button></div></div>` : ''}
+        <div class="cm-add"><textarea id="rc-${r.id}" data-men rows="1" maxlength="5000" placeholder="Tulis komentar… @ untuk menandai · Ctrl/⌘+Enter kirim"></textarea>${attachBtn('rc-' + r.id)}<button type="button" class="btn primary sm" data-a="remCmAdd" data-id="${r.id}">Kirim</button></div><div class="pend" data-pf="rc-${r.id}">${pfHtml('rc-' + r.id)}</div></div>` : ''}
     </div>
     ${canEdit(r) ? `<div class="ra"><button type="button" class="ib" data-a="remEdit" data-id="${r.id}" title="Ubah">✏️</button><button type="button" class="ib" data-a="remDel" data-id="${r.id}" title="Hapus">🗑</button></div>` : ''}
   </div>`;
 }
+const reOldHtml = () => (S.dlg?.rfiles || []).map((f, i) => `<span class="pf">${f.thumb ? `<img src="${f.thumb}" alt="">` : fileIcon(f.mime)} ${esc(f.name)}<button type="button" class="ib" data-a="reFileDel" data-i="${i}" title="Hapus lampiran">✕</button></span>`).join('');
 function remDialog(r) {
-  const d = r.data;
+  const d = r.data; delete PF.re;
+  S.dlg = { type: 'rem', id: r.id, rfiles: [...(d.files || [])] };
   openDlg(`<form class="dlg" id="rem-edit" data-id="${r.id}"><h2>Ubah reminder</h2>
-    <label>Judul<input id="re-title" value="${esc(d.title)}" maxlength="200" required></label>
+    <label>Judul<input id="re-title" data-men value="${esc(d.title)}" maxlength="200" required></label>
     <div class="row2"><label>Tanggal<input id="re-date" type="date" value="${esc(d.date)}" required></label><label>Jam<input id="re-time" type="time" value="${esc(d.time || '')}"></label></div>
     <label>Warna<span class="swatches">${Object.entries(PALETTE).map(([k, [n, h]]) => `<label class="sw" title="${n}"><input type="radio" name="re-color" value="${k}" ${(d.color || 'blue') === k ? 'checked' : ''}><i style="--c:${h}"></i></label>`).join('')}</span></label>
-    <label>Catatan<textarea id="re-note" rows="4" maxlength="2000">${esc(d.note || '')}</textarea></label>
+    <label>Catatan<textarea id="re-note" data-men rows="4" maxlength="2000">${esc(d.note || '')}</textarea></label>
+    <div class="re-files"><span class="lbl">Lampiran ${attachBtn('re')}</span><div class="pend" id="re-old">${reOldHtml()}</div><div class="pend" data-pf="re"></div></div>
     <p class="muted small">Dibuat oleh ${esc(uname(r.owner))} · ${dtText(r.created)}</p>
     <div class="dlg-f"><button type="button" class="btn danger" data-a="remDel" data-id="${r.id}">Hapus</button><span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
   </form>`);
@@ -1227,32 +1258,47 @@ function vChat() {
     </section>
   </div>`;
 }
+const PF = {}; // pending uploads per field: 'ra' new reminder, 're' edit dialog, 'rc-<id>' reminder comment
+const pfHtml = k => (PF[k] || []).map((f, i) => `<span class="pf">${f.thumb ? `<img src="${f.thumb}" alt="">` : fileIcon(f.mime)} ${esc(f.name)} <small>${fsize(f.size)}</small><button type="button" class="ib" data-a="pfDel" data-k="${esc(k)}" data-i="${i}" title="Batal lampirkan">✕</button></span>`).join('');
+const pfShow = k => $$(`[data-pf="${k}"]`).forEach(e => e.innerHTML = pfHtml(k));
+async function pfAdd(k, files) { for (const f of files) { try { (PF[k] ||= []).push(await prepFile(f)); } catch (e) { toast(esc(e.message), 'warn'); } } pfShow(k); }
+async function pfUpload(k) { const out = []; for (const f of PF[k] || []) out.push(await uploadFile(f)); delete PF[k]; return out; }
+const attachBtn = k => `<label class="ib attach" title="Lampirkan gambar / file">📎<input type="file" multiple hidden data-ch="pfFile" data-k="${esc(k)}"></label>`;
 function pendHtml() { return S.chat.files.map((f, i) => `<span class="pf">${f.thumb ? `<img src="${f.thumb}" alt="">` : fileIcon(f.mime)} ${esc(f.name)} <small>${fsize(f.size)}</small><button type="button" class="ib" data-a="pendDel" data-i="${i}">✕</button></span>`).join(''); }
 async function addPending(files) {
   for (const f of files) { try { S.chat.files.push(await prepFile(f)); } catch (e) { toast(esc(e.message), 'warn'); } }
   const p = $('#pend'); if (p) p.innerHTML = pendHtml();
 }
-const M = { open: false, start: 0, list: [], idx: 0 };
-function mentionCheck(t) {
+const M = { open: false, start: 0, list: [], idx: 0, id: '' };
+function mentionCheck(t) { // @ popup for the chat composer and every [data-men] field
   const p = t.selectionStart ?? t.value.length, m = /(^|[\s(])@([\w.-]{0,32})$/.exec(t.value.slice(0, p));
   if (!m) return mentionClose();
-  const q = m[2].toLowerCase(), conv = S.chat.conv;
+  const chat = t.id === 'c-text', q = m[2].toLowerCase(), conv = chat ? S.chat.conv : 'g';
   let list = S.users.filter(u => u.name !== S.me.name && (conv === 'g' || u.name === conv.slice(2)));
   list = list.filter(u => !q || u.name.includes(q) || (u.display || '').toLowerCase().includes(q)).sort((a, b) => (online(b) - online(a)) || a.name.localeCompare(b.name)).slice(0, 6).map(u => u.name);
   if (conv === 'g' && 'semua'.startsWith(q)) list.push('semua');
   if (!list.length) return mentionClose();
-  Object.assign(M, { open: true, start: p - m[2].length - 1, list, idx: Math.min(M.idx, list.length - 1) });
-  const pop = $('#mpop'); pop.hidden = false;
+  if (M.id && M.id !== t.id) mentionClose();
+  Object.assign(M, { open: true, start: p - m[2].length - 1, list, idx: Math.min(M.idx, list.length - 1), id: t.id });
+  let pop = chat ? $('#mpop') : t.nextElementSibling?.classList.contains('mpop2') ? t.nextElementSibling : null;
+  if (!pop) { $$('.mpop2').forEach(e => e.remove()); pop = document.createElement('div'); pop.className = 'mpop mpop2'; t.insertAdjacentElement('afterend', pop); }
+  pop.hidden = false;
   pop.innerHTML = list.map((n, i) => `<button type="button" class="mi ${i === M.idx ? 'on' : ''}" data-a="mentionPick" data-u="${esc(n)}">${n === 'semua' ? '<span class="av gl">📣</span><span><b>@semua</b><small>tandai semua anggota</small></span>' : `${av(n)}<span><b>${esc(uname(n))}</b><small>@${esc(n)}${online(user(n)) ? ' · ● online' : ''}</small></span>`}</button>`).join('');
+  if (!chat) { // below the field, or above it when the screen bottom is near
+    Object.assign(pop.style, { left: t.offsetLeft + 'px', width: Math.max(230, Math.min(t.offsetWidth, 340)) + 'px' });
+    const up = t.getBoundingClientRect().bottom + pop.offsetHeight + 12 > innerHeight && t.getBoundingClientRect().top > pop.offsetHeight + 12;
+    pop.style.top = (up ? t.offsetTop - pop.offsetHeight - 2 : t.offsetTop + t.offsetHeight + 2) + 'px';
+  }
 }
-function mentionClose() { M.open = false; M.idx = 0; const pop = $('#mpop'); if (pop) { pop.hidden = true; pop.innerHTML = ''; } }
+function mentionClose() { M.open = false; M.idx = 0; M.id = ''; const pop = $('#mpop'); if (pop) { pop.hidden = true; pop.innerHTML = ''; } $$('.mpop2').forEach(e => e.remove()); }
 function mentionInsert(n) {
-  const t = $('#c-text'); if (!t || !n) return;
+  const t = document.getElementById(M.id); if (!t || !n) return mentionClose();
   const p = t.selectionStart ?? t.value.length, ins = '@' + n + ' ';
   t.value = t.value.slice(0, M.start) + ins + t.value.slice(p); const c = M.start + ins.length;
-  mentionClose(); t.focus(); t.setSelectionRange(c, c); autoGrow(t);
+  mentionClose(); t.focus(); t.setSelectionRange(c, c); if (t.id === 'c-text') autoGrow(t);
 }
 function mentionKey(ev) {
+  if (!$('.mpop:not([hidden])')) { M.open = false; return false; } // popup vanished in a re-render
   if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); M.idx = (M.idx + (ev.key === 'ArrowDown' ? 1 : -1) + M.list.length) % M.list.length; mentionCheck(ev.target); return true; }
   if ((ev.key === 'Enter' || ev.key === 'Tab') && !ev.isComposing) { ev.preventDefault(); mentionInsert(M.list[M.idx]); return true; }
   if (ev.key === 'Escape') { ev.preventDefault(); mentionClose(); return true; }
@@ -1290,7 +1336,7 @@ function taskList() {
   if (T.tab === 'assigned') l = l.filter(t => t.data.assign === me);
   if (T.tab === 'done') l = l.filter(t => t.data.status === 'done');
   if (T.tab === 'all') l = l.filter(t => t.data.status !== 'done' || P.includes(t.id));
-  if (T.who) l = l.filter(t => t.owner === T.who);
+  if (T.who === '@me') l = l.filter(t => mentionsMe(t) || comments(t.id).some(mentionsMe)); else if (T.who) l = l.filter(t => t.owner === T.who);
   if (q) l = l.filter(t => [t.data.title, t.data.body, t.data.link, ...(t.data.items || []).map(i => i.t)].join(' ').toLowerCase().includes(q));
   return l.sort((a, b) => (P.includes(b.id) - P.includes(a.id)) || b.updated - a.updated);
 }
@@ -1308,7 +1354,7 @@ function vTask() {
   </section>
   <div class="tf ${T.tab === 'routine' ? 'rt' : ''}">
     <select id="t-tab" data-ch="taskTabSel" data-keep="0" class="t-tab">${tabs.map(([k, l]) => `<option value="${k}" ${T.tab === k ? 'selected' : ''}>${l} (${n[k]})</option>`).join('')}</select>
-    ${T.tab !== 'routine' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
+    ${T.tab !== 'routine' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option><option value="@me" ${T.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
     <input id="t-q" class="t-q" placeholder="🔍 Cari task…" data-ch="taskQ" value="${esc(T.q)}">` : ''}
   </div>
   ${T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
@@ -1318,9 +1364,9 @@ function taskCard(t) {
   const d = t.data, P = pins(), cc = comments(t.id).length, col = NOTE_COLORS[d.color]?.[1];
   const items = d.items || [], doneN = items.filter(i => i.d).length;
   const late = d.due && d.status !== 'done' && d.due < today();
-  return `<article class="ncard ${col && d.color ? 'col' : ''} st-${d.status || 'todo'}" style="${col && d.color ? '--nc:' + col : ''}" data-a="taskOpen" data-id="${t.id}" tabindex="0">
-    <div class="nh"><h3>${esc(d.title || 'Tanpa judul')}</h3><button type="button" class="ib ${P.includes(t.id) ? 'on' : ''}" data-a="taskPin" data-id="${t.id}" title="${P.includes(t.id) ? 'Lepas sematan' : 'Sematkan / favorit'}">${P.includes(t.id) ? '★' : '☆'}</button></div>
-    ${d.body ? `<div class="nb">${linkify(d.body.slice(0, 600))}</div>` : ''}
+  return `<article class="ncard ${mentionsMe(t) ? 'ment' : ''} ${col && d.color ? 'col' : ''} st-${d.status || 'todo'}" style="${col && d.color ? '--nc:' + col : ''}" data-a="taskOpen" data-id="${t.id}" tabindex="0">
+    <div class="nh"><h3>${withMentions(esc(d.title || 'Tanpa judul'))}</h3><button type="button" class="ib ${P.includes(t.id) ? 'on' : ''}" data-a="taskPin" data-id="${t.id}" title="${P.includes(t.id) ? 'Lepas sematan' : 'Sematkan / favorit'}">${P.includes(t.id) ? '★' : '☆'}</button></div>
+    ${d.body ? `<div class="nb">${withMentions(linkify(d.body.slice(0, 600)))}</div>` : ''}
     ${items.length ? `<div class="cl">${items.slice(0, 6).map((it, i) => `<div class="cli ${it.d ? 'dn' : ''}"><button type="button" class="cb" data-a="taskItem" data-id="${t.id}" data-i="${i}">${it.d ? '☑' : '☐'}</button><span>${esc(it.t)}</span></div>`).join('')}${items.length > 6 ? `<span class="muted small">+${items.length - 6} item</span>` : ''}</div>` : ''}
     ${d.link ? `<a class="tlink" href="${esc(d.link)}" target="_blank" rel="noopener" data-a="stop">🔗 ${esc(host(d.link))}</a>` : ''}
     <div class="nf">
@@ -1359,8 +1405,8 @@ function openTask(id, opts = {}) {
   const dis = ro ? 'disabled' : '';
   openDlg(`<form class="dlg ted ${d.color ? 'col' : ''}" id="task-form" style="${d.color ? '--nc:' + NOTE_COLORS[d.color][1] : ''}">
     <div class="ed-bar"><b>${t ? (ro ? 'Task' : 'Ubah task') : 'Task baru'}</b><span class="sp"></span>${t ? `<button type="button" class="ib ${pins().includes(t.id) ? 'on' : ''}" data-a="taskPin" data-id="${t.id}" title="Sematkan / favorit">${pins().includes(t.id) ? '★' : '☆'}</button>` : ''}<button type="button" class="ib" data-a="close" title="Tutup">✕</button></div>
-    <input id="tf-title" class="e-title" placeholder="Judul task" value="${esc(d.title)}" maxlength="300" ${dis}>
-    <textarea id="tf-body" class="e-body" placeholder="Tulis detail task… (link otomatis bisa diklik)" ${dis}>${esc(d.body || '')}</textarea>
+    <input id="tf-title" data-men class="e-title" placeholder="Judul task" value="${esc(d.title)}" maxlength="300" ${dis}>
+    <textarea id="tf-body" data-men class="e-body" placeholder="Tulis detail task… (@ untuk menandai, link otomatis bisa diklik)" ${dis}>${esc(d.body || '')}</textarea>
     ${ro && d.body ? `<div class="nb ro-body">${linkify(d.body)}</div>` : ''}
     <div class="cl-ed" id="tf-items">${(d.items || []).map((it, i) => clRow(it, i, ro)).join('')}</div>
     ${ro ? '' : '<button type="button" class="btn sm" data-a="clAdd">＋ Item checklist</button>'}
@@ -1377,7 +1423,7 @@ function openTask(id, opts = {}) {
     ${t ? `<p class="muted small">Dibuat oleh <b>${esc(uname(t.owner))}</b> · ${dtText(t.created)} · diubah ${ago(t.updated)}${d.statusBy ? ` · status oleh ${esc(uname(d.statusBy))} ${ago(d.statusAt)}` : ''}</p>` : ''}
     <div class="dlg-f">${t && canEdit(t) ? `<button type="button" class="btn danger" data-a="taskDel" data-id="${t.id}">Hapus</button><button type="button" class="btn" data-a="taskArch" data-id="${t.id}">${d.archived ? 'Keluarkan dari arsip' : 'Arsipkan'}</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Tutup</button><button class="btn primary" type="submit">${t ? 'Simpan' : 'Buat task'}</button></div>
     ${t ? `<section class="cmts"><h3>💬 Komentar</h3><div id="cm-list">${cmtHtml(t.id)}</div>
-      <div class="cm-add"><textarea id="cm-text" rows="2" placeholder="Tulis komentar…"></textarea><button type="button" class="btn primary" data-a="cmtAdd" data-id="${t.id}">Kirim</button></div></section>` : ''}
+      <div class="cm-add"><textarea id="cm-text" data-men rows="2" placeholder="Tulis komentar… (@ untuk menandai)"></textarea><button type="button" class="btn primary" data-a="cmtAdd" data-id="${t.id}">Kirim</button></div></section>` : ''}
   </form>`, 'wide');
   if (ro) $('#tf-body').style.display = 'none';
   if (!t) $('#tf-title').focus();
@@ -1385,7 +1431,7 @@ function openTask(id, opts = {}) {
 const clRow = (it, i, ro) => `<div class="cli-ed"><input type="checkbox" class="tf-d" ${it.d ? 'checked' : ''}><input class="tf-t" value="${esc(it.t)}" placeholder="Item…" ${ro ? 'disabled' : ''}>${ro ? '' : '<button type="button" class="ib" data-a="clDel" title="Hapus item">✕</button>'}</div>`;
 function cmtHtml(id) {
   const l = comments(id);
-  return l.length ? l.map(c => `<div class="cmt">${av(c.owner)}<div><div class="ch"><b>${esc(uname(c.owner))}</b><span class="muted small">${dtText(c.created)}</span>${canEdit(c) ? `<button type="button" class="mini" data-a="cmtDel" data-id="${c.id}">hapus</button>` : ''}</div><div class="ct">${linkify(c.data.text)}</div></div></div>`).join('') : '<p class="muted small">Belum ada komentar.</p>';
+  return l.length ? l.map(c => `<div class="cmt">${av(c.owner)}<div><div class="ch"><b>${esc(uname(c.owner))}</b><span class="muted small">${dtText(c.created)}</span>${canEdit(c) ? `<button type="button" class="mini" data-a="cmtDel" data-id="${c.id}">hapus</button>` : ''}</div>${c.data.text ? `<div class="ct">${withMentions(linkify(c.data.text))}</div>` : ''}${filesHtml(c.data.files)}</div></div>`).join('') : '<p class="muted small">Belum ada komentar.</p>';
 }
 function readTaskForm() {
   const f = $('#task-form');
@@ -1457,7 +1503,7 @@ function vCash() {
   <div class="csum"><span>Periode: <b>${esc(periodLabel(C.p, C.ref, C.from, C.to))}</b>${C.cat ? ` · ${esc(catName(C.cat))}` : ''}</span><span class="in">Masuk ${money(tin)}</span><span class="out">Keluar ${money(tout)}</span><span>Selisih <b>${money(tin - tout)}</b></span><span class="muted">${tx.length} transaksi</span></div>
   <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, l]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${money(l.reduce((a, t) => a + (t.data.type === 'in' ? t.data.amount : -t.data.amount), 0))}</span></div>
     ${l.map(t => `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="cashEdit" data-id="${t.id}"` : ''}><span class="tic ${t.data.type}">${t.data.type === 'in' ? '▲' : '▼'}</span>
-      <span class="ti"><b>${esc(t.data.note || (t.data.type === 'in' ? 'Uang masuk' : 'Uang keluar'))}</b><small><span class="kc" style="--c:${catColor(t.data.cat)}">${esc(catName(t.data.cat))}</span> · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}${t.data.file ? ' · 📎 bukti' : ''}</small>${t.data.file ? filesHtml([t.data.file]) : ''}</span>
+      <span class="ti"><b>${withMentions(esc(t.data.note || (t.data.type === 'in' ? 'Uang masuk' : 'Uang keluar')))}</b><small><span class="kc" style="--c:${catColor(t.data.cat)}">${esc(catName(t.data.cat))}</span> · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}${t.data.file ? ' · 📎 bukti' : ''}</small>${t.data.file ? filesHtml([t.data.file]) : ''}</span>
       <span class="ta ${t.data.type}">${t.data.type === 'in' ? '+' : '−'}${money(t.data.amount)}</span></div>`).join('')}</div>`).join('') : '<p class="empty">Belum ada transaksi di periode ini.</p>'}</div>`;
 }
 function cashDialog(t, type) {
@@ -1469,7 +1515,7 @@ function cashDialog(t, type) {
     <div class="seg"><label><input type="radio" name="cf-type" value="in" ${d.type === 'in' ? 'checked' : ''}><span class="in">▲ Uang masuk</span></label><label><input type="radio" name="cf-type" value="out" ${d.type === 'out' ? 'checked' : ''}><span class="out">▼ Uang keluar</span></label></div>
     <label>Kategori kasbon<select id="cf-cat">${cl.map(c => `<option value="${c.id}" ${d.cat === c.id ? 'selected' : ''}>${esc(c.data.name)} — sisa ${money(catTotals(c.id).close)}</option>`).join('')}</select></label>
     <div class="row2"><label>Jumlah (Rp)<input id="cf-amt" inputmode="numeric" placeholder="0" value="${d.amount ? num(d.amount) : ''}" data-ch="amt" required></label><label>Tanggal<input id="cf-date" type="date" value="${esc(d.date)}" required></label></div>
-    <label>Keterangan<input id="cf-note" maxlength="300" value="${esc(d.note || '')}" placeholder="mis. Beli ATK, Transfer dari kantor"></label>
+    <label>Keterangan<input id="cf-note" data-men maxlength="300" value="${esc(d.note || '')}" placeholder="mis. Beli ATK, Transfer dari kantor"></label>
     <label>Bukti / nota (opsional)<span class="filep"><input type="file" id="cf-file" accept="image/*,application/pdf" data-ch="cfFile"><span id="cf-fname" class="muted small">${d.file ? '📎 ' + esc(d.file.name) : ''}</span></span></label>
     ${t ? `<p class="muted small">Dicatat oleh ${esc(uname(t.owner))} · ${dtText(t.created)}${t.updated !== t.created ? ' · diubah ' + ago(t.updated) : ''}</p>` : ''}
     <div class="dlg-f">${t ? `<button type="button" class="btn danger" data-a="cashDel" data-id="${t.id}">Hapus</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit" id="cf-save">Simpan</button></div>
@@ -1690,7 +1736,7 @@ function vUnit() {
   <p class="muted small">Periode: <b>${esc(periodLabel(U.p, U.ref, U.from, U.to))}</b> · ${l.length} input${U.bc ? ' · ' + esc(U.bc) : ''}</p>
   <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, g]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${g.length} input</span></div>
     ${g.map(t => { const x = t.data; return `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
-      <span class="ti"><b>${esc(pu[x.unit]?.name || x.unit)}${x.size ? ' · ' + esc(x.size) : ''}</b><small>📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${linkify(x.note)}</small>` : ''}</span>
+      <span class="ti"><b>${esc(pu[x.unit]?.name || x.unit)}${x.size ? ' · ' + esc(x.size) : ''}</b><small>📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${withMentions(linkify(x.note))}</small>` : ''}</span>
       <span class="ta">${vol(x.volume)} <small>${esc(x.sat || '')}</small></span></div>`; }).join('')}</div>`).join('') : '<p class="empty">Belum ada input produksi di periode ini.</p>'}</div>`;
 }
 function unitDialog(t) {
@@ -1708,7 +1754,7 @@ function unitDialog(t) {
       <div class="sz-ed" id="uf-size-ed" hidden></div>
       <label id="uf-size-new-l" hidden>Ukuran baru<input id="uf-size-new" maxlength="80" placeholder="mis. U-Ditch (60x80x120 t.15)"></label></div>
     <label>Volume produksi<span class="volin"><input id="uf-vol" inputmode="decimal" placeholder="0" value="${d.volume !== '' && d.volume != null ? esc(String(d.volume).replace('.', ',')) : ''}" required><b id="uf-sat">${esc(d.sat || pu[d.unit]?.sat || '')}</b></span></label>
-    <label>Keterangan (opsional)<input id="uf-note" maxlength="300" value="${esc(d.note || '')}" placeholder="mis. shift pagi, proyek X"></label>
+    <label>Keterangan (opsional)<input id="uf-note" data-men maxlength="300" value="${esc(d.note || '')}" placeholder="mis. shift pagi, proyek X"></label>
     ${t ? `<p class="muted small">Dicatat oleh ${esc(uname(t.owner))} · ${dtText(t.created)}</p>` : ''}
     <div class="dlg-f">${t ? `<button type="button" class="btn danger" data-a="unitDel" data-id="${t.id}">Hapus</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
   </form>`);
@@ -1763,7 +1809,7 @@ function vStok() {
   <p class="muted small">Periode: <b>${esc(D.label)}</b> · ${l.length} transaksi${U.bc ? ' · ' + esc(U.bc) : ''}</p>
   <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, g]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${g.length} transaksi</span></div>
     ${g.map(t => { const x = t.data; return `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
-      <span class="ti"><b>${esc(x.item || '')}${x.mcat ? ` <small class="muted">· ${esc(x.mcat)}</small>` : ''}</b><small>${x.dir === 'out' ? '📤 Keluar' : '📥 Masuk'} · 📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${linkify(x.note)}</small>` : ''}</span>
+      <span class="ti"><b>${esc(x.item || '')}${x.mcat ? ` <small class="muted">· ${esc(x.mcat)}</small>` : ''}</b><small>${x.dir === 'out' ? '📤 Keluar' : '📥 Masuk'} · 📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${withMentions(linkify(x.note))}</small>` : ''}</span>
       <span class="ta ${x.dir === 'out' ? 'out' : 'in'}">${sgn(x)}${vol(x.volume)} <small>${esc(x.sat || '')}</small></span></div>`; }).join('')}</div>`).join('') : '<p class="empty">Belum ada transaksi stok di periode ini.</p>'}</div>`;
 }
 function satOptions(sel) { const l = satuans(); if (sel && !l.includes(sel)) l.unshift(sel); return '<option value="">Pilih satuan…</option>' + l.map(z => `<option ${sel === z ? 'selected' : ''}>${esc(z)}</option>`).join('') + '<option value="+">＋ Tambah satuan…</option>'; }
@@ -1790,7 +1836,7 @@ function stokDialog(t) {
       <label>Satuan<span class="sz-sel"><select id="sf-sat" data-ch="sfSat" required>${satOptions(d.sat)}</select><button type="button" class="btn sm" data-a="satEdit" title="Kelola daftar satuan">✏️</button></span></label></div>
     <div class="sz-ed" id="sf-sat-ed" hidden></div>
     <label id="sf-sat-new-l" hidden>Satuan baru<input id="sf-sat-new" maxlength="16" placeholder="mis. truk / ritase / kubik"></label>
-    <label>Keterangan (opsional)<input id="sf-note" maxlength="300" value="${esc(d.note || '')}" placeholder="mis. dari supplier X, dipakai produksi PCP"></label>
+    <label>Keterangan (opsional)<input id="sf-note" data-men maxlength="300" value="${esc(d.note || '')}" placeholder="mis. dari supplier X, dipakai produksi PCP"></label>
     ${t ? `<p class="muted small">Dicatat oleh ${esc(uname(t.owner))} · ${dtText(t.created)}</p>` : ''}
     <div class="dlg-f">${t ? `<button type="button" class="btn danger" data-a="unitDel" data-id="${t.id}">Hapus</button>` : ''}<span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
   </form>`);
@@ -1942,12 +1988,18 @@ const A = {
   remEdit: el => remDialog(S.items.get(el.dataset.id)),
   remDel: async el => { const r = S.items.get(el.dataset.id); if (r && await confirmDlg(`Hapus reminder <b>${esc(r.data.title)}</b> beserta komentarnya?`, 'Hapus')) { closeAll(); comments(r.id).forEach(c => remove(c.id)); remove(r.id); } },
   remCm: el => { const id = el.dataset.id; if (S.rem.open[id]) delete S.rem.open[id]; else S.rem.open[id] = 1; renderMain(); if (S.rem.open[id]) $('#rc-' + id)?.focus(); },
-  remCmAdd: el => { const t = $('#rc-' + el.dataset.id), v = t?.value.trim(); if (!v) return; t.value = ''; create('comment', { rem: el.dataset.id, text: v.slice(0, 5000) }); $('#rc-' + el.dataset.id)?.focus(); },
+  remCmAdd: async el => {
+    const id = el.dataset.id, k = 'rc-' + id, t = $('#rc-' + id), v = t?.value.trim() || ''; if ((!v && !PF[k]?.length) || el.disabled) return;
+    let files = [];
+    if (PF[k]?.length) { el.disabled = true; el.textContent = '⏳'; try { files = await pfUpload(k); } catch (e) { toast('Upload gagal: ' + esc(e.message), 'warn'); el.disabled = false; el.textContent = 'Kirim'; return; } }
+    const ta = $('#rc-' + id); if (ta) ta.value = ''; create('comment', { rem: id, text: v.slice(0, 5000), ...(files.length ? { files } : {}) }); $('#rc-' + id)?.focus(); },
+  pfDel: el => { PF[el.dataset.k]?.splice(Number(el.dataset.i), 1); pfShow(el.dataset.k); },
+  reFileDel: el => { S.dlg.rfiles.splice(Number(el.dataset.i), 1); $('#re-old').innerHTML = reOldHtml(); },
   // chat
   conv: el => { S.chat.conv = el.dataset.c; S.chat.limit = 200; renderMain(); markRead(); renderNav(); $('#c-text')?.focus(); },
   chatMore: () => { S.chat.limit += 300; renderMain(); },
   msgDel: async el => { if (await confirmDlg('Hapus pesan ini untuk semua orang?', 'Hapus')) remove(el.dataset.id); },
-  atStart: () => { const t = $('#c-text'); if (!t) return; const p = t.selectionStart ?? t.value.length, pre = t.value.slice(0, p); const ins = (pre && !/\s$/.test(pre) ? ' ' : '') + '@'; t.value = pre + ins + t.value.slice(p); t.focus(); t.setSelectionRange(p + ins.length, p + ins.length); mentionCheck(t); },
+  atStart: () => { const t = $('#c-text'); if (!t) return; M.id = 'c-text'; const p = t.selectionStart ?? t.value.length, pre = t.value.slice(0, p); const ins = (pre && !/\s$/.test(pre) ? ' ' : '') + '@'; t.value = pre + ins + t.value.slice(p); t.focus(); t.setSelectionRange(p + ins.length, p + ins.length); mentionCheck(t); },
   sizeEdit: () => { const e = $('#uf-size-ed'); e.hidden = !e.hidden; if (!e.hidden) sizeEditor(); },
   sizeDel: async el => { const n = el.dataset.n; if (!await confirmDlg(`Hapus ukuran <b>${esc(n)}</b> dari daftar? Data produksi yang sudah tercatat tidak berubah.`, 'Hapus')) return;
     create('unitopt', { type: 'sizehide', name: n }, { quiet: 1 }); const s = $('#uf-size'); if (s) { const cur = s.value; s.innerHTML = sizeOptions(cur === n ? '' : cur); } sizeEditor(); toast('Ukuran dihapus dari daftar.', 'info', null, 2000); },
@@ -2007,6 +2059,7 @@ const CH = { // change / input handlers
   raDate: el => { S.rem.addDate = el.value; },
   convSel: el => { if (el.value === '+') { const others = S.users.filter(u => u.name !== S.me.name); pickUser(others); return; } S.chat.conv = el.value; renderMain(); markRead(); renderNav(); },
   whNew: el => { if (el.value) { S.chat.conv = 'w:' + el.value; renderMain(); markRead(); $('#c-text')?.focus(); } },
+  pfFile: el => { pfAdd(el.dataset.k, [...el.files]); el.value = ''; },
   cFile: el => { addPending([...el.files]); el.value = ''; },
   cText: (el, ev) => { if (ev.type === 'input') { autoGrow(el); mentionCheck(el); } },
   taskQ: (el, ev) => { if (ev.type === 'input') { S.task.q = el.value; renderMain(); } },
@@ -2053,6 +2106,7 @@ async function pickUser(list) {
 
 // ---------- events ----------
 document.addEventListener('click', ev => {
+  if (M.open && !ev.target.closest('.mpop') && ev.target.id !== M.id) mentionClose();
   const el = ev.target.closest('[data-a]'); if (!el) return;
   if (el.tagName === 'A' && el.dataset.a === 'stop') return;
   const a = ev.target.closest('a[href]'); if (a && a !== el && el.contains(a)) return; // links inside cards open normally
@@ -2062,11 +2116,12 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Enter' && ev.target.matches?.('.ncard')) A.taskOpen(ev.target);
-  if (ev.target.id === 'c-text' && M.open && mentionKey(ev)) return;
+  if (M.open && ev.target.id && ev.target.id === M.id && mentionKey(ev)) return;
   if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing && ev.target.id === 'c-text' && !matchMedia('(pointer:coarse)').matches) { ev.preventDefault(); sendMsg(); }
   if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey) && ev.target.id === 'cm-text') { ev.preventDefault(); $('[data-a=cmtAdd]')?.click(); }
   if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey) && ev.target.id?.startsWith('rc-')) { ev.preventDefault(); $(`[data-a=remCmAdd][data-id="${ev.target.id.slice(3)}"]`)?.click(); }
 });
+document.addEventListener('input', ev => { if (ev.target.matches?.('[data-men]') && ev.target.id) mentionCheck(ev.target); });
 for (const type of ['change', 'input']) document.addEventListener(type, ev => {
   const el = ev.target.closest?.('[data-ch]'); if (!el) return;
   const fn = CH[el.dataset.ch]; if (!fn) return;
@@ -2092,11 +2147,15 @@ document.addEventListener('submit', async ev => {
     try { await login($('#l-user').value, $('#l-pass').value, $('#l-rem').checked); } catch (e) { b.disabled = false; b.textContent = 'Masuk'; $('#l-err').textContent = e.message; $('#l-pass').select(); }
   } else if (f.id === 'rem-add') {
     const title = $('#ra-title').value.trim(); if (!title) return;
-    create('reminder', { title, date: $('#ra-date').value || today(), time: $('#ra-time').value, color: $('#ra-color').value, note: $('#ra-note').value.trim(), done: false, doneBy: '', doneAt: 0 }, { quiet: 1 });
+    const btn = $('#ra-btn'); let files = [];
+    if (PF.ra?.length) { btn.disabled = true; btn.textContent = 'Upload…'; try { files = await pfUpload('ra'); } catch (e) { toast('Upload gagal: ' + esc(e.message), 'warn'); btn.disabled = false; btn.textContent = 'Tambah'; return; } }
+    create('reminder', { title, date: $('#ra-date').value || today(), time: $('#ra-time').value, color: $('#ra-color').value, note: $('#ra-note').value.trim(), done: false, doneBy: '', doneAt: 0, ...(files.length ? { files } : {}) }, { quiet: 1 });
     $('#ra-title').value = ''; $('#ra-note').value = ''; $('#ra-time').value = ''; renderMain(); $('#ra-title').focus();
     toast('Reminder ditambahkan.', 'info', null, 2000);
   } else if (f.id === 'rem-edit') {
-    patch(f.dataset.id, { title: $('#re-title').value.trim(), date: $('#re-date').value, time: $('#re-time').value, color: $('input[name=re-color]:checked', f)?.value || 'blue', note: $('#re-note').value.trim() }); closeAll();
+    const btn = $('button[type=submit]', f); let files = [];
+    if (PF.re?.length) { btn.disabled = true; btn.textContent = 'Upload…'; try { files = await pfUpload('re'); } catch (e) { toast('Upload gagal: ' + esc(e.message), 'warn'); btn.disabled = false; btn.textContent = 'Simpan'; return; } }
+    patch(f.dataset.id, { title: $('#re-title').value.trim(), date: $('#re-date').value, time: $('#re-time').value, color: $('input[name=re-color]:checked', f)?.value || 'blue', note: $('#re-note').value.trim(), files: [...(S.dlg?.rfiles || []), ...files] }); closeAll();
   } else if (f.id === 'composer') sendMsg();
   else if (f.id === 'link-add') {
     const url = normUrl($('#lk-url').value); if (!/^https?:\/\/[^\s]+\.[^\s]+/.test(url)) { toast('Link tidak valid.', 'warn'); return; }
