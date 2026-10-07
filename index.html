@@ -118,6 +118,12 @@ main{grid-area:main;min-width:0;padding:18px 24px 100px}
 .tools{display:flex;gap:8px;flex-wrap:wrap}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
 .empty{text-align:center;color:var(--muted);margin:36px 10px}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.tl{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 12px;text-align:center;text-decoration:none;color:var(--text);transition:transform .15s,border-color .15s}
+.tl:hover{transform:translateY(-2px);border-color:var(--acc)}
+.tl-ic{width:64px;height:64px;margin-bottom:4px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.15))}
+.tl b{font-size:16px}
+@media (max-width:600px){.tl-grid{grid-template-columns:repeat(2,1fr);gap:10px}.tl{padding:16px 8px}.tl-ic{width:52px;height:52px}}
 .chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .chips.scroll::-webkit-scrollbar{display:none}
@@ -465,7 +471,7 @@ main[data-view=chat]{padding-bottom:18px}
   .me-btn{padding:3px}
   .side{display:none}
   main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
-  .bnav{display:grid;grid-template-columns:repeat(7,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .bnav{display:grid;grid-template-columns:repeat(8,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
   .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
   .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
   .bnav .ic{font-size:20px;position:relative;line-height:1.2}
@@ -1060,7 +1066,7 @@ setInterval(() => {
 }, 1000);
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261007-154146';
+const BUILD = '20261007-185236';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -1113,7 +1119,7 @@ const NOTE_COLORS = { '': ['Tanpa warna', 'transparent'], red: ['Merah', '#f28b8
 const ACCENTS = { '#1f6fc0': 'Biru AHG (logo)', '#d62b2b': 'Merah AHG (logo)', '#1a8566': 'Hijau', '#2563eb': 'Biru', '#7c3aed': 'Ungu', '#db2777': 'Pink', '#e07b00': 'Oranye', '#dc2626': 'Merah', '#0d9488': 'Toska', '#475569': 'Abu' };
 const AV_COLORS = ['#1a8566', '#2563eb', '#7c3aed', '#db2777', '#e07b00', '#dc2626', '#0d9488', '#475569', '#9333ea', '#0891b2'];
 const STATUS = { todo: ['Belum', '○'], doing: ['Proses', '◐'], done: ['Selesai', '●'] };
-const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], wait: ['🎮', 'Waiting'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
+const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], wait: ['🎮', 'Waiting'], tools: ['🧰', 'Tools'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
 
 // ---------- state ----------
 const now0 = new Date();
@@ -1438,11 +1444,11 @@ function badges() {
 }
 function renderNav() {
   const b = badges(), on = S.users.filter(online).length;
-  const items = ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'users', ...(isAdmin() ? ['admin'] : [])];
+  const items = ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'tools', 'users', ...(isAdmin() ? ['admin'] : [])];
   const n = { reminder: b.rem, chat: b.chat, task: b.task, wait: waitBadge(), users: on };
   setHTML($('#side'), items.map(v => `<button type="button" class="nav ${S.view === v ? 'on' : ''} nv-${v}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}</span><span class="lb">${VIEWS[v][1]}</span>${n[v] ? `<span class="n ${v === 'chat' ? 'hot' : v === 'users' ? 'grn' : ''}">${n[v]}</span>` : ''}</button>`).join('')
     + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
-  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
+  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'tools', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
   setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
@@ -1465,7 +1471,7 @@ function keep(root, fn) {
 }
 function renderMain() {
   const m = $('#main'); if (!m) return;
-  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, wait: vWait, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
+  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, wait: vWait, tools: vTools, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
   const sameChat = S.view === 'chat' && m.dataset.view === 'chat' && m.dataset.conv === S.chat.conv && $('#composer', m);
   if (sameChat) { // keep the composer (typing, IME, file picker) — refresh only lists and header
     const tmp = document.createElement('div'); tmp.innerHTML = html;
@@ -1504,6 +1510,16 @@ function renderUsers() {
   const on = S.users.filter(online).length;
   setHTML(el, `<div class="up-h"><b>👥 Users</b><span class="muted small">${on} online · ${S.users.length} anggota</span></div><div class="ulist">${userList()}</div><p class="muted small up-f">Klik nama untuk kirim chat whisper.</p>`);
   if (S.view === 'users') setHTML($('#main .ulist'), userList());
+}
+const TOOLS = [
+  ['saku', 'Saku', 'Catatan keuangan', `<circle cx='50' cy='50' r='48' fill='#1a8566'/><path d='M28 66c0-22 16-36 42-36-3 26-18 42-38 42l-7 7' fill='none' stroke='white' stroke-width='8' stroke-linecap='round'/>`],
+  ['planner', 'Planner', 'To-do, kalender & catatan', `<rect width='100' height='100' rx='24' fill='#4f5bd5'/><path d='M28 52l14 14 30-32' fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/>`],
+  ['calc', 'Calc', 'Kalkulator & luas/volume', `<rect width='100' height='100' rx='24' fill='#e8590c'/><rect x='24' y='18' width='52' height='20' rx='5' fill='white'/><g fill='white'><circle cx='32' cy='54' r='6'/><circle cx='50' cy='54' r='6'/><circle cx='68' cy='54' r='6'/><circle cx='32' cy='72' r='6'/><circle cx='50' cy='72' r='6'/><circle cx='68' cy='72' r='6'/></g>`],
+  ['notes', 'Notes', 'Catatan', `<rect width='100' height='100' rx='24' fill='#f0a020'/><path d='M30 30h40M30 50h40M30 70h24' fill='none' stroke='white' stroke-width='9' stroke-linecap='round'/>`],
+];
+function vTools() {
+  return `<div class="head"><h1>🧰 Tools <span class="hc">aplikasi pendukung</span></h1></div>
+  <div class="tl-grid">${TOOLS.map(([k, n, d, svg]) => `<a class="card tl" href="https://liemyo.github.io/${k}/" target="_blank" rel="noopener"><svg class="tl-ic" viewBox="0 0 100 100" aria-hidden="true">${svg}</svg><b>${n}</b><span class="muted small">${d}</span></a>`).join('')}</div>`;
 }
 function vUsersPage() {
   const on = S.users.filter(online).length;
