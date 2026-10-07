@@ -471,7 +471,7 @@ main[data-view=chat]{padding-bottom:18px}
   .me-btn{padding:3px}
   .side{display:none}
   main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
-  .bnav{display:grid;grid-template-columns:repeat(8,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .bnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
   .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
   .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
   .bnav .ic{font-size:20px;position:relative;line-height:1.2}
@@ -784,6 +784,22 @@ main[data-view=chat]{padding-bottom:18px}
   .top-r{gap:8px}
   .bell-btn{width:40px;height:40px}
   .bell-pop{position:fixed;top:58px;right:12px;left:12px;width:auto}
+}
+/* ---- 🧰 tools di top bar + 💬 chat bola mengambang ---- */
+.tools-btn.on{background:color-mix(in srgb,var(--acc) 16%,var(--card));border-color:var(--acc);color:var(--acc)}
+.side{padding-bottom:96px}
+.chat-fab{position:fixed;left:20px;bottom:20px;z-index:40;width:60px;height:60px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;cursor:pointer;color:#fff;background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 72%,#fff),var(--acc));box-shadow:0 8px 22px color-mix(in srgb,var(--acc) 40%,rgba(0,0,0,.25));transition:transform .15s}
+.chat-fab:hover{transform:scale(1.06)}
+.chat-fab svg{pointer-events:none}
+.chat-fab .bdot{top:-2px;right:-2px;border-color:var(--bg)}
+.chat-fab.has{animation:fab-pulse 2.2s ease-out infinite}
+.chat-fab.on{background:var(--card);color:var(--text);border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+@keyframes fab-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 55%,transparent),0 8px 22px rgba(0,0,0,.2)}70%,100%{box-shadow:0 0 0 14px transparent,0 8px 22px rgba(0,0,0,.2)}}
+#toasts{right:20px;bottom:20px}
+@media (max-width:820px){
+  .chat-fab{left:16px;bottom:calc(76px + env(safe-area-inset-bottom));width:56px;height:56px}
+  .chat-fab.on{display:none}
+  #toasts{left:12px;right:12px;bottom:calc(144px + env(safe-area-inset-bottom))}
 }
 </style>
 </head>
@@ -1795,7 +1811,7 @@ document.addEventListener('click', ev => { if (N.open && !ev.target.closest('#be
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && N.open) bellOpen(false); });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261007-223106';
+const BUILD = '20261007-224229';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2143,17 +2159,21 @@ function renderLogin() {
   S.loginMsg = '';
   (last ? $('#l-pass') : $('#l-user')).focus();
 }
+const TOOLS_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9 3.5h6A2 2 0 0 1 17 5.5V7h3a2 2 0 0 1 2 2v3.5h-7.5v-1h-5v1H2V9a2 2 0 0 1 2-2h3V5.5a2 2 0 0 1 2-2Zm0 2V7h6V5.5ZM2 14h7.5v1.5h5V14H22v4.5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/></svg>';
+const CHAT_SVG = '<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11.1c0 2.5 1.4 4.7 3.6 6.2L4.8 21l4.2-2.3c.9.2 1.9.4 3 .4 5.5 0 10-3.6 10-8S17.5 3 12 3Z"/><circle cx="7.8" cy="11.1" r="1.35" fill="var(--acc)"/><circle cx="12" cy="11.1" r="1.35" fill="var(--acc)"/><circle cx="16.2" cy="11.1" r="1.35" fill="var(--acc)"/></svg>';
+const CLOSE_SVG = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>';
 function renderShell() {
   app().innerHTML = `<div class="shell">
     <header class="top">
       <div class="clock" id="clock"><b id="clk-t">--:--:--</b><span id="clk-d"></span></div>
       <div class="brand"><span class="ahg-logo hdr" role="img" aria-label="PT. Armada Hada Graha"></span><span class="bt">Virtual Work AHG</span></div>
-      <div class="top-r"><span class="sync"></span><button type="button" class="bell-btn" data-a="bellOpen" id="bell-btn" title="Notifikasi"></button><button type="button" class="me-btn" data-a="profile" id="me-btn"></button><div class="bell-pop card" id="bell-pop" hidden></div></div>
+      <div class="top-r"><span class="sync"></span><button type="button" class="bell-btn tools-btn" data-a="go" data-v="tools" id="tools-btn" title="Tools · aplikasi pendukung">${TOOLS_SVG}</button><button type="button" class="bell-btn" data-a="bellOpen" id="bell-btn" title="Notifikasi"></button><button type="button" class="me-btn" data-a="profile" id="me-btn"></button><div class="bell-pop card" id="bell-pop" hidden></div></div>
     </header>
     <aside class="side" id="side"></aside>
     <main id="main"></main>
     <aside class="upanel" id="users"></aside>
     <nav class="bnav" id="bnav"></nav>
+    <button type="button" class="chat-fab" id="chat-fab" data-a="chatFab" title="Global Chat"></button>
   </div>`;
   tickClock();
 }
@@ -2172,18 +2192,22 @@ function badges() {
 }
 function renderNav() {
   const b = badges(), on = S.users.filter(online).length;
-  const items = ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'tools', 'users', ...(isAdmin() ? ['admin'] : [])];
+  const items = ['reminder', 'task', 'cash', 'unit', 'wait', 'users', ...(isAdmin() ? ['admin'] : [])];
   const n = { reminder: b.rem, chat: b.chat, task: b.task, wait: waitBadge(), users: on };
   setHTML($('#side'), items.map(v => `<button type="button" class="nav ${S.view === v ? 'on' : ''} nv-${v}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}</span><span class="lb">${VIEWS[v][1]}</span>${n[v] ? `<span class="n ${v === 'chat' ? 'hot' : v === 'users' ? 'grn' : ''}">${n[v]}</span>` : ''}</button>`).join('')
     + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
-  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'tools', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
+  setHTML($('#bnav'), ['reminder', 'task', 'cash', 'unit', 'wait', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
   setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
   renderBell();
+  $('#tools-btn')?.classList.toggle('on', S.view === 'tools');
+  const fab = $('#chat-fab');
+  if (fab) { const on = S.view === 'chat'; setHTML(fab, `${on ? CLOSE_SVG : CHAT_SVG}${!on && b.chat ? `<i class="bdot">${b.chat > 99 ? '99+' : b.chat}</i>` : ''}`); fab.classList.toggle('on', on); fab.classList.toggle('has', !on && !!b.chat); fab.title = on ? 'Tutup chat' : b.chat ? `Global Chat · ${b.chat} pesan baru` : 'Global Chat'; }
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
 function go(v) {
   if (v === 'admin' && !isAdmin()) v = 'reminder';
   if (S.view === 'wait' && v !== 'wait' && W.saveT) gameFlush();
+  if (v === 'chat' && S.view !== 'chat') S.chatBack = S.view;
   if (S.view !== v) { S.view = v; window.scrollTo(0, 0); }
   render();
   if (v === 'chat') markRead();
@@ -3235,6 +3259,7 @@ const A = {
   stop: () => {},
   dl: el => saveAs(el.dataset.url, el.dataset.name),
   openFile: el => viewFile(el.dataset.id, el.dataset.name, el.dataset.mime),
+  chatFab: () => go(S.view === 'chat' ? S.chatBack || 'reminder' : 'chat'),
   whisper: el => { closeAll(); S.chat.conv = 'w:' + el.dataset.u; go('chat'); setTimeout(() => $('#c-text')?.focus(), 50); },
   // reminder
   remMon: el => { const d = new Date(S.rem.y, S.rem.m + Number(el.dataset.n), 1); S.rem.y = d.getFullYear(); S.rem.m = d.getMonth(); S.rem.sel = ''; S.rem.addDate = ''; renderMain(); },
