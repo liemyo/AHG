@@ -801,6 +801,13 @@ main[data-view=chat]{padding-bottom:18px}
   .chat-fab.on{display:none}
   #toasts{left:12px;right:12px;bottom:calc(144px + env(safe-area-inset-bottom))}
 }
+/* simetri: logo AHG tepat di tengah top bar; bola chat segaris vertikal dengan menu Reminder */
+.top{position:sticky}
+.brand{position:absolute;left:50%;transform:translateX(-50%);margin:0}
+.top-r{margin-left:auto}
+.chat-fab{left:calc((230px - 1px) / 2 - 30px)}
+@media (max-width:1180px){.chat-fab{left:calc((220px - 1px) / 2 - 30px)}}
+@media (max-width:820px){.chat-fab{left:calc((100vw - 8px) / 12 + 4px - 28px)}}
 </style>
 </head>
 <body>
@@ -1811,7 +1818,7 @@ document.addEventListener('click', ev => { if (N.open && !ev.target.closest('#be
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && N.open) bellOpen(false); });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261007-224229';
+const BUILD = '20261007-225445';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2167,7 +2174,7 @@ function renderShell() {
     <header class="top">
       <div class="clock" id="clock"><b id="clk-t">--:--:--</b><span id="clk-d"></span></div>
       <div class="brand"><span class="ahg-logo hdr" role="img" aria-label="PT. Armada Hada Graha"></span><span class="bt">Virtual Work AHG</span></div>
-      <div class="top-r"><span class="sync"></span><button type="button" class="bell-btn tools-btn" data-a="go" data-v="tools" id="tools-btn" title="Tools · aplikasi pendukung">${TOOLS_SVG}</button><button type="button" class="bell-btn" data-a="bellOpen" id="bell-btn" title="Notifikasi"></button><button type="button" class="me-btn" data-a="profile" id="me-btn"></button><div class="bell-pop card" id="bell-pop" hidden></div></div>
+      <div class="top-r"><span class="sync"></span><button type="button" class="bell-btn tools-btn" data-a="toolsBtn" id="tools-btn" title="Tools · aplikasi pendukung">${TOOLS_SVG}</button><button type="button" class="bell-btn" data-a="bellOpen" id="bell-btn" title="Notifikasi"></button><button type="button" class="me-btn" data-a="profile" id="me-btn"></button><div class="bell-pop card" id="bell-pop" hidden></div></div>
     </header>
     <aside class="side" id="side"></aside>
     <main id="main"></main>
@@ -3259,6 +3266,7 @@ const A = {
   stop: () => {},
   dl: el => saveAs(el.dataset.url, el.dataset.name),
   openFile: el => viewFile(el.dataset.id, el.dataset.name, el.dataset.mime),
+  toolsBtn: () => go(S.view === 'tools' ? 'reminder' : 'tools'),
   chatFab: () => go(S.view === 'chat' ? S.chatBack || 'reminder' : 'chat'),
   whisper: el => { closeAll(); S.chat.conv = 'w:' + el.dataset.u; go('chat'); setTimeout(() => $('#c-text')?.focus(), 50); },
   // reminder
