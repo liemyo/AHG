@@ -465,7 +465,7 @@ main[data-view=chat]{padding-bottom:18px}
   .me-btn{padding:3px}
   .side{display:none}
   main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
-  .bnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .bnav{display:grid;grid-template-columns:repeat(7,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
   .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
   .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
   .bnav .ic{font-size:20px;position:relative;line-height:1.2}
@@ -564,6 +564,107 @@ main[data-view=chat]{padding-bottom:18px}
 .xo{display:flex!important;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:600}
 .xo:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
 .xo input{accent-color:var(--acc)}
+/* ---------- WAITING (game) ---------- */
+.gm button *{pointer-events:none}
+.gm .gm-tabs{gap:6px;display:flex;flex-wrap:wrap}
+.gm-bar{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 12px}
+.gm-pill{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px 11px;font-size:13px;font-weight:600}
+.ok-t{color:var(--green)}
+.gm h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gm h4{margin:14px 0 4px;font-size:14px}
+.gm-menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.gm-card{display:flex;align-items:center;gap:14px;padding:16px;text-align:left;cursor:pointer;color:var(--text);font:inherit}
+.gm-card:hover{border-color:var(--acc)}
+.gm-card.pet{background:linear-gradient(135deg,color-mix(in srgb,#ec4899 12%,var(--card)),var(--card))}
+.gm-card.farm{background:linear-gradient(135deg,color-mix(in srgb,#16a34a 14%,var(--card)),var(--card))}
+.gm-art{font-size:54px;line-height:1;flex:none}
+.gm-ct{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.gm-ct small{color:var(--muted)}
+.gm-st{font-size:13px}
+.gm-lb{padding:14px 16px}
+.lb-r{display:flex;align-items:center;gap:9px;padding:7px 4px;border-top:1px solid var(--line)}
+.lb-r.me{background:color-mix(in srgb,var(--acc) 8%,transparent);border-radius:10px}
+.lb-n{width:26px;text-align:center;font-weight:800}
+.lb-u{flex:1;min-width:0;display:flex;flex-direction:column}
+.lb-u small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-s{font-size:16px;color:var(--acc)}
+.gm-pets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.gm-pet{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px}
+.gm-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 14px;min-height:300px;overflow:hidden;
+  background:radial-gradient(130% 34% at 50% 100%,color-mix(in srgb,#16a34a 30%,var(--card)) 0 70%,transparent 71%),linear-gradient(180deg,color-mix(in srgb,#38bdf8 18%,var(--card)),var(--card))}
+.gm-stage.night{background:radial-gradient(130% 34% at 50% 100%,color-mix(in srgb,#16a34a 18%,#0f172a) 0 70%,transparent 71%),linear-gradient(180deg,#1e293b,#0f172a);color:#e2e8f0}
+.gm-stage.night .muted{color:#94a3b8}
+.gm-bub{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:6px 12px;font-size:13px;font-weight:600;position:relative;margin-bottom:8px;max-width:90%;text-align:center}
+.gm-bub:after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:inherit;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.gm-petbig{line-height:1.1;animation:gm-idle 2.4s ease-in-out infinite;user-select:none}
+.gm-petbig.s0{font-size:70px;animation:gm-egg 1.2s ease-in-out infinite}
+.gm-petbig.s1{font-size:72px}.gm-petbig.s2{font-size:92px}.gm-petbig.s3{font-size:112px}
+.gm-petbig.zz{animation:gm-zz 3s ease-in-out infinite;opacity:.85}
+.gm-petbig.play{animation:gm-jump .4s ease-in-out 3}
+.gm-petbig.eat{animation:gm-eat .3s ease-in-out 3}
+.gm-petbig.bath{animation:gm-shake .2s linear 6}
+@keyframes gm-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes gm-egg{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes gm-zz{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes gm-jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-34px) rotate(8deg)}}
+@keyframes gm-eat{0%,100%{transform:scale(1)}50%{transform:scale(1.12,.9)}}
+@keyframes gm-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.gm-mood{font-size:26px;min-height:34px}
+.gm-name{text-align:center}
+.gm-stats{padding:14px 16px}
+.gs{display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:8px;font-size:13px;font-weight:600;margin:6px 0}
+.gs b{text-align:right;font-variant-numeric:tabular-nums}
+.gs-b{display:block;height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+.gs-b.sm{display:inline-block;width:70px;height:7px;vertical-align:middle;margin-left:6px}
+.gs-b i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .6s}
+.gs-b i.mid{background:#f59e0b}.gs-b i.lo{background:var(--red)}.gs-b i.xp{background:#8b5cf6}
+.gs-lv{margin-bottom:10px}
+.gm-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.gm-acts .btn{flex:1 1 auto}
+.gm-feed{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding:10px;background:var(--soft);border-radius:12px}
+.gm-feed p{flex-basis:100%;margin:2px 0 0}
+.gm-food{display:flex;flex-direction:column;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:6px 8px;min-width:68px;cursor:pointer;font:inherit;color:var(--text)}
+.gm-food span{font-size:26px;line-height:1.2}.gm-food small{font-size:11px;font-weight:600}
+.gm-food:disabled{opacity:.4;cursor:default}
+.gm-foot{margin:12px 0 0}
+.mini.danger{color:var(--red)}
+.gm-adopt{padding:16px;max-width:640px}
+.gm-species{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.gm-sp{display:flex;flex-direction:column;align-items:center;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:8px 4px;cursor:pointer;font:inherit;color:var(--text)}
+.gm-sp span{font-size:38px;line-height:1.2}.gm-sp small{font-size:12px;font-weight:600}
+.gm-sp.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,var(--card))}
+.gm-adopt-f{display:flex;gap:8px;flex-wrap:wrap}.gm-adopt-f input{flex:1 1 160px}
+.gm-farm{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px;align-items:start}
+.gm-field{padding:14px}
+.gm-fh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:600;font-size:14px;margin-bottom:8px}
+.gm-seeds{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip.on.warn{border-color:var(--warn);color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--card))}
+.plots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:10px;border-radius:14px;background:color-mix(in srgb,#65a30d 22%,var(--card))}
+.plot{position:relative;height:104px;width:100%;min-width:0;border:0;border-radius:12px;background:#a16207;background:color-mix(in srgb,#a16207 70%,var(--card));color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font:inherit;padding:4px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
+.plot.wet{background:color-mix(in srgb,#57300a 85%,var(--card))}
+.plot.kosong{background:color-mix(in srgb,#a16207 45%,var(--card))}
+.plot.ripe{box-shadow:inset 0 -4px 0 rgba(0,0,0,.15),0 0 0 3px #facc15}
+.plot.dig{outline:2px dashed var(--warn);outline-offset:-4px}
+.plot .pe{font-size:34px;line-height:1.1}
+.plot.kosong .pe{font-size:22px;opacity:.5}
+.plot.ripe .pe{animation:gm-idle 1.6s ease-in-out infinite}
+.plot small{font-size:11px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.plot .pb{position:absolute;left:8px;right:8px;bottom:6px;height:4px;background:rgba(0,0,0,.25);border-radius:99px;overflow:hidden}
+.plot .pb i{display:block;height:100%;background:#4ade80}
+.gm-barn,.gm-shop{padding:14px 16px}
+.gm-shop{grid-column:1/-1}
+.gm-li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.gm-li.lock{opacity:.55}
+.gm-buy{display:flex;gap:4px}
+@media (max-width:820px){
+  .gm-menu,.gm-pet,.gm-farm{grid-template-columns:minmax(0,1fr)}
+  .gm-stage{min-height:240px}
+  .gm-art{font-size:44px}
+  .plots{gap:6px;padding:8px}
+  .plot{height:80px}.plot .pe{font-size:28px}
+  .gm-species{grid-template-columns:repeat(4,1fr)}
+  .gs{grid-template-columns:86px 1fr 28px}
+}
 </style>
 </head>
 <body>
@@ -659,8 +760,307 @@ const PDF = {
   }
 };
 
+// ---------- WAITING (game ringan sambil menunggu): 🐾 Pet ala Tamagotchi + 🌾 Kebun ala Harvest Moon ----------
+// Progres per user disimpan di pref.data.game (ikut sinkron ke server); pref semua user terbaca → papan skor tim.
+// Waktu berjalan nyata: pet lapar/kotor/ngantuk seiring jam, tanaman tumbuh hanya selama tanah basah (disiram / hujan).
+const PETS = { kucing: ['Kucing', '🐱', '🐱', '🐈'], anjing: ['Anjing', '🐶', '🐶', '🐕'], kelinci: ['Kelinci', '🐰', '🐰', '🐇'], hamster: ['Hamster', '🐹', '🐹', '🐹'], ayam: ['Anak ayam', '🐣', '🐥', '🐓'], panda: ['Panda', '🐼', '🐼', '🐼'], penguin: ['Penguin', '🐧', '🐧', '🐧'], naga: ['Naga', '🦎', '🐲', '🐉'] };
+const PET_STAGES = ['Telur', 'Bayi', 'Remaja', 'Dewasa'];
+const PET_MAX = 4, HATCH_MS = 90e3, WET_MS = 15 * 60e3;
+// name, emoji, minutes to grow (while wet), seed price, sell price, farmer level needed
+const CROPS = { sawi: ['Sawi', '🥬', 3, 8, 16, 1], wortel: ['Wortel', '🥕', 5, 12, 26, 1], kentang: ['Kentang', '🥔', 7, 16, 36, 2], tomat: ['Tomat', '🍅', 9, 20, 46, 2], jagung: ['Jagung', '🌽', 12, 25, 60, 3], terong: ['Terong', '🍆', 15, 30, 74, 4], stroberi: ['Stroberi', '🍓', 20, 40, 104, 5], semangka: ['Semangka', '🍉', 30, 55, 150, 6], labu: ['Labu', '🎃', 45, 75, 220, 7] };
+// pet food: name, emoji, price (0 = gratis tanpa batas), effects
+const FOODS = { pakan: ['Pakan biasa', '🍚', 0, { hunger: 18 }], susu: ['Susu', '🥛', 8, { hunger: 15, happy: 6, energy: 5 }], ikan: ['Ikan', '🐟', 12, { hunger: 30, happy: 8 }], kue: ['Kue', '🍰', 15, { hunger: 12, happy: 18 }] };
+const MED_PRICE = 25, LAND = { 8: 150, 12: 300 }; // lahan 8 → 12 → 16 petak
+const cropFeed = k => { const m = CROPS[k][2]; return { hunger: Math.min(45, 10 + Math.round(m * 1.2)), happy: 4 + Math.floor(m / 5) }; };
+const clamp = v => Math.max(0, Math.min(100, v));
+const lvlOf = (xp, k) => Math.floor(Math.sqrt((xp || 0) / k)) + 1;
+const petLvl = p => lvlOf(p.xp, 8), farmLvl = G => lvlOf(G.fxp, 10);
+const petStage = (p, now = Date.now()) => now - p.born < HATCH_MS ? 0 : petLvl(p) < 3 ? 1 : petLvl(p) < 6 ? 2 : 3;
+const petEmoji = (p, now) => { const s = petStage(p, now); return s ? PETS[p.sp][s] : '🥚'; };
+const dayHash = s => { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+const rainy = (d = today()) => dayHash('ahg-cuaca-' + d) % 4 === 0; // cuaca sama untuk semua anggota
+const weather = () => rainy() ? ['🌧', 'Hujan — kebun tersiram otomatis'] : dayHash('awan' + today()) % 3 ? ['☀️', 'Cerah'] : ['⛅', 'Berawan'];
+const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}j ${m}m` : `${m}:${pad(s % 60)}`; };
+
+function newGame() {
+  const now = Date.now();
+  return { v: 1, start: now, at: 0, coins: 100, seeds: { sawi: 4, wortel: 2 }, crops: {}, food: {}, pets: [], active: '', fxp: 0, daily: '',
+    plots: Array.from({ length: 8 }, () => ({ c: '', g: 0, w: 0, t: now })), stats: { harvest: 0, earn: 0, fed: 0 } };
+}
+const W = { G: null, owner: '', tab: 'menu', seed: 'sawi', dig: false, shop: false, feed: false, anim: null, saveT: null, tick: 0 };
+function gameG() { // my game state; a newer copy saved from another device wins
+  if (W.owner !== S.me?.name) { W.G = null; W.owner = S.me?.name || ''; }
+  const srv = prefData().game;
+  if (srv && (!W.G || (srv.at || 0) > (W.G.at || 0))) W.G = JSON.parse(JSON.stringify(srv));
+  if (!W.G && S.loaded) W.G = newGame();
+  return W.G;
+}
+function gameSave(now) {
+  const G = W.G; if (!G) return; G.at = Math.max(Date.now(), (G.at || 0) + 1);
+  clearTimeout(W.saveT); W.saveT = setTimeout(gameFlush, now ? 0 : 2500);
+}
+function gameFlush() { clearTimeout(W.saveT); W.saveT = null; if (W.G && S.me && W.owner === S.me.name) savePref({ game: JSON.parse(JSON.stringify(W.G)) }); }
+
+// stats now, from the last settled state (linear in time, so settling at any moment gives the same result)
+function petNow(p, now = Date.now()) {
+  const from = Math.max(p.t, p.born + HATCH_MS); if (now <= from) return { ...p };
+  const h = (now - from) / 3.6e6, q = { ...p };
+  if (q.sleep) { q.hunger -= 3 * h; q.clean -= 1 * h; q.energy += 30 * h; if (q.energy >= 100) q.sleep = false; }
+  else { q.hunger -= 9 * h; q.happy -= (q.sick ? 18 : 6) * h; q.clean -= 4 * h; q.energy -= 5 * h; }
+  for (const k of ['hunger', 'happy', 'clean', 'energy']) q[k] = clamp(q[k]);
+  if (q.hunger <= 0 || q.clean <= 0) q.sick = true;
+  q.t = now; return q;
+}
+function plotNow(pl, now = Date.now()) {
+  if (!pl.c) return { ...pl, t: now };
+  const need = CROPS[pl.c][2] * 60e3, wetEnd = rainy() ? now : Math.min(now, pl.w || 0);
+  return { ...pl, g: Math.min(need, pl.g + Math.max(0, wetEnd - Math.max(pl.t, 0))), t: now };
+}
+const ripe = pl => pl.c && pl.g >= CROPS[pl.c][2] * 60e3;
+function settle(G, now = Date.now()) { G.pets = G.pets.map(p => petNow(p, now)); G.plots = G.plots.map(pl => plotNow(pl, now)); }
+function petNeeds(p) {
+  if (petStage(p) === 0) return ['Sebentar lagi menetas…'];
+  if (p.sleep) return ['Zzz…'];
+  const l = [];
+  if (p.sick) l.push('Aku sakit 🤒 — butuh obat');
+  if (p.hunger < 35) l.push('Aku lapar! 🍚');
+  if (p.clean < 35) l.push('Badanku kotor 🛁');
+  if (p.energy < 25) l.push('Ngantuk… 💤');
+  if (p.happy < 35) l.push('Ayo main! 🎾');
+  return l;
+}
+const petMood = p => p.sick ? '🤒' : p.sleep ? '😴' : (a => a >= 75 ? '😄' : a >= 50 ? '🙂' : a >= 30 ? '😐' : '😢')((p.hunger + p.happy + p.clean + p.energy) / 4);
+function waitBadge() { // ripe crops + pets that need care (sick / very hungry)
+  const G = gameG(); if (!G) return 0; const now = Date.now();
+  return G.plots.filter(pl => ripe(plotNow(pl, now))).length + G.pets.map(p => petNow(p, now)).filter(p => petStage(p, now) && (p.sick || p.hunger < 25)).length;
+}
+const gameScore = G => Math.round((G.stats?.earn || 0) + (G.pets || []).reduce((s, p) => s + (p.xp || 0), 0) * 2);
+
+// ---------- views ----------
+function vWait() {
+  const G = gameG();
+  const tabs = [['menu', '🏠 Menu'], ['pet', '🐾 Pet'], ['farm', '🌾 Kebun']];
+  const head = `<div class="head"><h1>🎮 Waiting <span class="hc">main sebentar sambil menunggu</span></h1><div class="tools gm-tabs">${tabs.map(([k, l]) => `<button type="button" class="chip ${W.tab === k ? 'on' : ''}" data-a="gTab" data-k="${k}">${l}</button>`).join('')}</div></div>`;
+  if (!G) return head + '<div class="card empty">⏳ Memuat data game…</div>';
+  const now = Date.now(), [wi, wt] = weather();
+  const bar = `<div class="gm-bar"><span class="gm-pill" title="Koin">🪙 <b>${num(G.coins)}</b></span><span class="gm-pill" title="${wt}">${wi} ${wt.split(' —')[0]}</span><span class="gm-pill">🧑‍🌾 Petani Lv ${farmLvl(G)}</span><span class="gm-pill">📅 Hari ke-${Math.floor((now - G.start) / 864e5) + 1}</span></div>`;
+  return `<div class="gm">${head}${bar}${({ menu: gMenu, pet: gPet, farm: gFarm }[W.tab] || gMenu)(G, now)}</div>`;
+}
+function gMenu(G, now) {
+  const pets = G.pets.map(p => petNow(p, now)), act = pets.find(p => p.id === G.active) || pets[0];
+  const plots = G.plots.map(pl => plotNow(pl, now)), rp = plots.filter(ripe).length, grow = plots.filter(pl => pl.c && !ripe(pl)).length;
+  const rows = [];
+  for (const it of live('pref')) { const g = it.owner === S.me.name ? G : it.data.game; if (g?.pets && user(it.owner) && !rows.some(r => r.u === it.owner)) rows.push({ u: it.owner, g }); }
+  if (!rows.some(r => r.u === S.me.name)) rows.push({ u: S.me.name, g: G });
+  rows.sort((a, b) => gameScore(b.g) - gameScore(a.g));
+  return `<div class="gm-menu">
+    <button type="button" class="card gm-card pet" data-a="gTab" data-k="pet"><span class="gm-art">${act ? petEmoji(act, now) : '🥚'}</span>
+      <span class="gm-ct"><b>🐾 Pet Kesayangan</b><small>ala Tamagotchi — pilih hewan, beri makan, ajak main, mandikan & tidurkan.</small>
+      <span class="gm-st">${act ? `${esc(act.name)} ${petMood(act)} · Lv ${petLvl(act)}${petNeeds(act).length && petStage(act, now) ? ' · <b class="warn-t">' + esc(petNeeds(act)[0]) + '</b>' : ''}` : 'Belum punya pet — adopsi sekarang!'}</span></span><span class="btn primary sm">Main ▸</span></button>
+    <button type="button" class="card gm-card farm" data-a="gTab" data-k="farm"><span class="gm-art">🌾</span>
+      <span class="gm-ct"><b>🌾 Kebun Panen</b><small>ala Harvest Moon — tanam bibit, siram, panen, jual ke toko & beri makan pet.</small>
+      <span class="gm-st">${rp ? `<b class="ok-t">🧺 ${rp} siap panen!</b>` : grow ? `🌱 ${grow} tanaman tumbuh` : 'Lahan kosong — ayo tanam!'} · ${G.plots.length} petak</span></span><span class="btn primary sm">Main ▸</span></button>
+  </div>
+  <section class="card gm-lb"><h3>🏆 Papan skor tim <small class="muted">skor = hasil jual panen + XP pet ×2</small></h3>
+    ${rows.map((r, i) => { const g = r.g, p = (g.pets || []).find(x => x.id === g.active) || g.pets?.[0];
+      return `<div class="lb-r ${r.u === S.me.name ? 'me' : ''}"><span class="lb-n">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>${av(r.u, 'xs')}<span class="lb-u"><b>${esc(uname(r.u))}</b><small>${p ? `${petEmoji(p, now)} ${esc(p.name)} Lv ${petLvl(p)}` : 'belum punya pet'} · 🧺 ${num(g.stats?.harvest || 0)} panen · 🧑‍🌾 Lv ${farmLvl(g)}${g.at ? ' · main ' + ago(g.at) : ''}</small></span><b class="lb-s">${num(gameScore(g))}</b></div>`; }).join('')}
+  </section>`;
+}
+function gPet(G, now) {
+  if (!G.pets.length || W.adopt) return gAdopt(G);
+  const p = petNow(G.pets.find(x => x.id === G.active) || G.pets[0], now), st = petStage(p, now), needs = petNeeds(p);
+  const anim = W.anim && W.anim.id === p.id && W.anim.until > now ? W.anim.a : '';
+  const statBar = (k, ic, l) => `<div class="gs"><span>${ic} ${l}</span><span class="gs-b"><i class="${p[k] < 30 ? 'lo' : p[k] < 60 ? 'mid' : ''}" style="width:${Math.round(p[k])}%"></i></span><b>${Math.round(p[k])}</b></div>`;
+  const lv = petLvl(p), x0 = (lv - 1) ** 2 * 8, x1 = lv ** 2 * 8;
+  const age = now - p.born, ageT = age < 36e5 ? Math.floor(age / 6e4) + ' menit' : age < 864e5 ? Math.floor(age / 36e5) + ' jam' : Math.floor(age / 864e5) + ' hari';
+  return `<div class="gm-pets">${G.pets.map(q => `<button type="button" class="chip ${q.id === p.id ? 'on' : ''}" data-a="gPetSel" data-id="${q.id}">${petEmoji(q, now)} ${esc(q.name)}</button>`).join('')}${G.pets.length < PET_MAX ? '<button type="button" class="chip" data-a="gAdoptOpen">＋ Adopsi</button>' : ''}</div>
+  <div class="gm-pet">
+    <section class="card gm-stage ${p.sleep ? 'night' : ''}">
+      <div class="gm-bub">${esc(needs[0] || ['Aku senang! 💛', 'Hari yang indah ✨', 'Terima kasih sudah merawatku!', 'Semangat kerjanya! 💪'][Math.floor(now / 8000) % 4])}</div>
+      <div class="gm-petbig s${st} ${p.sleep ? 'zz' : ''} ${anim}">${petEmoji(p, now)}</div>
+      <div class="gm-mood">${st ? petMood(p) : ''}${p.clean < 35 && st ? ' 🪰' : ''}</div>
+      <div class="gm-name"><b>${esc(p.name)}</b> <small class="muted">${esc(PETS[p.sp][0])} · ${PET_STAGES[st]} · umur ${ageT}</small></div>
+      ${st ? '' : `<div class="muted small">🥚 menetas dalam ${mmss(p.born + HATCH_MS - now)}</div>`}
+    </section>
+    <section class="card gm-stats">
+      <div class="gs gs-lv"><span>⭐ Level ${lv}</span><span class="gs-b"><i class="xp" style="width:${Math.round((p.xp - x0) / (x1 - x0) * 100)}%"></i></span><b>${p.xp}</b></div>
+      ${statBar('hunger', '🍚', 'Kenyang')}${statBar('happy', '😊', 'Senang')}${statBar('clean', '🛁', 'Bersih')}${statBar('energy', '⚡', 'Energi')}
+      <div class="gm-acts">
+        <button type="button" class="btn ${W.feed ? 'primary' : ''}" data-a="gFeedTog" ${st && !p.sleep ? '' : 'disabled'}>🍚 Makan</button>
+        <button type="button" class="btn" data-a="gPlay" ${st && !p.sleep ? '' : 'disabled'}>🎾 Main</button>
+        <button type="button" class="btn" data-a="gBath" ${st && !p.sleep ? '' : 'disabled'}>🛁 Mandi</button>
+        <button type="button" class="btn" data-a="gSleep" ${st ? '' : 'disabled'}>${p.sleep ? '☀️ Bangun' : '💤 Tidur'}</button>
+        ${p.sick ? `<button type="button" class="btn danger" data-a="gMed">💊 Obat ${G.food.obat ? '(' + G.food.obat + ')' : '· 🪙' + MED_PRICE}</button>` : ''}
+      </div>
+      ${W.feed && st && !p.sleep ? `<div class="gm-feed">${Object.entries(FOODS).map(([k, [n, e, pr]]) => { const c = G.food[k] || 0; return `<button type="button" class="gm-food" data-a="gFeed" data-k="f:${k}" ${pr && !c ? `title="Beli di toko kebun (🪙${pr})" disabled` : ''}><span>${e}</span><small>${n}${pr ? ` ×${c}` : ' ∞'}</small></button>`; }).join('')}
+        ${Object.entries(G.crops).filter(([, c]) => c > 0).map(([k, c]) => `<button type="button" class="gm-food" data-a="gFeed" data-k="c:${k}"><span>${CROPS[k][1]}</span><small>${CROPS[k][0]} ×${c}</small></button>`).join('')}
+        <p class="muted small">Hasil panen kebun & makanan dari toko bisa diberikan ke pet.</p></div>` : ''}
+      <p class="muted small gm-foot">Statistik turun seiring waktu nyata. Kalau lapar atau kotor terlalu lama, pet jatuh sakit. ${G.pets.length ? `<button type="button" class="mini danger" data-a="gRelease" data-id="${p.id}">Lepaskan ${esc(p.name)}</button>` : ''}</p>
+    </section>
+  </div>`;
+}
+function gAdopt(G) {
+  const sp = W.sp || 'kucing';
+  return `<section class="card gm-adopt"><h3>🐾 Adopsi pet ${G.pets.length ? `<button type="button" class="mini" data-a="gAdoptClose">✕ batal</button>` : ''}</h3>
+    <p class="muted small">Pilih hewan peliharaan (maks. ${PET_MAX}). Dimulai dari telur 🥚, menetas ±1,5 menit, lalu tumbuh jadi bayi → remaja → dewasa seiring level.</p>
+    <div class="gm-species">${Object.entries(PETS).map(([k, v]) => `<button type="button" class="gm-sp ${sp === k ? 'on' : ''}" data-a="gSp" data-k="${k}"><span>${v[3]}</span><small>${v[0]}</small></button>`).join('')}</div>
+    <div class="gm-adopt-f"><input id="g-pname" maxlength="16" placeholder="Nama pet (mis. ${esc(PETS[sp][0] === 'Kucing' ? 'Mochi' : 'Boni')})"><button type="button" class="btn primary" data-a="gAdopt">🥚 Adopsi ${esc(PETS[sp][0])}</button></div></section>`;
+}
+function gFarm(G, now) {
+  const plots = G.plots.map(pl => plotNow(pl, now)), fl = farmLvl(G), x0 = (fl - 1) ** 2 * 10, x1 = fl ** 2 * 10, rain = rainy();
+  const seeds = Object.entries(G.seeds).filter(([, c]) => c > 0);
+  if (!G.seeds[W.seed] && seeds.length) W.seed = seeds[0][0];
+  const cell = (pl, i) => {
+    if (!pl.c) return `<button type="button" class="plot kosong ${W.dig ? 'dig' : ''}" data-a="gPlot" data-i="${i}"><span class="pe">🟫</span><small>${W.dig ? '—' : G.seeds[W.seed] ? '＋ Tanam' : 'Kosong'}</small></button>`;
+    const c = CROPS[pl.c], need = c[2] * 60e3, f = pl.g / need, wet = rain || (pl.w || 0) > now, r = f >= 1;
+    const em = r ? c[1] : f < .34 ? '🌱' : f < .67 ? '🌿' : '🪴';
+    const txt = r ? '🧺 Panen!' : wet ? `⏳ ${mmss(need - pl.g)}` : '💧 Siram';
+    return `<button type="button" class="plot ${wet ? 'wet' : 'dry'} ${r ? 'ripe' : ''} ${W.dig ? 'dig' : ''}" data-a="gPlot" data-i="${i}" title="${c[0]}${wet && !r && !rain ? ' · basah ' + mmss(pl.w - now) : ''}"><span class="pe">${em}</span><small>${txt}</small>${r ? '' : `<span class="pb"><i style="width:${Math.round(f * 100)}%"></i></span>`}</button>`;
+  };
+  return `<div class="gm-farm">
+    <section class="card gm-field">
+      <div class="gm-fh"><span>🧑‍🌾 Petani Lv ${fl} <span class="gs-b sm"><i class="xp" style="width:${Math.round(((G.fxp || 0) - x0) / (x1 - x0) * 100)}%"></i></span></span><span class="muted small">${rain ? '🌧 Hujan hari ini — tidak perlu menyiram' : `💧 Siraman bertahan ${WET_MS / 60e3} menit; tanaman tumbuh hanya saat tanah basah`}</span></div>
+      <div class="gm-seeds">${seeds.map(([k, n]) => `<button type="button" class="chip ${W.seed === k && !W.dig ? 'on' : ''}" data-a="gSeed" data-k="${k}">${CROPS[k][1]} ${CROPS[k][0]} <small>×${n}</small></button>`).join('') || '<span class="muted small">Bibit habis — beli di 🏪 Toko.</span>'}
+        <button type="button" class="chip ${W.dig ? 'on warn' : ''}" data-a="gDig" title="Cabut tanaman">⛏ Cabut</button></div>
+      <div class="plots">${plots.map(cell).join('')}</div>
+      <div class="gm-acts"><button type="button" class="btn" data-a="gWaterAll" ${rain ? 'disabled' : ''}>🚿 Siram semua</button><button type="button" class="btn" data-a="gHarvestAll" ${plots.some(ripe) ? '' : 'disabled'}>🧺 Panen semua</button><button type="button" class="btn ${W.shop ? 'primary' : ''}" data-a="gShop">🏪 Toko</button></div>
+    </section>
+    <section class="card gm-barn"><h3>🏚 Lumbung</h3>
+      ${Object.entries(G.crops).filter(([, c]) => c > 0).map(([k, c]) => `<div class="gm-li"><span>${CROPS[k][1]} ${CROPS[k][0]} <b>×${c}</b></span><span class="muted small">🪙${CROPS[k][4]}/buah</span></div>`).join('') || '<p class="muted small">Belum ada hasil panen.</p>'}
+      ${Object.entries(G.food).filter(([, c]) => c > 0).map(([k, c]) => `<div class="gm-li"><span>${k === 'obat' ? '💊 Obat' : FOODS[k][1] + ' ' + FOODS[k][0]} <b>×${c}</b></span><span class="muted small">untuk pet</span></div>`).join('')}
+      <p class="muted small">🧺 Total panen ${num(G.stats.harvest)} · 🪙 hasil jual ${num(G.stats.earn)}</p>
+    </section>
+    ${W.shop ? gShop(G, fl) : ''}
+  </div>`;
+}
+function gShop(G, fl) {
+  const nxt = LAND[G.plots.length];
+  return `<section class="card gm-shop"><h3>🏪 Toko desa <button type="button" class="mini" data-a="gShop">✕ tutup</button></h3>
+    <h4>🌱 Bibit</h4>${Object.entries(CROPS).map(([k, [n, e, m, pr, sell, lv]]) => `<div class="gm-li ${fl < lv ? 'lock' : ''}"><span>${e} <b>${n}</b> <small class="muted">${m} mnt · jual 🪙${sell}</small></span>${fl < lv ? `<span class="muted small">🔒 Petani Lv ${lv}</span>` : `<span class="gm-buy"><button type="button" class="btn sm" data-a="gBuy" data-k="s:${k}" data-n="1" ${G.coins < pr ? 'disabled' : ''}>🪙${pr}</button><button type="button" class="btn sm" data-a="gBuy" data-k="s:${k}" data-n="5" ${G.coins < pr * 5 ? 'disabled' : ''}>×5</button></span>`}</div>`).join('')}
+    <h4>🧺 Jual hasil panen</h4>${Object.entries(G.crops).filter(([, c]) => c > 0).map(([k, c]) => `<div class="gm-li"><span>${CROPS[k][1]} ${CROPS[k][0]} <b>×${c}</b></span><span class="gm-buy"><button type="button" class="btn sm" data-a="gSell" data-k="${k}" data-n="1">Jual 1 · 🪙${CROPS[k][4]}</button><button type="button" class="btn sm" data-a="gSell" data-k="${k}" data-n="${c}">Semua</button></span></div>`).join('') || '<p class="muted small">Lumbung kosong.</p>'}
+    <h4>🐾 Untuk pet</h4>${Object.entries(FOODS).filter(([, f]) => f[2]).map(([k, [n, e, pr]]) => `<div class="gm-li"><span>${e} ${n} <small class="muted">punya ${G.food[k] || 0}</small></span><button type="button" class="btn sm" data-a="gBuy" data-k="f:${k}" data-n="1" ${G.coins < pr ? 'disabled' : ''}>🪙${pr}</button></div>`).join('')}
+      <div class="gm-li"><span>💊 Obat <small class="muted">punya ${G.food.obat || 0}</small></span><button type="button" class="btn sm" data-a="gBuy" data-k="f:obat" data-n="1" ${G.coins < MED_PRICE ? 'disabled' : ''}>🪙${MED_PRICE}</button></div>
+    <h4>🟫 Lahan</h4><div class="gm-li"><span>${G.plots.length} petak${nxt ? ' → ' + (G.plots.length + 4) : ' (maksimal)'}</span>${nxt ? `<button type="button" class="btn sm" data-a="gLand" ${G.coins < nxt ? 'disabled' : ''}>＋4 petak · 🪙${nxt}</button>` : ''}</div>
+  </section>`;
+}
+
+// ---------- actions ----------
+const gToast = (h, t = 'info') => toast(h, t, null, 2500);
+function gDo(fn) { // settle time, mutate, save, repaint
+  const G = gameG(); if (!G) return; const now = Date.now(); settle(G, now);
+  if (fn(G, now) === false) return;
+  gameSave(); renderMain(); renderNav();
+}
+const gPetCur = G => G.pets.find(x => x.id === G.active) || G.pets[0];
+const gXp = (p, n) => { p.xp = (p.xp || 0) + n; };
+function dailyBonus() {
+  const G = gameG(); if (!G || G.daily === today()) return;
+  const first = !G.daily; G.daily = today(); G.coins += first ? 0 : 20; gameSave();
+  if (!first) gToast('🎁 Bonus harian: +🪙20');
+}
+const GA = {
+  gTab: el => { W.tab = el.dataset.k; W.feed = false; if (W.tab !== 'menu') dailyBonus(); renderMain(); window.scrollTo(0, 0); },
+  gPetSel: el => gDo(G => { G.active = el.dataset.id; W.feed = false; }),
+  gAdoptOpen: () => { W.adopt = true; renderMain(); },
+  gAdoptClose: () => { W.adopt = false; renderMain(); },
+  gSp: el => { W.sp = el.dataset.k; renderMain(); },
+  gAdopt: () => gDo((G, now) => {
+    if (G.pets.length >= PET_MAX) { gToast(`Maksimal ${PET_MAX} pet.`, 'warn'); return false; }
+    const sp = W.sp || 'kucing', name = ($('#g-pname')?.value || '').trim().slice(0, 16) || PETS[sp][0];
+    const p = { id: uid(), sp, name, born: now, t: now, xp: 0, hunger: 80, happy: 80, clean: 100, energy: 90, sleep: false, sick: false };
+    G.pets.push(p); G.active = p.id; W.adopt = false; gToast(`🥚 ${esc(name)} diadopsi! Tunggu menetas ya.`);
+  }),
+  gRelease: async el => {
+    const G = gameG(), p = G?.pets.find(x => x.id === el.dataset.id); if (!p) return;
+    if (!await confirmDlg(`Lepaskan <b>${esc(p.name)}</b>? Pet ini akan hilang dari daftar.`, 'Lepaskan')) return;
+    gDo(G => { G.pets = G.pets.filter(x => x.id !== p.id); if (G.active === p.id) G.active = G.pets[0]?.id || ''; });
+  },
+  gFeedTog: () => { W.feed = !W.feed; renderMain(); },
+  gFeed: el => gDo(G => {
+    const p = gPetCur(G), [t, k] = el.dataset.k.split(':');
+    if (p.hunger >= 96) { p.happy = clamp(p.happy - 3); gToast(`${esc(p.name)} sudah kenyang! 😣`, 'warn'); return; }
+    let fx;
+    if (t === 'c') { if (!(G.crops[k] > 0)) return false; G.crops[k]--; fx = cropFeed(k); }
+    else { const f = FOODS[k]; if (f[2]) { if (!(G.food[k] > 0)) return false; G.food[k]--; } fx = f[3]; }
+    for (const [s, v] of Object.entries(fx)) p[s] = clamp(p[s] + v);
+    gXp(p, 2); G.stats.fed = (G.stats.fed || 0) + 1; W.anim = { id: p.id, a: 'eat', until: Date.now() + 900 };
+  }),
+  gPlay: () => gDo(G => {
+    const p = gPetCur(G);
+    if (p.energy < 12) { gToast(`${esc(p.name)} terlalu capek — tidurkan dulu 💤`, 'warn'); return false; }
+    if (p.hunger < 10) { gToast(`${esc(p.name)} terlalu lapar untuk main 🍚`, 'warn'); return false; }
+    p.happy = clamp(p.happy + 18); p.energy = clamp(p.energy - 12); p.hunger = clamp(p.hunger - 6); p.clean = clamp(p.clean - 6); gXp(p, 4);
+    W.anim = { id: p.id, a: 'play', until: Date.now() + 1200 };
+  }),
+  gBath: () => gDo(G => { const p = gPetCur(G); if (p.clean >= 95) { gToast(`${esc(p.name)} sudah bersih ✨`); return false; } p.clean = 100; p.happy = clamp(p.happy + 3); gXp(p, 2); W.anim = { id: p.id, a: 'bath', until: Date.now() + 1200 }; }),
+  gSleep: () => gDo(G => { const p = gPetCur(G); p.sleep = !p.sleep; W.feed = false; if (p.sleep) gXp(p, 1); }),
+  gMed: () => gDo(G => {
+    const p = gPetCur(G);
+    if (G.food.obat > 0) G.food.obat--; else if (G.coins >= MED_PRICE) G.coins -= MED_PRICE; else { gToast('Koin tidak cukup untuk obat.', 'warn'); return false; }
+    p.sick = false; p.hunger = Math.max(p.hunger, 30); p.clean = Math.max(p.clean, 30); gXp(p, 3); gToast(`💊 ${esc(p.name)} sudah sembuh!`);
+  }),
+  gSeed: el => { W.seed = el.dataset.k; W.dig = false; renderMain(); },
+  gDig: () => { W.dig = !W.dig; renderMain(); },
+  gShop: () => { W.shop = !W.shop; renderMain(); if (W.shop) setTimeout(() => $('.gm-shop')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50); },
+  gPlot: el => gDo((G, now) => {
+    const pl = G.plots[Number(el.dataset.i)]; if (!pl) return false;
+    if (W.dig) { if (!pl.c) return false; Object.assign(pl, { c: '', g: 0, w: pl.w }); return; }
+    if (!pl.c) {
+      if (!(G.seeds[W.seed] > 0)) { gToast('Bibit habis — beli di 🏪 Toko.', 'warn'); W.shop = true; return; }
+      G.seeds[W.seed]--; Object.assign(pl, { c: W.seed, g: 0, t: now }); return;
+    }
+    if (ripe(pl)) return gHarvest(G, pl);
+    if (rainy() || (pl.w || 0) > now + WET_MS - 60e3) { gToast('Tanah masih basah 💧'); return false; }
+    pl.w = now + WET_MS;
+  }),
+  gWaterAll: () => gDo(G => { const now = Date.now(); let n = 0; for (const pl of G.plots) if (pl.c && !ripe(pl)) { pl.w = now + WET_MS; n++; } if (!n) { gToast('Tidak ada tanaman yang perlu disiram.'); return false; } gToast(`🚿 ${n} petak disiram.`); }),
+  gHarvestAll: () => gDo(G => { let n = 0; for (const pl of G.plots) if (ripe(pl)) { gHarvest(G, pl, true); n++; } if (!n) return false; gToast(`🧺 Panen ${n} tanaman!`); }),
+  gBuy: el => gDo(G => {
+    const [t, k] = el.dataset.k.split(':'), n = Number(el.dataset.n) || 1;
+    const price = (t === 's' ? CROPS[k][3] : k === 'obat' ? MED_PRICE : FOODS[k][2]) * n;
+    if (t === 's' && farmLvl(G) < CROPS[k][5]) return false;
+    if (G.coins < price) { gToast('Koin tidak cukup 🪙', 'warn'); return false; }
+    G.coins -= price; const bag = t === 's' ? G.seeds : G.food; bag[k] = (bag[k] || 0) + n;
+    if (t === 's') { W.seed = k; W.dig = false; }
+  }),
+  gSell: el => gDo(G => {
+    const k = el.dataset.k, n = Math.min(Number(el.dataset.n) || 1, G.crops[k] || 0); if (!n) return false;
+    const v = CROPS[k][4] * n; G.crops[k] -= n; G.coins += v; G.stats.earn = (G.stats.earn || 0) + v; gToast(`Terjual ${n} ${CROPS[k][0]} · +🪙${v}`);
+  }),
+  gLand: () => gDo((G, now) => { const c = LAND[G.plots.length]; if (!c || G.coins < c) return false; G.coins -= c; for (let i = 0; i < 4; i++) G.plots.push({ c: '', g: 0, w: 0, t: now }); gToast('🟫 Lahan bertambah 4 petak!'); }),
+};
+function gHarvest(G, pl, quiet) {
+  const k = pl.c, lv = farmLvl(G);
+  G.crops[k] = (G.crops[k] || 0) + 1; G.fxp = (G.fxp || 0) + CROPS[k][2] + 2; G.stats.harvest = (G.stats.harvest || 0) + 1;
+  Object.assign(pl, { c: '', g: 0 });
+  if (!quiet) gToast(`🧺 Panen ${CROPS[k][1]} ${CROPS[k][0]}!`);
+  if (farmLvl(G) > lv) { const un = Object.values(CROPS).filter(c => c[5] === farmLvl(G)).map(c => c[1] + ' ' + c[0]).join(', '); gToast(`🎉 Petani naik ke Lv ${farmLvl(G)}!${un ? ' Bibit baru: ' + un : ''}`); }
+}
+
+// re-render the game without replacing nodes (buttons stay the same element → taps never get lost while timers tick)
+function morph(a, b) {
+  const ac = [...a.childNodes], bc = [...b.childNodes];
+  bc.forEach((y, i) => {
+    const x = ac[i];
+    if (!x) a.appendChild(y);
+    else if (x.nodeType !== y.nodeType || x.nodeName !== y.nodeName) a.replaceChild(y, x);
+    else if (x.nodeType !== 1) { if (x.nodeValue !== y.nodeValue) x.nodeValue = y.nodeValue; }
+    else {
+      for (const at of [...x.attributes]) if (!y.hasAttribute(at.name)) x.removeAttribute(at.name);
+      for (const at of [...y.attributes]) if (x.getAttribute(at.name) !== at.value) x.setAttribute(at.name, at.value);
+      if ('disabled' in x) x.disabled = y.hasAttribute('disabled');
+      morph(x, y);
+    }
+  });
+  for (let i = bc.length; i < ac.length; i++) ac[i].remove();
+}
+setInterval(() => {
+  if (!S.me || S.view !== 'wait' || document.hidden) return;
+  renderMain(); if (++W.tick % 5 === 0) renderNav();
+}, 1000);
+
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261005-135149';
+const BUILD = '20261007-154146';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -713,7 +1113,7 @@ const NOTE_COLORS = { '': ['Tanpa warna', 'transparent'], red: ['Merah', '#f28b8
 const ACCENTS = { '#1f6fc0': 'Biru AHG (logo)', '#d62b2b': 'Merah AHG (logo)', '#1a8566': 'Hijau', '#2563eb': 'Biru', '#7c3aed': 'Ungu', '#db2777': 'Pink', '#e07b00': 'Oranye', '#dc2626': 'Merah', '#0d9488': 'Toska', '#475569': 'Abu' };
 const AV_COLORS = ['#1a8566', '#2563eb', '#7c3aed', '#db2777', '#e07b00', '#dc2626', '#0d9488', '#475569', '#9333ea', '#0891b2'];
 const STATUS = { todo: ['Belum', '○'], doing: ['Proses', '◐'], done: ['Selesai', '●'] };
-const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
+const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], wait: ['🎮', 'Waiting'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
 
 // ---------- state ----------
 const now0 = new Date();
@@ -1038,16 +1438,17 @@ function badges() {
 }
 function renderNav() {
   const b = badges(), on = S.users.filter(online).length;
-  const items = ['reminder', 'chat', 'task', 'cash', 'unit', 'users', ...(isAdmin() ? ['admin'] : [])];
-  const n = { reminder: b.rem, chat: b.chat, task: b.task, users: on };
+  const items = ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'users', ...(isAdmin() ? ['admin'] : [])];
+  const n = { reminder: b.rem, chat: b.chat, task: b.task, wait: waitBadge(), users: on };
   setHTML($('#side'), items.map(v => `<button type="button" class="nav ${S.view === v ? 'on' : ''} nv-${v}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}</span><span class="lb">${VIEWS[v][1]}</span>${n[v] ? `<span class="n ${v === 'chat' ? 'hot' : v === 'users' ? 'grn' : ''}">${n[v]}</span>` : ''}</button>`).join('')
     + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
-  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
+  setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
   setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
 function go(v) {
   if (v === 'admin' && !isAdmin()) v = 'reminder';
+  if (S.view === 'wait' && v !== 'wait' && W.saveT) gameFlush();
   if (S.view !== v) { S.view = v; window.scrollTo(0, 0); }
   render();
   if (v === 'chat') markRead();
@@ -1064,7 +1465,7 @@ function keep(root, fn) {
 }
 function renderMain() {
   const m = $('#main'); if (!m) return;
-  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
+  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, wait: vWait, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
   const sameChat = S.view === 'chat' && m.dataset.view === 'chat' && m.dataset.conv === S.chat.conv && $('#composer', m);
   if (sameChat) { // keep the composer (typing, IME, file picker) — refresh only lists and header
     const tmp = document.createElement('div'); tmp.innerHTML = html;
@@ -1075,6 +1476,7 @@ function renderMain() {
     return;
   }
   if (m._h === html && m.dataset.view === S.view) return;
+  if (S.view === 'wait' && m.dataset.view === 'wait') { m._h = html; const t = document.createElement('div'); t.innerHTML = html; morph(m, t); return; } // game ticks every second
   m._h = html;
   keep(m, () => { m.innerHTML = html; m.dataset.view = S.view; m.dataset.conv = S.view === 'chat' ? S.chat.conv : ''; });
   if (S.view === 'chat') { const c = $('#c-text'); if (c && !c.dataset.init) { c.dataset.init = 1; autoGrow(c); } }
@@ -2078,6 +2480,7 @@ async function viewFile(id, name, mime) {
 
 // ---------- actions ----------
 const A = {
+  ...GA,
   pwShow() { const p = $('#l-pass'); p.type = p.type === 'password' ? 'text' : 'password'; },
   go: el => { if (dlg().open) closeAll(); go(el.dataset.v); },
   profile: () => profileDialog(),
@@ -2330,7 +2733,7 @@ setInterval(() => checkDue(), 30000);
 setInterval(checkUpdate, 10 * 60e3);
 setInterval(() => { if (S.me && !dlg().open && !document.activeElement?.matches?.('input,textarea,select')) render(); }, 60000); // refresh "x mnt lalu"
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token) { syncNow(); if (S.view === 'chat') markRead(); } });
-window.addEventListener('pagehide', () => { if (S.token) rpc('ahg_away', { p_token: S.token, p_logout: false }, { keepalive: true, once: true }).catch(() => {}); });
+window.addEventListener('pagehide', () => { if (W.saveT) gameFlush(); if (S.token) rpc('ahg_away', { p_token: S.token, p_logout: false }, { keepalive: true, once: true }).catch(() => {}); });
 window.addEventListener('online', () => syncNow());
 window.addEventListener('focus', () => syncNow());
 
