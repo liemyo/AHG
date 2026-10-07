@@ -756,6 +756,35 @@ main[data-view=chat]{padding-bottom:18px}
   .tr-scene{min-height:190px}
   .pc{font-size:9.5vw}.ox-c{font-size:6vw}
 }
+/* ---- 🔔 notifikasi ---- */
+.top-r{position:relative}
+.bell-btn{position:relative;width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);display:grid;place-items:center;cursor:pointer;padding:0}
+.bell-btn:hover{background:var(--soft)}
+.bell-btn svg{pointer-events:none}
+.bell-btn.has svg{color:var(--acc);animation:bell-ring 2.4s ease-in-out infinite;transform-origin:50% 8%}
+@keyframes bell-ring{0%,62%,100%{transform:rotate(0)}66%{transform:rotate(16deg)}72%{transform:rotate(-14deg)}78%{transform:rotate(10deg)}84%{transform:rotate(-6deg)}90%{transform:rotate(3deg)}}
+.bdot{position:absolute;top:-4px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-style:normal;font-weight:800;display:grid;place-items:center;border:2px solid var(--card);pointer-events:none}
+.bell-pop{position:absolute;top:calc(100% + 10px);right:0;width:min(400px,calc(100vw - 24px));max-height:min(560px,72vh);display:flex;flex-direction:column;z-index:60;padding:0;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.25)}
+.bell-pop[hidden]{display:none}
+.bp-h{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.bp-h .sp{flex:1}
+.bp-l{overflow-y:auto;padding:4px}
+.bp-i{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:0;background:none;color:var(--text);padding:9px 8px;border-radius:10px;cursor:pointer;font:inherit}
+.bp-i:hover{background:var(--soft)}
+.bp-i *{pointer-events:none}
+.bp-i.new{background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.bp-i.new .bp-t>span:first-child:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:6px;vertical-align:1px}
+.bp-av{position:relative;flex:none}
+.bp-av i{position:absolute;right:-6px;bottom:-4px;font-style:normal;font-size:13px;line-height:1}
+.bp-t{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13.5px}
+.bp-t small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bp-t em{font-style:normal;font-size:11.5px;color:var(--muted)}
+.bp-e{padding:16px;text-align:center}
+@media (max-width:820px){
+  .top-r{gap:8px}
+  .bell-btn{width:40px;height:40px}
+  .bell-pop{position:fixed;top:58px;right:12px;left:12px;width:auto}
+}
 </style>
 </head>
 <body>
@@ -1670,8 +1699,103 @@ function oxGo() {
 }
 const GA2 = { ...GA_TREE, ...GA_FISH, ...GA_CHESS, ...GA_OX };
 
+// ---------- 🔔 NOTIFIKASI: semua kegiatan baru / diperbarui oleh anggota lain + bunyi lonceng "ckringgg" ----------
+// Daftar diturunkan dari data yang sudah tersinkron (tanpa tabel baru). Penanda "sudah dibaca" = pref.data.nseen (ikut sinkron antar perangkat).
+const N_KINDS = new Set(['reminder', 'task', 'comment', 'cash', 'cashcat', 'unit', 'link', 'msg']);
+const N = { open: false, start: Date.now() - 864e5, seenOpen: 0, lastRing: 0 };
+function nActor(it) {
+  const d = it.data || {}, near = t => t && Math.abs(t - it.updated) < 8000;
+  if (it.kind === 'task' && d.statusBy && near(d.statusAt)) return d.statusBy;
+  if (it.kind === 'reminder' && d.done && d.doneBy && near(d.doneAt)) return d.doneBy;
+  return it.owner;
+}
+function isNotif(it) {
+  if (!it || it.deleted || !N_KINDS.has(it.kind) || !it.updated || !S.me) return false;
+  const me = S.me.name;
+  if (it.kind === 'msg' && !(it.to === me || (it.data?.mentions || []).some(x => x === me || (x === 'semua' && !it.to)))) return false; // chat biasa punya badge sendiri
+  return nActor(it) !== me;
+}
+function notifs() {
+  const from = srvNow() - 14 * 864e5, out = [];
+  for (const it of S.items.values()) if (it.updated >= from && isNotif(it)) out.push(it);
+  return out.sort((a, b) => b.updated - a.updated).slice(0, 80);
+}
+const nSeen = () => prefData().nseen ?? N.start;
+const nUnread = () => { const s = nSeen(); return notifs().filter(it => it.updated > s).length; };
+function nInfo(it) { // [ikon, kalimat aksi, judul/isi]
+  const d = it.data || {}, isNew = it.updated - (it.created || it.updated) < 4000, cut = s => String(s || '').replace(/\s+/g, ' ').slice(0, 90);
+  switch (it.kind) {
+    case 'reminder': return ['⏰', d.done && nActor(it) === d.doneBy && !isNew ? 'menyelesaikan reminder' : isNew ? 'membuat reminder' : 'memperbarui reminder', `${cut(d.title)}${d.date ? ' · ' + dShort(d.date) + (d.time ? ' ' + d.time : '') : ''}`];
+    case 'task': return ['✅', nActor(it) === d.statusBy && !isNew ? `mengubah status task → ${STATUS[d.status || 'todo'][0]}` : isNew ? (d.assign === S.me.name ? 'menugaskan task kepadamu' : 'membuat task') : 'memperbarui task', cut(d.title || 'Tanpa judul')];
+    case 'comment': { const r = S.items.get(d.rem || d.task); return ['💬', `mengomentari ${d.rem ? 'reminder' : 'task'} “${cut(r?.data.title || '…')}”`, cut(d.text)]; }
+    case 'cash': return ['💰', isNew ? 'menambahkan transaksi kas' : 'memperbarui transaksi kas', `${d.type === 'in' ? '⬇ masuk' : '⬆ keluar'} Rp ${num(d.amount || 0)}${d.note ? ' · ' + cut(d.note) : ''}`];
+    case 'cashcat': return ['🏷', isNew ? 'menambah kategori kas' : 'mengubah kategori kas', cut(d.name)];
+    case 'unit': return d.cat === 'stok' ? ['📦', isNew ? `mencatat stok ${d.dir === 'out' ? 'keluar' : 'masuk'}` : 'memperbarui stok material', `${cut(d.item)} · ${d.volume ?? ''} ${d.sat || ''} · ${d.basecamp || ''}`]
+      : ['🏭', isNew ? 'menginput produksi' : 'memperbarui produksi', `${d.unit || ''} ${d.volume ?? ''} ${d.sat || ''} · ${d.basecamp || ''}${d.date ? ' · ' + dShort(d.date) : ''}`];
+    case 'link': return ['🔗', isNew ? 'menambahkan link kerja' : 'memperbarui link kerja', cut(d.title || d.url)];
+    case 'msg': return [it.to ? '🤫' : '📣', it.to ? 'mengirim whisper' : 'menandai kamu di Global Chat', cut(d.text || (d.files?.length ? '📎 lampiran' : ''))];
+  }
+  return ['🔔', 'memperbarui data', ''];
+}
+function nGo(it) {
+  const d = it.data || {};
+  if (it.kind === 'reminder') { S.rem.sel = ''; go('reminder'); }
+  else if (it.kind === 'task') openTask(it.id);
+  else if (it.kind === 'comment') { const r = S.items.get(d.rem || d.task); if (!r) return; if (r.kind === 'reminder') { S.rem.open[r.id] = 1; go('reminder'); } else openTask(r.id); }
+  else if (it.kind === 'cash' || it.kind === 'cashcat') go('cash');
+  else if (it.kind === 'unit') go('unit');
+  else if (it.kind === 'link') go('task');
+  else if (it.kind === 'msg') { S.chat.conv = convOf(it); go('chat'); }
+}
+const BELL_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a1.6 1.6 0 0 0-1.6 1.6v.55A6.4 6.4 0 0 0 5.6 10.4v4.1L3.8 17.3a.9.9 0 0 0 .76 1.4h14.88a.9.9 0 0 0 .76-1.4l-1.8-2.8v-4.1a6.4 6.4 0 0 0-4.8-6.25V3.6A1.6 1.6 0 0 0 12 2Zm-2.6 17.6a2.6 2.6 0 0 0 5.2 0Z"/></svg>';
+function renderBell() {
+  const b = $('#bell-btn'); if (!b || !S.me) return;
+  const n = nUnread();
+  setHTML(b, `${BELL_SVG}${n ? `<i class="bdot">${n > 99 ? '99+' : n}</i>` : ''}`);
+  b.classList.toggle('has', !!n); b.title = n ? `${n} notifikasi baru` : 'Notifikasi';
+  if (N.open) renderBellPop();
+}
+function renderBellPop() {
+  const p = $('#bell-pop'); if (!p) return;
+  const list = notifs(), seen = N.seenOpen;
+  setHTML(p, `<div class="bp-h"><b>🔔 Notifikasi</b><span class="sp"></span><button type="button" class="mini" data-a="bellSound" title="Bunyi lonceng">${notifyPref().sound ? '🔊' : '🔇'}</button><button type="button" class="mini" data-a="bellClose">✕</button></div>
+    <div class="bp-l">${list.map(it => { const [ic, act, tx] = nInfo(it), who = nActor(it);
+      return `<button type="button" class="bp-i ${it.updated > seen ? 'new' : ''}" data-a="bellGo" data-id="${esc(it.id)}"><span class="bp-av">${av(who)}<i>${ic}</i></span><span class="bp-t"><span><b>${esc(uname(who))}</b> ${esc(act)}</span>${tx ? `<small>${esc(tx)}</small>` : ''}<em>${ago(it.updated)}</em></span></button>`; }).join('') || '<p class="muted small bp-e">Belum ada kegiatan dari anggota lain dalam 14 hari terakhir.</p>'}</div>`);
+}
+function bellOpen(v) {
+  N.open = v ?? !N.open; const p = $('#bell-pop'); if (!p) return;
+  p.hidden = !N.open;
+  if (N.open) { N.seenOpen = nSeen(); renderBellPop(); if (nUnread()) savePref({ nseen: srvNow() }); }
+  renderBell();
+}
+// suara lonceng "ckringgg": klik pukulan + 3 pukulan cepat lonceng sepeda dengan getar (tremolo)
+function bellSound() {
+  if (!notifyPref().sound) return; const now = Date.now(); if (now - N.lastRing < 1500) return; N.lastRing = now;
+  try {
+    audioCtx ||= new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume();
+    const c = audioCtx, t0 = c.currentTime + .02, out = c.createGain(); out.gain.value = .32; out.connect(c.destination);
+    const nb = c.createBuffer(1, c.sampleRate * .03, c.sampleRate), nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length) ** 3;
+    const ns = c.createBufferSource(), nf = c.createBiquadFilter(), ng = c.createGain(); ns.buffer = nb; nf.type = 'highpass'; nf.frequency.value = 3000; ng.gain.value = .5; ns.connect(nf).connect(ng).connect(out); ns.start(t0);
+    const trem = c.createOscillator(), td = c.createGain(), amp = c.createGain(); trem.frequency.value = 26; td.gain.value = .45; amp.gain.value = .6;
+    trem.connect(td).connect(amp.gain); amp.connect(out); trem.start(t0); trem.stop(t0 + 1.6);
+    [0, .07, .14].forEach((dt, k) => [[1, .5], [2.32, .28], [4.25, .16], [6.63, .08]].forEach(([m, g]) => {
+      const o = c.createOscillator(), e = c.createGain(), t = t0 + dt, f = 1720 * m * (k === 1 ? 1.004 : 1);
+      o.type = 'sine'; o.frequency.value = f; e.gain.setValueAtTime(.0001, t); e.gain.exponentialRampToValueAtTime(g * (k ? .8 : 1), t + .004); e.gain.exponentialRampToValueAtTime(.0001, t + (k === 2 ? 1.5 : .5) / Math.sqrt(m));
+      o.connect(e).connect(amp); o.start(t); o.stop(t + 1.6);
+    }));
+  } catch {}
+}
+const NA = {
+  bellOpen: () => bellOpen(),
+  bellClose: () => bellOpen(false),
+  bellGo: el => { const it = S.items.get(el.dataset.id); bellOpen(false); if (it) nGo(it); },
+  bellSound: () => { const p = notifyPref(); LS.set('notify', JSON.stringify({ ...p, sound: !p.sound })); renderBellPop(); if (!p.sound) { N.lastRing = 0; bellSound(); } },
+};
+document.addEventListener('click', ev => { if (N.open && !ev.target.closest('#bell-pop,#bell-btn')) bellOpen(false); }, true);
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && N.open) bellOpen(false); });
+
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261007-222732';
+const BUILD = '20261007-223106';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -1823,6 +1947,7 @@ async function syncNow() {
           if (!cur || JSON.stringify({ ...cur, lv: 0 }) !== JSON.stringify({ ...it, lv: 0 })) changed = true;
           const ment = S.loaded && it.kind !== 'msg' && it.owner !== S.me.name && hitsMe(itemMent(it)) && !hitsMe(itemMent(cur));
           if (S.loaded && !cur && !it.deleted && !ment) notifyNew(it);
+          if (S.loaded && isNotif(it) && (!cur || cur.updated !== it.updated)) N.ring = true;
           if (ment) notifyMention(it);
           S.items.set(it.id, it);
         }
@@ -1832,6 +1957,7 @@ async function syncNow() {
     }
     if (changed) saveCache();
     S.loaded = true; S.sync.at = new Date(); S.sync.err = '';
+    if (N.ring) { N.ring = false; bellSound(); }
   } catch (e) { S.sync.err = e?.message === 'offline' ? 'offline — tersimpan di perangkat ini' : (e?.message || String(e)); }
   finally { S.sync.busy = false; }
   if (S.sync.again) { S.sync.again = false; return syncNow(); }
@@ -1901,10 +2027,7 @@ function filesHtml(files = []) {
 // ---------- notifications ----------
 const notifyPref = () => ({ sound: true, browser: false, rem: 'all', ...jget('notify', {}) });
 let audioCtx = null;
-function beep() {
-  if (!notifyPref().sound) return;
-  try { audioCtx ||= new AudioContext(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.0001, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35); o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.4); } catch {}
-}
+function beep() { bellSound(); } // semua bunyi notifikasi = lonceng "ckringgg" (src/notif.js)
 function sysNotify(title, body) {
   if (!notifyPref().browser || !('Notification' in window) || Notification.permission !== 'granted') return;
   try { new Notification(title, { body, tag: 'ahg-' + title }); } catch {}
@@ -2025,7 +2148,7 @@ function renderShell() {
     <header class="top">
       <div class="clock" id="clock"><b id="clk-t">--:--:--</b><span id="clk-d"></span></div>
       <div class="brand"><span class="ahg-logo hdr" role="img" aria-label="PT. Armada Hada Graha"></span><span class="bt">Virtual Work AHG</span></div>
-      <div class="top-r"><span class="sync"></span><button type="button" class="me-btn" data-a="profile" id="me-btn"></button></div>
+      <div class="top-r"><span class="sync"></span><button type="button" class="bell-btn" data-a="bellOpen" id="bell-btn" title="Notifikasi"></button><button type="button" class="me-btn" data-a="profile" id="me-btn"></button><div class="bell-pop card" id="bell-pop" hidden></div></div>
     </header>
     <aside class="side" id="side"></aside>
     <main id="main"></main>
@@ -2055,6 +2178,7 @@ function renderNav() {
     + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
   setHTML($('#bnav'), ['reminder', 'chat', 'task', 'cash', 'unit', 'wait', 'tools', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
   setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
+  renderBell();
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
 function go(v) {
@@ -3101,7 +3225,7 @@ async function viewFile(id, name, mime) {
 
 // ---------- actions ----------
 const A = {
-  ...GA, ...GA2,
+  ...GA, ...GA2, ...NA,
   pwShow() { const p = $('#l-pass'); p.type = p.type === 'password' ? 'text' : 'password'; },
   go: el => { if (dlg().open) closeAll(); go(el.dataset.v); },
   profile: () => profileDialog(),
