@@ -671,6 +671,91 @@ main[data-view=chat]{padding-bottom:18px}
   .gm-species{grid-template-columns:repeat(4,1fr)}
   .gs{grid-template-columns:86px 1fr 28px}
 }
+/* ---- Waiting 2: pohon, mancing, catur, O-X ---- */
+.gm-card.tree{background:linear-gradient(135deg,color-mix(in srgb,#65a30d 16%,var(--card)),var(--card))}
+.gm-card.fish{background:linear-gradient(135deg,color-mix(in srgb,#0ea5e9 16%,var(--card)),var(--card))}
+.gm-card.chess{background:linear-gradient(135deg,color-mix(in srgb,#78716c 18%,var(--card)),var(--card))}
+.gm-card.ox{background:linear-gradient(135deg,color-mix(in srgb,#f97316 14%,var(--card)),var(--card))}
+.gm-sp:disabled{opacity:.4;cursor:default}
+.gm-sp small.muted{font-size:10px;font-weight:500}
+.tr-stage{justify-content:flex-start}
+.tr-stage.rain{background:linear-gradient(180deg,color-mix(in srgb,#64748b 30%,var(--card)),var(--card))}
+.tr-stage.gold .tr-tree{filter:drop-shadow(0 0 14px #facc15)}
+.tr-scene{position:relative;width:100%;flex:1;min-height:260px;display:flex;align-items:flex-end;justify-content:center}
+.tr-tree{position:relative;line-height:1;margin-bottom:22px;animation:tr-sway 5s ease-in-out infinite;transform-origin:50% 100%;user-select:none;transition:font-size .6s}
+.tr-tree.wilt{filter:saturate(.35) brightness(.9);transform:rotate(-4deg)}
+@keyframes tr-sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+.tr-fl,.tr-fr,.tr-bug{position:absolute;font-size:max(14px,.2em);line-height:1;transform:translate(-50%,-50%)}
+.tr-fr,.tr-bug,.tr-weed{background:none;border:0;padding:2px;cursor:pointer;font-family:inherit}
+.tr-fr{animation:gm-idle 2s ease-in-out infinite}
+.tr-bug{font-size:max(18px,.17em);animation:tr-crawl 1.6s ease-in-out infinite}
+@keyframes tr-crawl{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-30%,-60%)}}
+.tr-br{position:absolute;right:-8px;top:30%;font-size:16px}
+.tr-ground{position:absolute;left:0;right:0;bottom:0;height:26px;border-radius:50%/40%;background:color-mix(in srgb,#92400e 55%,var(--card))}
+.tr-weed{position:absolute;bottom:8px;font-size:22px}
+.tr-wet{position:absolute;right:30%;bottom:4px;font-size:13px}
+.tr-deco{position:absolute;font-size:22px;transform:translate(-50%,-50%);pointer-events:none}
+.tr-deco.d-pelangi{font-size:46px;opacity:.75}.tr-deco.d-kupu,.tr-deco.d-burung{animation:gm-idle 3s ease-in-out infinite}
+.tr-tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0;font-size:12px;font-weight:600}
+.tr-tags span{background:var(--soft);border-radius:99px;padding:3px 9px}
+.tr-quest{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:12px;padding:10px;border-radius:12px;background:var(--soft);font-size:12.5px}
+.tr-quest b{flex-basis:100%;font-size:13px}.tr-quest.ok{outline:2px solid var(--green)}
+.fs-stage{justify-content:center;gap:12px;color:#0f172a;background:linear-gradient(180deg,#bae6fd 0 38%,#38bdf8 38% 100%)}
+.fs-stage.sp-kolam{background:linear-gradient(180deg,#bbf7d0 0 38%,#4ade80 38% 42%,#0ea5e9 42% 100%)}
+.fs-stage.sp-sungai{background:linear-gradient(180deg,#d9f99d 0 34%,#65a30d 34% 40%,#0284c7 40% 100%)}
+.fs-stage.sp-danau{background:linear-gradient(180deg,#e0e7ff 0 30%,#64748b 30% 38%,#0369a1 38% 100%)}
+.fs-stage.sp-laut{background:linear-gradient(180deg,#fde68a 0 30%,#0ea5e9 30% 60%,#075985 60% 100%)}
+.fs-top{position:absolute;top:10px;left:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.fs-top span{background:rgba(255,255,255,.85);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700}
+.fs-msg{background:rgba(255,255,255,.9);border-radius:12px;padding:6px 12px;font-weight:700;font-size:14px;text-align:center;max-width:94%}
+.fs-msg.strike{background:#dc2626;color:#fff;animation:gm-shake .2s linear infinite}
+.fs-big{font-size:17px;padding:12px 26px;min-width:180px}
+.fs-bob{font-size:30px;animation:gm-idle 1.4s ease-in-out infinite}
+.fs-bob.bite{animation:gm-shake .15s linear infinite}
+.fs-reel{position:relative;width:88%;height:30px;border-radius:99px;background:rgba(255,255,255,.85);overflow:hidden;box-shadow:inset 0 0 0 2px rgba(0,0,0,.15)}
+.fs-zone{position:absolute;top:0;bottom:0;background:#22c55e;opacity:.85}
+.fs-cur{position:absolute;top:-2px;bottom:-2px;width:6px;margin-left:-3px;background:#0f172a;border-radius:3px;left:0}
+.fs-catch{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.92);border-radius:16px;padding:10px 18px;border:3px solid var(--rc)}
+.fs-catch span{font-size:64px;line-height:1.1;animation:gm-jump .5s ease-in-out 2}
+.fs-catch small{color:var(--rc);font-weight:700}
+.fs-box{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.fs-it{display:flex;flex-direction:column;align-items:center;font-size:24px;line-height:1.1;background:var(--card);border:2px solid var(--rc);border-radius:10px;padding:3px 5px;cursor:pointer;font-family:inherit;color:var(--text)}
+.fs-it small{font-size:10px;font-weight:700}
+.fs-dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.fs-d{display:flex;flex-direction:column;align-items:center;text-align:center;border:2px solid var(--rc,var(--line));border-radius:12px;padding:8px;font-size:13px}
+.fs-d span{font-size:32px}.fs-d small{color:var(--muted);font-size:11px}.fs-d.un{opacity:.5}
+.ch-wrap{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start}
+.ch-card{padding:10px}
+.ch-board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border-radius:8px;overflow:hidden;border:3px solid #78350f;width:min(100%,560px,66vh);margin:0 auto}
+.cs{position:relative;border:0;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;aspect-ratio:1;font-family:inherit}
+.cs.lt{background:#f0d9b5}.cs.dk{background:#b58863}
+.cs.last{box-shadow:inset 0 0 0 100px rgba(250,204,21,.38)}
+.cs.sel{box-shadow:inset 0 0 0 100px rgba(34,197,94,.5)}
+.cs.chk{box-shadow:inset 0 0 0 100px rgba(220,38,38,.6)}
+.cs.mv:after{content:'';width:28%;height:28%;border-radius:50%;background:rgba(0,0,0,.28);position:absolute}
+.cs.cap:after{content:'';position:absolute;inset:4%;border-radius:50%;box-shadow:inset 0 0 0 4px rgba(0,0,0,.3)}
+.pc{font-size:min(7.2vw,50px,6.6vh);line-height:1;font-family:"Segoe UI Symbol","Apple Symbols","DejaVu Sans",serif}
+.pc.w{color:#fff;-webkit-text-stroke:1.2px #111;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.pc.b{color:#111;text-shadow:0 1px 1px rgba(255,255,255,.25)}
+.cs .rk,.cs .fl{position:absolute;font-size:9px;font-weight:700;font-style:normal;color:rgba(0,0,0,.45)}
+.cs .rk{left:2px;top:1px}.cs .fl{right:2px;bottom:0}
+.ch-cap{min-height:26px;display:flex;flex-wrap:wrap;justify-content:center}
+.ch-cap .pc{font-size:20px}
+.ox-msg{font-size:17px;font-weight:800;margin:4px 0 8px;padding:8px 12px;border-radius:10px;background:var(--soft)}
+.ox-msg.end{background:color-mix(in srgb,var(--acc) 15%,var(--card))}
+.ox-set{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+.ox-set .muted{flex-basis:100%;margin-top:4px}
+.ox-set .btn{margin-top:6px}
+.ox-board{display:grid;gap:3px;aspect-ratio:1;width:min(100%,560px,66vh);margin:0 auto;padding:6px;border-radius:12px;background:var(--line)}
+.ox-c{border:0;border-radius:6px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:min(5vw,30px);font-weight:900;cursor:pointer;aspect-ratio:1;padding:0;font-family:inherit}
+.ox-c.x{color:#dc2626}.ox-c.o{color:#2563eb}
+.ox-c.last{outline:2px solid #f59e0b;outline-offset:-2px}
+.ox-c.win{background:#fde047;animation:gm-idle .8s ease-in-out infinite}
+@media (max-width:820px){
+  .ch-wrap{grid-template-columns:minmax(0,1fr)}
+  .tr-scene{min-height:190px}
+  .pc{font-size:9.5vw}.ox-c{font-size:6vw}
+}
 </style>
 </head>
 <body>
@@ -799,6 +884,7 @@ function gameG() { // my game state; a newer copy saved from another device wins
   const srv = prefData().game;
   if (srv && (!W.G || (srv.at || 0) > (W.G.at || 0))) W.G = JSON.parse(JSON.stringify(srv));
   if (!W.G && S.loaded) W.G = newGame();
+  if (W.G) { const G = W.G; G.trees ||= []; G.titem ||= {}; G.deco ||= {}; G.tslots ||= 1; fshG(G); }
   return W.G;
 }
 function gameSave(now) {
@@ -823,7 +909,7 @@ function plotNow(pl, now = Date.now()) {
   return { ...pl, g: Math.min(need, pl.g + Math.max(0, wetEnd - Math.max(pl.t, 0))), t: now };
 }
 const ripe = pl => pl.c && pl.g >= CROPS[pl.c][2] * 60e3;
-function settle(G, now = Date.now()) { G.pets = G.pets.map(p => petNow(p, now)); G.plots = G.plots.map(pl => plotNow(pl, now)); }
+function settle(G, now = Date.now()) { G.pets = G.pets.map(p => petNow(p, now)); G.plots = G.plots.map(pl => plotNow(pl, now)); treeSettle(G, now); }
 function petNeeds(p) {
   if (petStage(p) === 0) return ['Sebentar lagi menetas…'];
   if (p.sleep) return ['Zzz…'];
@@ -838,19 +924,20 @@ function petNeeds(p) {
 const petMood = p => p.sick ? '🤒' : p.sleep ? '😴' : (a => a >= 75 ? '😄' : a >= 50 ? '🙂' : a >= 30 ? '😐' : '😢')((p.hunger + p.happy + p.clean + p.energy) / 4);
 function waitBadge() { // ripe crops + pets that need care (sick / very hungry)
   const G = gameG(); if (!G) return 0; const now = Date.now();
-  return G.plots.filter(pl => ripe(plotNow(pl, now))).length + G.pets.map(p => petNow(p, now)).filter(p => petStage(p, now) && (p.sick || p.hunger < 25)).length;
+  return G.plots.filter(pl => ripe(plotNow(pl, now))).length + G.pets.map(p => petNow(p, now)).filter(p => petStage(p, now) && (p.sick || p.hunger < 25)).length
+    + (G.trees || []).map(T => treeNow(T, now, G.sprink)).filter(T => T.water < 20 || T.pests >= 2 || T.hp < 40 || (T.fr && T.fr >= fruitCap(treeLvl(T.xp)))).length;
 }
-const gameScore = G => Math.round((G.stats?.earn || 0) + (G.pets || []).reduce((s, p) => s + (p.xp || 0), 0) * 2);
+const gameScore = G => Math.round((G.stats?.earn || 0) + (G.pets || []).reduce((s, p) => s + (p.xp || 0), 0) * 2 + (G.trees || []).reduce((s, T) => s + treeLvl(T.xp) * 10, 0) + (G.chst?.w || 0) * 30 + (G.oxst?.w || 0) * 8);
 
 // ---------- views ----------
 function vWait() {
   const G = gameG();
-  const tabs = [['menu', '🏠 Menu'], ['pet', '🐾 Pet'], ['farm', '🌾 Kebun']];
+  const tabs = [['menu', '🏠 Menu'], ['pet', '🐾 Pet'], ['farm', '🌾 Kebun'], ['tree', '🌳 Pohon'], ['fish', '🎣 Mancing'], ['chess', '♟ Catur'], ['ox', '⭕ O-X']];
   const head = `<div class="head"><h1>🎮 Waiting <span class="hc">main sebentar sambil menunggu</span></h1><div class="tools gm-tabs">${tabs.map(([k, l]) => `<button type="button" class="chip ${W.tab === k ? 'on' : ''}" data-a="gTab" data-k="${k}">${l}</button>`).join('')}</div></div>`;
   if (!G) return head + '<div class="card empty">⏳ Memuat data game…</div>';
   const now = Date.now(), [wi, wt] = weather();
   const bar = `<div class="gm-bar"><span class="gm-pill" title="Koin">🪙 <b>${num(G.coins)}</b></span><span class="gm-pill" title="${wt}">${wi} ${wt.split(' —')[0]}</span><span class="gm-pill">🧑‍🌾 Petani Lv ${farmLvl(G)}</span><span class="gm-pill">📅 Hari ke-${Math.floor((now - G.start) / 864e5) + 1}</span></div>`;
-  return `<div class="gm">${head}${bar}${({ menu: gMenu, pet: gPet, farm: gFarm }[W.tab] || gMenu)(G, now)}</div>`;
+  return `<div class="gm">${head}${bar}${({ menu: gMenu, pet: gPet, farm: gFarm, tree: gTree, fish: gFish, chess: gChess, ox: gOX }[W.tab] || gMenu)(G, now)}</div>`;
 }
 function gMenu(G, now) {
   const pets = G.pets.map(p => petNow(p, now)), act = pets.find(p => p.id === G.active) || pets[0];
@@ -866,10 +953,22 @@ function gMenu(G, now) {
     <button type="button" class="card gm-card farm" data-a="gTab" data-k="farm"><span class="gm-art">🌾</span>
       <span class="gm-ct"><b>🌾 Kebun Panen</b><small>ala Harvest Moon — tanam bibit, siram, panen, jual ke toko & beri makan pet.</small>
       <span class="gm-st">${rp ? `<b class="ok-t">🧺 ${rp} siap panen!</b>` : grow ? `🌱 ${grow} tanaman tumbuh` : 'Lahan kosong — ayo tanam!'} · ${G.plots.length} petak</span></span><span class="btn primary sm">Main ▸</span></button>
+    ${(() => { const T = G.trees[0] && treeNow(gTreeCur(G), now, G.sprink), n = T && treeNeeds(T)[0]; return `<button type="button" class="card gm-card tree" data-a="gTab" data-k="tree"><span class="gm-art">${T ? tEmoji(T) : '🌰'}</span>
+      <span class="gm-ct"><b>🌳 Pohon Kesayangan</b><small>siram, pupuk, pangkas & basmi hama — rawat dari biji sampai pohon berbuah Lv 100.</small>
+      <span class="gm-st">${T ? `${esc(T.name)} · Lv ${treeLvl(T.xp)} · ${tStage(treeLvl(T.xp))[1]}${n ? ' · <b class="warn-t">' + esc(n) + '</b>' : ''}` : 'Belum menanam — pohon pertama gratis!'}</span></span><span class="btn primary sm">Main ▸</span></button>`; })()}
+    <button type="button" class="card gm-card fish" data-a="gTab" data-k="fish"><span class="gm-art">🎣</span>
+      <span class="gm-ct"><b>🎣 Memancing</b><small>lempar kail, tunggu strike, gulung tepat waktu. ${Object.keys(FISH).length} jenis tangkapan di 4 tempat.</small>
+      <span class="gm-st">📖 ${Object.keys(G.fsh.dex).length}/${Object.keys(FISH).length} koleksi · 🧊 ${G.fsh.box.length} di cool box</span></span><span class="btn primary sm">Main ▸</span></button>
+    <button type="button" class="card gm-card chess" data-a="gTab" data-k="chess"><span class="gm-art">♟\uFE0E</span>
+      <span class="gm-ct"><b>♟ Catur</b><small>lawan komputer (3 level) atau 2 pemain di satu perangkat.</small>
+      <span class="gm-st">${G.chs && !G.chs.over ? '▶ Permainan berjalan' : 'Mulai permainan baru'} · 🏆 ${G.chst?.w || 0} menang</span></span><span class="btn primary sm">Main ▸</span></button>
+    <button type="button" class="card gm-card ox" data-a="gTab" data-k="ox"><span class="gm-art">⭕</span>
+      <span class="gm-ct"><b>⭕ O-X · 4 sejajar</b><small>susun 4 ❌/⭕ berderet untuk menang.</small>
+      <span class="gm-st">${G.ox && !G.ox.over ? '▶ Permainan berjalan' : 'Mulai permainan baru'} · 🏆 ${G.oxst?.w || 0} menang</span></span><span class="btn primary sm">Main ▸</span></button>
   </div>
-  <section class="card gm-lb"><h3>🏆 Papan skor tim <small class="muted">skor = hasil jual panen + XP pet ×2</small></h3>
+  <section class="card gm-lb"><h3>🏆 Papan skor tim <small class="muted">skor = hasil jual (panen/buah/ikan) + XP pet ×2 + Lv pohon ×10 + menang catur ×30 / O-X ×8</small></h3>
     ${rows.map((r, i) => { const g = r.g, p = (g.pets || []).find(x => x.id === g.active) || g.pets?.[0];
-      return `<div class="lb-r ${r.u === S.me.name ? 'me' : ''}"><span class="lb-n">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>${av(r.u, 'xs')}<span class="lb-u"><b>${esc(uname(r.u))}</b><small>${p ? `${petEmoji(p, now)} ${esc(p.name)} Lv ${petLvl(p)}` : 'belum punya pet'} · 🧺 ${num(g.stats?.harvest || 0)} panen · 🧑‍🌾 Lv ${farmLvl(g)}${g.at ? ' · main ' + ago(g.at) : ''}</small></span><b class="lb-s">${num(gameScore(g))}</b></div>`; }).join('')}
+      return `<div class="lb-r ${r.u === S.me.name ? 'me' : ''}"><span class="lb-n">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>${av(r.u, 'xs')}<span class="lb-u"><b>${esc(uname(r.u))}</b><small>${p ? `${petEmoji(p, now)} ${esc(p.name)} Lv ${petLvl(p)}` : 'belum punya pet'} · 🧺 ${num(g.stats?.harvest || 0)} panen · 🧑‍🌾 Lv ${farmLvl(g)}${g.trees?.length ? ' · 🌳 Lv ' + Math.max(...g.trees.map(T => treeLvl(T.xp))) : ''}${g.fsh?.caught ? ' · 🎣 ' + g.fsh.caught : ''}${g.at ? ' · main ' + ago(g.at) : ''}</small></span><b class="lb-s">${num(gameScore(g))}</b></div>`; }).join('')}
   </section>`;
 }
 function gPet(G, now) {
@@ -965,7 +1064,7 @@ function dailyBonus() {
   if (!first) gToast('🎁 Bonus harian: +🪙20');
 }
 const GA = {
-  gTab: el => { W.tab = el.dataset.k; W.feed = false; if (W.tab !== 'menu') dailyBonus(); renderMain(); window.scrollTo(0, 0); },
+  gTab: el => { W.tab = el.dataset.k; W.feed = false; if (W.fx && W.fx.ph !== 'done') W.fx = null; if (W.tab !== 'menu') dailyBonus(); renderMain(); window.scrollTo(0, 0); },
   gPetSel: el => gDo(G => { G.active = el.dataset.id; W.feed = false; }),
   gAdoptOpen: () => { W.adopt = true; renderMain(); },
   gAdoptClose: () => { W.adopt = false; renderMain(); },
@@ -1051,6 +1150,7 @@ function morph(a, b) {
     if (!x) a.appendChild(y);
     else if (x.nodeType !== y.nodeType || x.nodeName !== y.nodeName) a.replaceChild(y, x);
     else if (x.nodeType !== 1) { if (x.nodeValue !== y.nodeValue) x.nodeValue = y.nodeValue; }
+    else if (x.hasAttribute?.('data-live')) return; // dianimasikan JS sendiri (penanda pancing)
     else {
       for (const at of [...x.attributes]) if (!y.hasAttribute(at.name)) x.removeAttribute(at.name);
       for (const at of [...y.attributes]) if (x.getAttribute(at.name) !== at.value) x.setAttribute(at.name, at.value);
@@ -1063,10 +1163,515 @@ function morph(a, b) {
 setInterval(() => {
   if (!S.me || S.view !== 'wait' || document.hidden) return;
   renderMain(); if (++W.tick % 5 === 0) renderNav();
+  const G = W.G; if (!G) return; const now = Date.now();
+  if (W.tick % 10 === 0 && G.trees?.some(T => treeLvl(treeNow(T, now, G.sprink).xp) > (T.paid || 1))) gDo(() => {}); // hadiah naik level pohon
+  if (W.tab === 'chess' && G.chs?.mode === 'ai' && G.chs.turn === 'b' && !G.chs.over) chAI();
+  if (W.tab === 'ox' && G.ox?.mode === 'ai' && G.ox.turn === 'O' && !G.ox.over) oxGo();
 }, 1000);
 
+// ---------- WAITING bagian 2: 🌳 Pohon (Lv 1–100) · 🎣 Memancing · ♟ Catur · ⭕ O-X (4 sejajar) ----------
+// Semua progres ikut G (pref.data.game) → sinkron antar perangkat & masuk papan skor.
+const hh = n => { let h = (n * 2654435761) >>> 0; h = Math.imul(h ^ h >>> 15, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); return ((h ^ h >>> 16) >>> 0) / 4294967296; };
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+// ======================= 🌳 POHON =======================
+// name, buah, emoji pohon, harga bibit, menit per buah, koin per buah
+const TREES = { mangga: ['Mangga', '🥭', '🌳', 0, 30, 12], jeruk: ['Jeruk', '🍊', '🌳', 0, 25, 10], apel: ['Apel', '🍎', '🌳', 120, 35, 16], pisang: ['Pisang', '🍌', '🌴', 200, 30, 15], ceri: ['Ceri', '🍒', '🌳', 300, 40, 22], persik: ['Persik', '🍑', '🌳', 400, 45, 26], alpukat: ['Alpukat', '🥑', '🌳', 550, 55, 34], kelapa: ['Kelapa', '🥥', '🌴', 700, 60, 40] };
+const TREE_SLOT = { 1: 250, 2: 600 }, TREE_MAX = 3, FRUIT_LV = 40, TREE_LMAX = 100;
+const TSTAGE = [[1, 'Biji', '🌰'], [5, 'Tunas', '🌱'], [12, 'Bibit', '🌿'], [22, 'Tanaman muda', '🪴'], [35, 'Pohon muda'], [50, 'Pohon dewasa'], [70, 'Pohon besar'], [90, 'Pohon raksasa'], [100, 'Pohon legendaris']];
+// perawatan: name, emoji, harga, keterangan
+const TITEMS = { pupuk: ['Pupuk', '🧪', 15, 'Nutrisi +50'], super: ['Pupuk super', '⚗️', 45, 'Nutrisi penuh + tumbuh 2× selama 1 jam'], pest: ['Pestisida', '🧴', 12, 'Basmi semua hama + kebal 6 jam'], vit: ['Vitamin', '💉', 30, 'Kesehatan +50'] };
+const DECOS = { bunga: ['Bunga', '🌼', 20], batu: ['Batu', '🪨', 15], jamur: ['Jamur', '🍄', 25], kupu: ['Kupu-kupu', '🦋', 40], burung: ['Burung', '🐦', 60], lampu: ['Lentera', '🏮', 80], kursi: ['Bangku', '🪑', 90], pelangi: ['Pelangi', '🌈', 150] };
+const SPRINK = 300;
+const tCum = L => 15 * (L - 1) + 2 * L * (L - 1); // total XP untuk mencapai level L
+const treeLvl = xp => { let L = 1; while (L < TREE_LMAX && (xp || 0) >= tCum(L + 1)) L++; return L; };
+const tStage = lv => { let s = TSTAGE[0]; for (const x of TSTAGE) if (lv >= x[0]) s = x; return s; };
+const tEmoji = T => tStage(treeLvl(T.xp))[2] || TREES[T.sp][2];
+const fruitVal = (T, lv = treeLvl(T.xp)) => Math.round(TREES[T.sp][5] * (1 + Math.max(0, lv - FRUIT_LV) / 30) * (lv >= 100 ? 2 : 1));
+const fruitCap = lv => Math.min(12, 2 + Math.floor(lv / 10));
+const tLvReward = L => 5 + L + (L % 10 === 0 ? 50 : 0);
+
+function newTree(sp, name, now) {
+  return { id: uid(), sp, name, xp: 0, water: 80, nutr: 70, hp: 100, pests: 0, weeds: 0, br: 0, fr: 0, fp: 0, boost: 0, guard: 0, born: now, t: now, paid: 1,
+    pestAt: now + 3 * 36e5, weedAt: now + 2 * 36e5, brAt: now + 4 * 36e5 };
+}
+// simulasi waktu nyata per 5 menit (air & nutrisi turun, hama/gulma/ranting muncul, tumbuh hanya kalau sehat)
+function treeNow(t0, now = Date.now(), spr = false) {
+  const T = { ...t0 }; let cur = Math.max(T.t, now - 30 * 864e5);
+  while (cur < now) {
+    const dt = Math.min(5 * 60e3, now - cur), h = dt / 36e5, lv = treeLvl(T.xp);
+    if (cur >= T.pestAt) { if (T.guard > cur) T.pestAt = T.guard; else { if (lv >= 5) T.pests = Math.min(5, T.pests + 1); T.pestAt += (2 + hh(T.pestAt / 1e3) * 3) * 36e5; } }
+    if (cur >= T.weedAt) { T.weeds = Math.min(4, T.weeds + 1); T.weedAt += (3 + hh(T.weedAt / 1e3) * 3) * 36e5; }
+    if (cur >= T.brAt) { if (lv >= 12) T.br = Math.min(5, T.br + 1); T.brAt += (4 + hh(T.brAt / 1e3) * 3) * 36e5; }
+    T.water = rainy(ymd(new Date(cur))) ? 100 : Math.max(spr ? 60 : 0, T.water - 6 * h);
+    T.nutr = Math.max(0, T.nutr - (3 + T.weeds * 1.5) * h);
+    const bad = (T.water < 15 ? 8 : 0) + (T.nutr < 10 ? 4 : 0) + T.pests * 2;
+    T.hp = Math.max(0, Math.min(100, T.hp + (bad ? -bad : T.water >= 40 && T.nutr >= 30 ? 5 : 0) * h));
+    if (T.hp >= 30 && T.water >= 15 && T.nutr >= 10 && lv < TREE_LMAX) {
+      const r = (T.nutr >= 50 ? 1.25 : 1) * (T.boost > cur ? 2 : 1) * (1 - .1 * T.br) * (T.hp < 60 ? .6 : 1);
+      T.xp = Math.min(tCum(TREE_LMAX), T.xp + r * dt / 60e3);
+    }
+    if (lv >= FRUIT_LV && T.hp >= 50 && T.water >= 20) {
+      const per = TREES[T.sp][4] * 60e3 * (lv >= 100 ? .5 : 1), cap = fruitCap(lv);
+      T.fp += dt; while (T.fp >= per && T.fr < cap) { T.fr++; T.fp -= per; } if (T.fr >= cap) T.fp = 0;
+    }
+    cur += dt;
+  }
+  T.t = now; return T;
+}
+function treeSettle(G, now) {
+  G.trees = G.trees.map(T => treeNow(T, now, G.sprink));
+  for (const T of G.trees) {
+    const L = treeLvl(T.xp); let c = 0;
+    while ((T.paid || 1) < L) { T.paid = (T.paid || 1) + 1; c += tLvReward(T.paid); }
+    if (c) { G.coins += c; gToast(`🌳 ${esc(T.name)} naik ke Lv ${L}! +🪙${c}${L === FRUIT_LV ? ' · mulai berbuah!' : ''}`); }
+  }
+}
+function treeNeeds(T) {
+  const l = [], lv = treeLvl(T.xp);
+  if (T.water < 25) l.push('Haus! Siram aku 💧');
+  if (T.pests) l.push(`Ada ${T.pests} hama 🐛 — ketuk untuk membuang`);
+  if (T.nutr < 20) l.push('Butuh pupuk 🧪');
+  if (T.weeds) l.push('Banyak gulma 🌾 di sekitarku');
+  if (T.br >= 2) l.push('Ranting liar — pangkas ✂️');
+  if (T.hp < 40) l.push('Aku layu… beri vitamin 💉');
+  if (T.fr && T.fr >= fruitCap(lv)) l.push('Buah sudah penuh — petik! 🧺');
+  return l;
+}
+const gTreeCur = G => G.trees.find(x => x.id === G.tact) || G.trees[0];
+const FR_POS = [[30, 22], [62, 18], [46, 34], [24, 42], [70, 40], [40, 12], [56, 46], [34, 30], [78, 28], [18, 30], [50, 24], [64, 32]];
+const DECO_POS = { bunga: [8, 86], batu: [86, 88], jamur: [16, 92], kupu: [82, 30], burung: [12, 22], lampu: [92, 66], kursi: [78, 86], pelangi: [50, 6] };
+
+function gTree(G, now) {
+  if (!G.trees.length || W.tplant) return gTreePlant(G);
+  const T = treeNow(gTreeCur(G), now, G.sprink), lv = treeLvl(T.xp), st = tStage(lv), needs = treeNeeds(T);
+  const x0 = tCum(lv), x1 = tCum(lv + 1), pct = lv >= TREE_LMAX ? 100 : Math.round((T.xp - x0) / (x1 - x0) * 100);
+  const bar = (v, ic, l) => `<div class="gs"><span>${ic} ${l}</span><span class="gs-b"><i class="${v < 30 ? 'lo' : v < 60 ? 'mid' : ''}" style="width:${Math.round(v)}%"></i></span><b>${Math.round(v)}</b></div>`;
+  const size = Math.round(lv < 35 ? 60 + lv * 2 : 130 + (lv - 35) * 1.5), fruit = TREES[T.sp][1];
+  const q = G.tq?.d === today() ? G.tq : { w: 0, f: 0, c: 0 }, qDone = q.w >= 2 && q.f >= 1 && q.c >= 1;
+  const it = k => G.titem[k] || 0, rain = rainy();
+  return `<div class="gm-pets">${G.trees.map(x => `<button type="button" class="chip ${x.id === T.id ? 'on' : ''}" data-a="tSel" data-id="${x.id}">${tEmoji(x)} ${esc(x.name)} <small>Lv ${treeLvl(x.xp)}</small></button>`).join('')}${G.trees.length < (G.tslots || 1) ? '<button type="button" class="chip" data-a="tPlantOpen">＋ Tanam pohon</button>' : ''}</div>
+  <div class="gm-pet">
+    <section class="card gm-stage tr-stage ${rain ? 'rain' : ''} ${lv >= 100 ? 'gold' : ''}">
+      <div class="gm-bub">${esc(needs[0] || (lv >= 100 ? '✨ Aku pohon legendaris!' : ['Terima kasih sudah merawatku 🌿', 'Aku tumbuh semakin tinggi!', 'Udara segar hari ini ☀️', 'Semangat kerjanya! 💪'][Math.floor(now / 8000) % 4]))}</div>
+      <div class="tr-scene">
+        ${Object.keys(DECOS).filter(k => G.deco[k]).map(k => `<span class="tr-deco d-${k}" style="left:${DECO_POS[k][0]}%;top:${DECO_POS[k][1]}%">${DECOS[k][1]}</span>`).join('')}
+        <div class="tr-tree ${T.hp < 40 ? 'wilt' : ''}" style="font-size:${size}px">${tEmoji(T)}
+          ${lv >= 35 && lv < FRUIT_LV ? FR_POS.slice(0, 5).map(([x, y]) => `<span class="tr-fl" style="left:${x}%;top:${y}%">🌸</span>`).join('') : ''}
+          ${FR_POS.slice(0, T.fr).map(([x, y], i) => `<button type="button" class="tr-fr" data-a="tPick" data-n="1" style="left:${x}%;top:${y}%" title="Petik">${fruit}</button>`).join('')}
+          ${Array.from({ length: T.pests }, (_, i) => `<button type="button" class="tr-bug" data-a="tBug" style="left:${[20, 66, 42, 76, 30][i]}%;top:${[30, 22, 50, 48, 62][i]}%" title="Buang hama">${['🐛', '🐜', '🐌', '🐛', '🪲'][i]}</button>`).join('')}
+          ${T.br ? `<span class="tr-br">${'🪵'.repeat(Math.min(3, T.br))}</span>` : ''}
+        </div>
+        <div class="tr-ground">${Array.from({ length: T.weeds }, (_, i) => `<button type="button" class="tr-weed" data-a="tWeed" style="left:${[14, 74, 28, 62][i]}%" title="Cabut gulma">🌾</button>`).join('')}${T.water >= 60 ? '<span class="tr-wet">💧</span>' : ''}</div>
+      </div>
+      <div class="gm-name"><b>${esc(T.name)}</b> <small class="muted">${TREES[T.sp][1]} ${TREES[T.sp][0]} · ${st[1]} · Lv ${lv}/${TREE_LMAX}</small></div>
+      <div class="muted small">${lv < FRUIT_LV ? `🍎 Berbuah mulai Lv ${FRUIT_LV}` : `${fruit} ${T.fr}/${fruitCap(lv)} buah · 🪙${fruitVal(T, lv)}/buah`}${T.boost > now ? ` · ⚡ tumbuh 2× ${mmss(T.boost - now)}` : ''}${T.guard > now ? ` · 🛡 kebal hama ${mmss(T.guard - now)}` : ''}</div>
+    </section>
+    <section class="card gm-stats">
+      <div class="gs gs-lv"><span>⭐ Level ${lv}</span><span class="gs-b"><i class="xp" style="width:${pct}%"></i></span><b>${pct}%</b></div>
+      ${bar(T.water, '💧', 'Air')}${bar(T.nutr, '🧪', 'Nutrisi')}${bar(T.hp, '❤️', 'Kesehatan')}
+      <div class="tr-tags"><span>🐛 Hama ${T.pests}</span><span>🌾 Gulma ${T.weeds}</span><span>🪵 Ranting ${T.br}</span><span>${G.sprink ? '🚿 Sprinkler aktif' : rain ? '🌧 Hujan' : '☀️ Siram manual'}</span></div>
+      <div class="gm-acts">
+        <button type="button" class="btn" data-a="tWater" ${rain ? 'disabled' : ''}>💧 Siram</button>
+        <button type="button" class="btn" data-a="tFert" data-k="pupuk" ${it('pupuk') ? '' : 'disabled'}>🧪 Pupuk ×${it('pupuk')}</button>
+        <button type="button" class="btn" data-a="tFert" data-k="super" ${it('super') ? '' : 'disabled'}>⚗️ Super ×${it('super')}</button>
+        <button type="button" class="btn" data-a="tPrune" ${T.br ? '' : 'disabled'}>✂️ Pangkas</button>
+        <button type="button" class="btn" data-a="tSpray" ${it('pest') && T.pests ? '' : 'disabled'}>🧴 Pestisida ×${it('pest')}</button>
+        <button type="button" class="btn" data-a="tVit" ${it('vit') && T.hp < 100 ? '' : 'disabled'}>💉 Vitamin ×${it('vit')}</button>
+        <button type="button" class="btn primary" data-a="tPick" ${T.fr ? '' : 'disabled'}>🧺 Petik ${T.fr ? T.fr + ' buah' : ''}</button>
+        <button type="button" class="btn ${W.tshop ? 'primary' : ''}" data-a="tShop">🏪 Toko</button>
+      </div>
+      <div class="tr-quest ${qDone ? 'ok' : ''}"><b>📋 Rawat harian</b> <span>💧 Siram ${Math.min(2, q.w)}/2</span><span>🧪 Pupuk ${Math.min(1, q.f)}/1</span><span>✂️ Pangkas/hama/gulma ${Math.min(1, q.c)}/1</span>
+        ${q.got ? '<span class="ok-t">✓ Hadiah diambil</span>' : `<button type="button" class="btn sm ${qDone ? 'primary' : ''}" data-a="tClaim" ${qDone ? '' : 'disabled'}>🎁 Klaim 🪙30</button>`}</div>
+      <p class="muted small gm-foot">Air & nutrisi turun seiring waktu nyata. Pohon tumbuh hanya saat sehat (air ≥15, nutrisi ≥10, kesehatan ≥30). Hama 🐛, gulma 🌾 & ranting 🪵 muncul berkala dan memperlambat. Tiap naik level dapat koin (kelipatan 10: bonus 🪙50). <button type="button" class="mini danger" data-a="tCut" data-id="${T.id}">Tebang ${esc(T.name)}</button></p>
+    </section>
+    ${W.tshop ? gTreeShop(G) : ''}
+  </div>`;
+}
+function gTreePlant(G) {
+  const sp = W.tsp && TREES[W.tsp] ? W.tsp : 'mangga', free = !G.trees.length;
+  return `<section class="card gm-adopt"><h3>🌳 Tanam pohon ${G.trees.length ? '<button type="button" class="mini" data-a="tPlantClose">✕ batal</button>' : ''}</h3>
+    <p class="muted small">Pilih bibit. Dimulai dari biji 🌰 → tunas → bibit → pohon muda → pohon besar → legendaris (Lv 100). Berbuah mulai Lv ${FRUIT_LV}; buah dipetik jadi koin. ${free ? 'Pohon pertama: pilih Mangga atau Jeruk gratis.' : ''}</p>
+    <div class="gm-species">${Object.entries(TREES).map(([k, v]) => { const lock = free && v[3]; return `<button type="button" class="gm-sp ${sp === k ? 'on' : ''}" data-a="tSp" data-k="${k}" ${lock ? 'disabled' : ''}><span>${v[1]}</span><small>${v[0]}</small><small class="muted">${v[3] ? '🪙' + v[3] : 'gratis'} · 🪙${v[5]}/buah</small></button>`; }).join('')}</div>
+    <div class="gm-adopt-f"><input id="t-name" maxlength="16" placeholder="Nama pohon (mis. Si ${esc(TREES[sp][0])})"><button type="button" class="btn primary" data-a="tPlant" ${G.coins < TREES[sp][3] ? 'disabled' : ''}>🌰 Tanam ${esc(TREES[sp][0])}${TREES[sp][3] ? ' · 🪙' + TREES[sp][3] : ''}</button></div></section>`;
+}
+function gTreeShop(G) {
+  const slot = TREE_SLOT[G.tslots || 1];
+  return `<section class="card gm-shop"><h3>🏪 Toko taman <button type="button" class="mini" data-a="tShop">✕ tutup</button></h3>
+    <h4>🧰 Perawatan</h4>${Object.entries(TITEMS).map(([k, [n, e, pr, d]]) => `<div class="gm-li"><span>${e} <b>${n}</b> <small class="muted">${d} · punya ${G.titem[k] || 0}</small></span><span class="gm-buy"><button type="button" class="btn sm" data-a="tBuy" data-k="${k}" data-n="1" ${G.coins < pr ? 'disabled' : ''}>🪙${pr}</button><button type="button" class="btn sm" data-a="tBuy" data-k="${k}" data-n="5" ${G.coins < pr * 5 ? 'disabled' : ''}>×5</button></span></div>`).join('')}
+    <h4>⚙️ Peralatan</h4><div class="gm-li"><span>🚿 <b>Sprinkler otomatis</b> <small class="muted">air tidak pernah di bawah 60</small></span>${G.sprink ? '<span class="ok-t small">✓ terpasang</span>' : `<button type="button" class="btn sm" data-a="tSprink" ${G.coins < SPRINK ? 'disabled' : ''}>🪙${SPRINK}</button>`}</div>
+      <div class="gm-li"><span>🪴 <b>Lahan pohon</b> <small class="muted">${G.tslots || 1}/${TREE_MAX} pohon</small></span>${slot ? `<button type="button" class="btn sm" data-a="tSlot" ${G.coins < slot ? 'disabled' : ''}>＋1 · 🪙${slot}</button>` : '<span class="muted small">maksimal</span>'}</div>
+    <h4>🎀 Dekorasi taman</h4>${Object.entries(DECOS).map(([k, [n, e, pr]]) => `<div class="gm-li"><span>${e} ${n}</span>${G.deco[k] ? '<span class="ok-t small">✓ dimiliki</span>' : `<button type="button" class="btn sm" data-a="tDeco" data-k="${k}" ${G.coins < pr ? 'disabled' : ''}>🪙${pr}</button>`}</div>`).join('')}
+  </section>`;
+}
+function tQuest(G, k) { if (G.tq?.d !== today()) G.tq = { d: today(), w: 0, f: 0, c: 0, got: false }; G.tq[k]++; }
+const tDo = fn => gDo((G, now) => { const T = gTreeCur(G); if (!T) return false; return fn(G, T, now); });
+const GA_TREE = {
+  tSel: el => gDo(G => { G.tact = el.dataset.id; }),
+  tPlantOpen: () => { W.tplant = true; renderMain(); },
+  tPlantClose: () => { W.tplant = false; renderMain(); },
+  tSp: el => { W.tsp = el.dataset.k; renderMain(); },
+  tPlant: () => gDo((G, now) => {
+    const sp = W.tsp && TREES[W.tsp] ? W.tsp : 'mangga', pr = TREES[sp][3];
+    if (G.trees.length >= (G.tslots || 1)) { gToast('Lahan pohon penuh — beli lahan di 🏪 Toko.', 'warn'); return false; }
+    if (!G.trees.length && pr) return false;
+    if (G.coins < pr) { gToast('Koin tidak cukup 🪙', 'warn'); return false; }
+    const name = ($('#t-name')?.value || '').trim().slice(0, 16) || TREES[sp][0];
+    G.coins -= pr; const T = newTree(sp, name, now); G.trees.push(T); G.tact = T.id; W.tplant = false; gToast(`🌰 ${esc(name)} ditanam! Siram & beri pupuk ya.`);
+  }),
+  tCut: async el => {
+    const T = gameG()?.trees.find(x => x.id === el.dataset.id); if (!T) return;
+    if (!await confirmDlg(`Tebang <b>${esc(T.name)}</b> (Lv ${treeLvl(T.xp)})? Pohon akan hilang permanen.`, 'Tebang')) return;
+    gDo(G => { G.trees = G.trees.filter(x => x.id !== T.id); G.tact = G.trees[0]?.id || ''; });
+  },
+  tWater: () => tDo((G, T) => {
+    if (rainy()) return false;
+    if (T.water >= 90) { T.hp = Math.max(0, T.hp - 3); gToast('Kebanyakan air! Akar bisa busuk 😣', 'warn'); return; }
+    T.water = Math.min(100, T.water + 45); T.xp += 3; tQuest(G, 'w');
+  }),
+  tFert: el => tDo((G, T, now) => {
+    const k = el.dataset.k; if (!(G.titem[k] > 0)) return false;
+    if (k === 'pupuk' && T.nutr >= 90) { gToast('Nutrisi masih penuh 🧪'); return false; }
+    G.titem[k]--; if (k === 'super') { T.nutr = 100; T.boost = Math.max(now, T.boost) + 36e5; T.xp += 15; } else { T.nutr = Math.min(100, T.nutr + 50); T.xp += 8; } tQuest(G, 'f');
+  }),
+  tPrune: () => tDo((G, T) => { if (!T.br) return false; T.xp += 3 * T.br; gToast(`✂️ ${T.br} ranting dipangkas`); T.br = 0; tQuest(G, 'c'); }),
+  tBug: () => tDo((G, T) => { if (!T.pests) return false; T.pests--; T.xp += 2; G.coins += 1; tQuest(G, 'c'); }),
+  tWeed: () => tDo((G, T) => { if (!T.weeds) return false; T.weeds--; T.xp += 2; tQuest(G, 'c'); }),
+  tSpray: () => tDo((G, T, now) => { if (!(G.titem.pest > 0) || !T.pests) return false; G.titem.pest--; T.xp += 2 * T.pests; T.pests = 0; T.guard = now + 6 * 36e5; T.pestAt = T.guard; tQuest(G, 'c'); gToast('🧴 Hama dibasmi · kebal 6 jam'); }),
+  tVit: () => tDo((G, T) => { if (!(G.titem.vit > 0)) return false; G.titem.vit--; T.hp = Math.min(100, T.hp + 50); }),
+  tPick: el => tDo((G, T) => {
+    const n = Math.min(T.fr, Number(el.dataset.n) || T.fr); if (!n) return false;
+    const v = fruitVal(T) * n; T.fr -= n; G.coins += v; G.stats.earn = (G.stats.earn || 0) + v; G.stats.fruit = (G.stats.fruit || 0) + n; T.xp += n;
+    gToast(`🧺 ${n} ${TREES[T.sp][1]} dipetik · +🪙${v}`);
+  }),
+  tClaim: () => gDo(G => { const q = G.tq; if (!q || q.d !== today() || q.got || !(q.w >= 2 && q.f >= 1 && q.c >= 1)) return false; q.got = true; G.coins += 30; gToast('🎁 Hadiah rawat harian +🪙30'); }),
+  tShop: () => { W.tshop = !W.tshop; renderMain(); if (W.tshop) setTimeout(() => $('.gm-shop')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50); },
+  tBuy: el => gDo(G => { const k = el.dataset.k, n = Number(el.dataset.n) || 1, pr = TITEMS[k][2] * n; if (G.coins < pr) { gToast('Koin tidak cukup 🪙', 'warn'); return false; } G.coins -= pr; G.titem[k] = (G.titem[k] || 0) + n; }),
+  tSprink: () => gDo(G => { if (G.sprink || G.coins < SPRINK) return false; G.coins -= SPRINK; G.sprink = true; gToast('🚿 Sprinkler terpasang!'); }),
+  tSlot: () => gDo(G => { const c = TREE_SLOT[G.tslots || 1]; if (!c || G.coins < c) return false; G.coins -= c; G.tslots = (G.tslots || 1) + 1; W.tplant = true; gToast('🪴 Lahan pohon bertambah!'); }),
+  tDeco: el => gDo(G => { const k = el.dataset.k, pr = DECOS[k][2]; if (G.deco[k] || G.coins < pr) return false; G.coins -= pr; G.deco[k] = true; }),
+};
+
+// ======================= 🎣 MEMANCING =======================
+const SPOTS = { kolam: ['Kolam', '🪷', 0], sungai: ['Sungai', '🏞', 120], danau: ['Danau', '⛰', 300], laut: ['Laut', '🌊', 700] };
+// name, emoji, spot, rarity 0-5, harga dasar, kg min, kg max
+const FISH = {
+  sepatu: ['Sepatu bekas', '🥾', '*', 0, 1, .3, .8], kaleng: ['Kaleng', '🥫', '*', 0, 1, .1, .3],
+  lele: ['Lele', '🐟', 'kolam', 1, 6, .2, 1.5], nila: ['Nila', '🐟', 'kolam', 1, 8, .2, 1.2], mujair: ['Mujair', '🐟', 'kolam', 1, 7, .2, 1], mas: ['Ikan Mas', '🐠', 'kolam', 2, 15, .5, 3], gurame: ['Gurame', '🐠', 'kolam', 2, 18, .5, 4], koi: ['Koi', '🎏', 'kolam', 4, 80, 1, 6],
+  patin: ['Patin', '🐟', 'sungai', 2, 20, 1, 6], baung: ['Baung', '🐟', 'sungai', 2, 16, .5, 3], udang: ['Udang galah', '🦐', 'sungai', 2, 22, .1, .5], belut: ['Belut', '🪱', 'sungai', 1, 10, .2, 1], kepiting: ['Kepiting', '🦀', 'sungai', 3, 35, .3, 1.5], arwana: ['Arwana Super Red', '🐉', 'sungai', 5, 200, 1, 5],
+  gabus: ['Gabus', '🐟', 'danau', 2, 18, .5, 3], toman: ['Toman', '🐟', 'danau', 3, 40, 2, 12], lobster: ['Lobster air tawar', '🦞', 'danau', 3, 45, .2, 1], buntal: ['Buntal', '🐡', 'danau', 3, 30, .2, 1], belida: ['Belida', '🐟', 'danau', 4, 90, 2, 10], kura: ['Penyu emas (lepas lagi)', '🐢', 'danau', 5, 150, 3, 10],
+  kakap: ['Kakap merah', '🐟', 'laut', 2, 30, 1, 8], tongkol: ['Tongkol', '🐟', 'laut', 2, 28, 1, 6], cumi: ['Cumi-cumi', '🦑', 'laut', 2, 24, .2, 2], ubur: ['Ubur-ubur', '🪼', 'laut', 1, 4, .1, .5], kerapu: ['Kerapu', '🐠', 'laut', 3, 50, 1, 10], gurita: ['Gurita', '🐙', 'laut', 3, 55, 1, 8], tuna: ['Tuna sirip kuning', '🐟', 'laut', 4, 120, 10, 60], hiu: ['Hiu', '🦈', 'laut', 5, 260, 20, 120], peti: ['Peti harta karun', '🧰', 'laut', 5, 350, 5, 20],
+};
+const RAR = [['Sampah', '#94a3b8', 8], ['Biasa', '#64748b', 40], ['Umum', '#16a34a', 25], ['Langka', '#2563eb', 12], ['Epik', '#9333ea', 5], ['Legenda', '#f59e0b', 1.5]];
+const RODS = [['Joran bambu', '🎋', 0], ['Joran fiber', '🎣', 150], ['Joran karbon', '🎣', 400], ['Joran emas', '✨', 1000]];
+// umpan: name, emoji, harga, bonus langka
+const BAITS = { cacing: ['Cacing', '🪱', 0, 0], pelet: ['Pelet', '🟤', 3, .3], udang: ['Udang', '🦐', 6, .7], cumi: ['Potongan cumi', '🦑', 10, 1.1], emas: ['Umpan emas', '✨', 25, 2.2] };
+const BOX_MAX = 30;
+const fshG = G => (G.fsh ||= { rod: 0, bait: {}, bsel: 'cacing', spot: 'kolam', spots: ['kolam'], box: [], dex: {}, caught: 0 });
+function fishRoll(F) {
+  const b = BAITS[F.bsel] || BAITS.cacing, boost = b[3] + F.rod * .25;
+  const pool = Object.entries(FISH).filter(([, f]) => f[2] === '*' || f[2] === F.spot).map(([k, f]) => [k, RAR[f[3]][2] * (f[3] >= 3 ? 1 + boost : f[3] === 0 ? Math.max(.3, 1 - boost / 2) : 1)]);
+  let r = Math.random() * pool.reduce((s, x) => s + x[1], 0); for (const [k, w] of pool) if ((r -= w) <= 0) return k; return pool[0][0];
+}
+// W.fx: {ph: wait|bite|reel|done, until, k, t0, per, zc, zw, hit, need, miss, res}
+function gFish(G, now) {
+  const F = fshG(G), fx = W.fx, sp = SPOTS[F.spot], bait = BAITS[F.bsel] || BAITS.cacing, bc = F.bsel === 'cacing' ? '∞' : (F.bait[F.bsel] || 0);
+  let mid;
+  if (!fx) mid = `<div class="fs-msg">Pilih umpan lalu lempar kail 🎣</div><button type="button" class="btn primary fs-big" data-a="fCast" ${bc ? '' : 'disabled'}>🎣 Lempar kail</button>`;
+  else if (fx.ph === 'wait') mid = `<div class="fs-bob">🔴</div><div class="fs-msg">Menunggu ikan menggigit…</div><button type="button" class="btn fs-big" data-a="fPull">Tarik</button>`;
+  else if (fx.ph === 'bite') mid = `<div class="fs-bob bite">🔴</div><div class="fs-msg strike">❗ STRIKE! Tarik sekarang!</div><button type="button" class="btn danger fs-big" data-a="fPull">⚡ TARIK!</button>`;
+  else if (fx.ph === 'reel') mid = `<div class="fs-msg">Tekan <b>Gulung</b> saat penanda di zona hijau · ${'🟢'.repeat(fx.hit)}${'⚪'.repeat(fx.need - fx.hit)} · tali ${'❤️'.repeat(3 - fx.miss)}${'🖤'.repeat(fx.miss)}</div>
+    <div class="fs-reel"><i class="fs-zone" style="left:${(fx.zc - fx.zw / 2) * 100}%;width:${fx.zw * 100}%"></i><i class="fs-cur" data-live="1"></i></div><button type="button" class="btn primary fs-big" data-a="fReel">🌀 Gulung!</button>`;
+  else { const r = fx.res; mid = r ? `<div class="fs-catch" style="--rc:${RAR[FISH[r.k][3]][1]}"><span>${FISH[r.k][1]}</span><b>${esc(FISH[r.k][0])}</b><small>${RAR[FISH[r.k][3]][0]} · ${r.kg.toFixed(2)} kg · 🪙${r.v}${r.nu ? ' · 🆕 koleksi baru!' : ''}</small></div><button type="button" class="btn primary fs-big" data-a="fCast" ${bc ? '' : 'disabled'}>🎣 Lempar lagi</button>`
+    : `<div class="fs-msg">💨 ${esc(fx.why || 'Ikannya lepas…')}</div><button type="button" class="btn primary fs-big" data-a="fCast" ${bc ? '' : 'disabled'}>🎣 Coba lagi</button>`; }
+  const dexN = Object.keys(F.dex).length, total = Object.keys(FISH).length, boxV = F.box.reduce((s, x) => s + x.v, 0);
+  return `<div class="gm-pets">${Object.entries(SPOTS).map(([k, [n, e, pr]]) => F.spots.includes(k) ? `<button type="button" class="chip ${F.spot === k ? 'on' : ''}" data-a="fSpot" data-k="${k}" ${fx && fx.ph !== 'done' ? 'disabled' : ''}>${e} ${n}</button>` : `<button type="button" class="chip" data-a="fShop" title="Buka di toko">🔒 ${e} ${n} · 🪙${pr}</button>`).join('')}</div>
+  <div class="gm-pet">
+    <section class="card gm-stage fs-stage sp-${F.spot}">
+      <div class="fs-top"><span>${sp[1]} ${sp[0]}</span><span>${RODS[F.rod][1]} ${RODS[F.rod][0]}</span><span>${bait[1]} ${bait[0]} ${bc === '∞' ? '∞' : '×' + bc}</span></div>
+      ${mid}
+    </section>
+    <section class="card gm-stats">
+      <h3>🎒 Umpan</h3><div class="gm-seeds">${Object.entries(BAITS).map(([k, [n, e]]) => `<button type="button" class="chip ${F.bsel === k ? 'on' : ''}" data-a="fBait" data-k="${k}">${e} ${n} <small>${k === 'cacing' ? '∞' : '×' + (F.bait[k] || 0)}</small></button>`).join('')}</div>
+      <h3>🧊 Cool box <small class="muted">${F.box.length}/${BOX_MAX} · 🪙${num(boxV)}</small></h3>
+      <div class="fs-box">${F.box.map((x, i) => `<button type="button" class="fs-it" data-a="fSell" data-i="${i}" title="Jual ${esc(FISH[x.k][0])} ${x.kg.toFixed(2)} kg · 🪙${x.v}" style="--rc:${RAR[FISH[x.k][3]][1]}">${FISH[x.k][1]}<small>🪙${x.v}</small></button>`).join('') || '<p class="muted small">Kosong. Ketuk ikan untuk menjual satu.</p>'}</div>
+      <div class="gm-acts"><button type="button" class="btn primary" data-a="fSellAll" ${F.box.length ? '' : 'disabled'}>💰 Jual semua · 🪙${num(boxV)}</button><button type="button" class="btn" data-a="fPet" ${F.box.some(x => FISH[x.k][3]) ? '' : 'disabled'} title="Ubah ikan termurah jadi makanan pet 🐟">🐾 Jadi pakan pet</button><button type="button" class="btn ${W.fshop ? 'primary' : ''}" data-a="fShop">🏪 Toko</button><button type="button" class="btn ${W.fdex ? 'primary' : ''}" data-a="fDex">📖 Koleksi ${dexN}/${total}</button></div>
+      <p class="muted small gm-foot">Total tangkapan ${num(F.caught)}. Ikan langka lebih sering muncul dengan umpan & joran yang lebih bagus. Setiap tempat punya ikan berbeda.</p>
+    </section>
+    ${W.fdex ? `<section class="card gm-shop"><h3>📖 Koleksi ikan <button type="button" class="mini" data-a="fDex">✕ tutup</button></h3><div class="fs-dex">${Object.entries(FISH).map(([k, f]) => F.dex[k] ? `<div class="fs-d" style="--rc:${RAR[f[3]][1]}"><span>${f[1]}</span><b>${esc(f[0])}</b><small>${RAR[f[3]][0]} · ${f[2] === '*' ? 'di mana saja' : SPOTS[f[2]][0]} · rekor ${F.dex[k].toFixed(2)} kg</small></div>` : `<div class="fs-d un"><span>❔</span><b>???</b><small>${f[2] === '*' ? 'di mana saja' : SPOTS[f[2]][0]} · ${RAR[f[3]][0]}</small></div>`).join('')}</div></section>` : ''}
+    ${W.fshop ? gFishShop(G, F) : ''}
+  </div>`;
+}
+function gFishShop(G, F) {
+  const nr = RODS[F.rod + 1];
+  return `<section class="card gm-shop"><h3>🏪 Toko pancing <button type="button" class="mini" data-a="fShop">✕ tutup</button></h3>
+    <h4>🪱 Umpan</h4>${Object.entries(BAITS).filter(([, b]) => b[2]).map(([k, [n, e, pr, bo]]) => `<div class="gm-li"><span>${e} <b>${n}</b> <small class="muted">peluang langka +${Math.round(bo * 100)}% · punya ${F.bait[k] || 0}</small></span><span class="gm-buy"><button type="button" class="btn sm" data-a="fBuy" data-k="${k}" data-n="5" ${G.coins < pr * 5 ? 'disabled' : ''}>×5 · 🪙${pr * 5}</button><button type="button" class="btn sm" data-a="fBuy" data-k="${k}" data-n="20" ${G.coins < pr * 20 ? 'disabled' : ''}>×20</button></span></div>`).join('')}
+    <h4>🎣 Joran</h4><div class="gm-li"><span>${RODS[F.rod][1]} <b>${RODS[F.rod][0]}</b> <small class="muted">sekarang</small></span>${nr ? `<button type="button" class="btn sm" data-a="fRod" ${G.coins < nr[2] ? 'disabled' : ''}>⬆ ${nr[0]} · 🪙${nr[2]}</button>` : '<span class="ok-t small">✓ terbaik</span>'}</div>
+      <p class="muted small">Joran lebih bagus: zona gulung lebih lebar, waktu strike lebih lama, ikan langka lebih sering.</p>
+    <h4>🗺 Tempat memancing</h4>${Object.entries(SPOTS).map(([k, [n, e, pr]]) => `<div class="gm-li"><span>${e} ${n} <small class="muted">${Object.values(FISH).filter(f => f[2] === k).map(f => f[1]).join('')}</small></span>${F.spots.includes(k) ? '<span class="ok-t small">✓ terbuka</span>' : `<button type="button" class="btn sm" data-a="fSpotBuy" data-k="${k}" ${G.coins < pr ? 'disabled' : ''}>🪙${pr}</button>`}</div>`).join('')}
+    <h4>💰 Jual</h4><p class="muted small">Ketuk ikan di cool box untuk menjual satu, atau "Jual semua". Harga tergantung jenis & berat.</p>
+  </section>`;
+}
+function fishEnd(res, why) { if (W.fx) { W.fx.ph = 'done'; W.fx.res = res; W.fx.why = why; } }
+function fishLoop() { // rAF: pergantian fase tepat waktu + penanda gulung bergerak halus
+  const fx = W.fx; if (!fx || fx.ph === 'done' || S.view !== 'wait' || W.tab !== 'fish') { W.fraf = 0; return; }
+  const now = Date.now();
+  if (fx.ph === 'wait' && now >= fx.until) { fx.ph = 'bite'; fx.until = now + fx.win; renderMain(); try { navigator.vibrate?.(120); } catch {} }
+  else if (fx.ph === 'bite' && now >= fx.until) { fishEnd(null, 'Terlambat menarik — ikannya kabur!'); renderMain(); }
+  const c = $('.fs-cur'); if (c && fx.ph === 'reel') c.style.left = (fishPos(fx, now) * 100) + '%';
+  W.fraf = requestAnimationFrame(fishLoop);
+}
+const fishPos = (fx, now) => { const p = ((now - fx.t0) / fx.per) % 2; return p < 1 ? p : 2 - p; };
+const fishStart = () => { if (!W.fraf) W.fraf = requestAnimationFrame(fishLoop); };
+const GA_FISH = {
+  fCast: () => { const G = gameG(); if (!G) return; const F = fshG(G);
+    if (F.box.length >= BOX_MAX) { gToast('🧊 Cool box penuh — jual dulu ikannya.', 'warn'); return; }
+    if (F.bsel !== 'cacing' && !(F.bait[F.bsel] > 0)) { F.bsel = 'cacing'; }
+    if (F.bsel !== 'cacing') { F.bait[F.bsel]--; gameSave(); }
+    W.fx = { ph: 'wait', until: Date.now() + rnd(2500, 8000) * (F.bsel === 'cacing' ? 1 : .8), win: 1300 + F.rod * 350 };
+    renderMain(); fishStart(); },
+  fPull: () => { const fx = W.fx; if (!fx) return; const t = Date.now();
+    if (fx.ph === 'wait' && t >= fx.until) { if (t < fx.until + fx.win) fx.ph = 'bite'; else { fishEnd(null, 'Terlambat menarik — ikannya kabur!'); renderMain(); return; } } // rAF bisa tertunda
+    if (fx.ph === 'wait') { fishEnd(null, 'Terlalu cepat menarik — ikannya kabur!'); renderMain(); return; }
+    if (fx.ph !== 'bite') return;
+    const G = gameG(), F = fshG(G), k = fishRoll(F), r = FISH[k][3];
+    Object.assign(fx, { ph: 'reel', k, t0: Date.now(), per: Math.max(380, 1300 - r * 170 - Math.random() * 150), zc: rnd(.2, .8), zw: Math.max(.1, .26 + F.rod * .04 - r * .03), hit: 0, need: r ? Math.min(5, 2 + Math.ceil(r / 2)) : 1, miss: 0 });
+    renderMain(); fishStart(); },
+  fReel: () => { const fx = W.fx; if (!fx || fx.ph !== 'reel') return;
+    const p = fishPos(fx, Date.now());
+    if (Math.abs(p - fx.zc) <= fx.zw / 2) { fx.hit++; fx.zc = rnd(.15, .85); fx.per = Math.max(320, fx.per * .93); }
+    else if (++fx.miss >= 3) { fishEnd(null, `Tali putus… ${FISH[fx.k][3] >= 3 ? 'sepertinya ikan besar!' : ''}`); renderMain(); return; }
+    if (fx.hit >= fx.need) gDo(G => {
+      const F = fshG(G), f = FISH[fx.k], t = Math.random(), kg = f[5] + (f[6] - f[5]) * t * t, v = Math.max(1, Math.round(f[4] * (.7 + .8 * (kg - f[5]) / (f[6] - f[5] || 1))));
+      const nu = !F.dex[fx.k]; F.dex[fx.k] = Math.max(F.dex[fx.k] || 0, kg); F.caught++;
+      if (fx.k === 'kura') { G.coins += v; G.stats.earn = (G.stats.earn || 0) + v; gToast(`🐢 Penyu emas dilepas kembali — hadiah +🪙${v}`); }
+      else F.box.push({ k: fx.k, kg: Math.round(kg * 100) / 100, v });
+      fishEnd({ k: fx.k, kg, v, nu });
+      if (f[3] >= 4) gToast(`🎉 Tangkapan ${RAR[f[3]][0]}: ${f[1]} ${esc(f[0])}!`);
+    }); else renderMain(); },
+  fBait: el => { const G = gameG(); if (!G) return; fshG(G).bsel = el.dataset.k; gameSave(); renderMain(); },
+  fSpot: el => { if (W.fx && W.fx.ph !== 'done') return; const G = gameG(); if (!G) return; const F = fshG(G); if (!F.spots.includes(el.dataset.k)) return; F.spot = el.dataset.k; W.fx = null; gameSave(); renderMain(); },
+  fShop: () => { W.fshop = !W.fshop; W.fdex = false; renderMain(); if (W.fshop) setTimeout(() => $('.gm-shop')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50); },
+  fDex: () => { W.fdex = !W.fdex; W.fshop = false; renderMain(); },
+  fSell: el => gDo(G => { const F = fshG(G), x = F.box[Number(el.dataset.i)]; if (!x) return false; F.box.splice(Number(el.dataset.i), 1); G.coins += x.v; G.stats.earn = (G.stats.earn || 0) + x.v; gToast(`Terjual ${FISH[x.k][1]} ${esc(FISH[x.k][0])} · +🪙${x.v}`); }),
+  fSellAll: () => gDo(G => { const F = fshG(G), v = F.box.reduce((s, x) => s + x.v, 0); if (!F.box.length) return false; gToast(`💰 ${F.box.length} item terjual · +🪙${v}`); F.box = []; G.coins += v; G.stats.earn = (G.stats.earn || 0) + v; }),
+  fPet: () => gDo(G => { const F = fshG(G), c = F.box.map((x, i) => [x, i]).filter(([x]) => FISH[x.k][3]).sort((a, b) => a[0].v - b[0].v)[0]; if (!c) return false; F.box.splice(c[1], 1); G.food.ikan = (G.food.ikan || 0) + 1; gToast(`🐟 ${esc(FISH[c[0].k][0])} jadi makanan pet (Ikan ×${G.food.ikan})`); }),
+  fBuy: el => gDo(G => { const F = fshG(G), k = el.dataset.k, n = Number(el.dataset.n) || 1, pr = BAITS[k][2] * n; if (G.coins < pr) { gToast('Koin tidak cukup 🪙', 'warn'); return false; } G.coins -= pr; F.bait[k] = (F.bait[k] || 0) + n; F.bsel = k; }),
+  fRod: () => gDo(G => { const F = fshG(G), r = RODS[F.rod + 1]; if (!r || G.coins < r[2]) return false; G.coins -= r[2]; F.rod++; gToast(`🎣 ${r[0]} siap dipakai!`); }),
+  fSpotBuy: el => gDo(G => { const F = fshG(G), k = el.dataset.k, pr = SPOTS[k][2]; if (F.spots.includes(k) || G.coins < pr) return false; G.coins -= pr; F.spots.push(k); F.spot = k; W.fx = null; gToast(`🗺 ${SPOTS[k][1]} ${SPOTS[k][0]} terbuka!`); }),
+};
+
+// ======================= ♟ CATUR =======================
+// papan 64 kotak, indeks r*8+c (r=0 = baris 8 / sisi hitam). Huruf besar = putih.
+const CH_V = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
+const CH_G = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
+const CH_LV = [['Mudah', 1, 15], ['Sedang', 2, 35], ['Sulit', 3, 70]]; // name, depth, hadiah
+const ND = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]], KD = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+const RD = [[1, 0], [-1, 0], [0, 1], [0, -1]], BD = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+const chCol = p => p ? (p === p.toUpperCase() ? 'w' : 'b') : '';
+const chOpp = c => c === 'w' ? 'b' : 'w';
+function chNew(mode, lv) { return { b: [...'rnbqkbnrpppppppp', ...Array(32).fill(''), ...'PPPPPPPPRNBQKBNR'], turn: 'w', cast: 'KQkq', ep: -1, half: 0, last: null, over: '', mode, lv, n: 0, cap: [] }; }
+function chAtt(b, sq, by) {
+  const r = sq >> 3, c = sq & 7, W_ = by === 'w', at = (rr, cc) => rr >= 0 && rr < 8 && cc >= 0 && cc < 8 ? b[rr * 8 + cc] : null;
+  for (const dc of [-1, 1]) if (at(r + (W_ ? 1 : -1), c + dc) === (W_ ? 'P' : 'p')) return true;
+  for (const [dr, dc] of ND) if (at(r + dr, c + dc) === (W_ ? 'N' : 'n')) return true;
+  for (const [dr, dc] of KD) if (at(r + dr, c + dc) === (W_ ? 'K' : 'k')) return true;
+  for (const [ds, ps] of [[RD, 'rq'], [BD, 'bq']]) for (const [dr, dc] of ds) {
+    for (let i = 1; ; i++) { const p = at(r + dr * i, c + dc * i); if (p === null) break; if (p) { if (chCol(p) === by && ps.includes(p.toLowerCase())) return true; break; } }
+  }
+  return false;
+}
+function chGen(s) {
+  const b = s.b, me = s.turn, out = [], add = (f, t, x) => out.push({ f, t, ...x });
+  for (let f = 0; f < 64; f++) {
+    const p = b[f]; if (!p || chCol(p) !== me) continue;
+    const r = f >> 3, c = f & 7, t = p.toLowerCase(), free = (rr, cc) => rr >= 0 && rr < 8 && cc >= 0 && cc < 8;
+    if (t === 'p') {
+      const d = me === 'w' ? -1 : 1, st = me === 'w' ? 6 : 1, pr = me === 'w' ? 0 : 7, one = f + d * 8;
+      if (free(r + d, c) && !b[one]) { add(f, one, r + d === pr ? { pr: 1 } : {}); if (r === st && !b[one + d * 8]) add(f, one + d * 8, { dbl: 1 }); }
+      for (const dc of [-1, 1]) if (free(r + d, c + dc)) { const to = (r + d) * 8 + c + dc; if (b[to] && chCol(b[to]) !== me) add(f, to, r + d === pr ? { pr: 1 } : {}); else if (to === s.ep) add(f, to, { ep: 1 }); }
+    } else if (t === 'n' || t === 'k') {
+      for (const [dr, dc] of t === 'n' ? ND : KD) if (free(r + dr, c + dc)) { const to = (r + dr) * 8 + c + dc; if (!b[to] || chCol(b[to]) !== me) add(f, to); }
+      if (t === 'k') {
+        const o = chOpp(me), K = me === 'w' ? 'KQ' : 'kq', base = me === 'w' ? 56 : 0;
+        if (f === base + 4 && !chAtt(b, f, o)) {
+          if (s.cast.includes(K[0]) && !b[base + 5] && !b[base + 6] && !chAtt(b, base + 5, o) && !chAtt(b, base + 6, o)) add(f, base + 6, { cs: 1 });
+          if (s.cast.includes(K[1]) && !b[base + 1] && !b[base + 2] && !b[base + 3] && !chAtt(b, base + 3, o) && !chAtt(b, base + 2, o)) add(f, base + 2, { cs: 1 });
+        }
+      }
+    } else {
+      for (const [dr, dc] of t === 'r' ? RD : t === 'b' ? BD : [...RD, ...BD]) for (let i = 1; ; i++) {
+        const rr = r + dr * i, cc = c + dc * i; if (!free(rr, cc)) break; const to = rr * 8 + cc;
+        if (!b[to]) add(f, to); else { if (chCol(b[to]) !== me) add(f, to); break; }
+      }
+    }
+  }
+  return out;
+}
+function chMake(s, m) {
+  const b = s.b.slice(), p = b[m.f], me = s.turn; let capP = b[m.t];
+  b[m.t] = m.pr ? (me === 'w' ? 'Q' : 'q') : p; b[m.f] = '';
+  if (m.ep) { const cs = m.t + (me === 'w' ? 8 : -8); capP = b[cs]; b[cs] = ''; }
+  if (m.cs) { if (m.t % 8 === 6) { b[m.t - 1] = b[m.t + 1]; b[m.t + 1] = ''; } else { b[m.t + 1] = b[m.t - 2]; b[m.t - 2] = ''; } }
+  let cast = s.cast; const strip = (sq, ch) => { if (m.f === sq || m.t === sq) cast = cast.replace(ch, ''); };
+  if (p === 'K') cast = cast.replace('K', '').replace('Q', ''); if (p === 'k') cast = cast.replace('k', '').replace('q', '');
+  strip(63, 'K'); strip(56, 'Q'); strip(7, 'k'); strip(0, 'q');
+  return { ...s, b, cast, turn: chOpp(me), ep: m.dbl ? (m.f + m.t) / 2 : -1, half: p.toLowerCase() === 'p' || capP ? 0 : s.half + 1, last: [m.f, m.t], capP };
+}
+const chInCheck = (s, col = s.turn) => chAtt(s.b, s.b.indexOf(col === 'w' ? 'K' : 'k'), chOpp(col));
+const chLegal = s => chGen(s).filter(m => { const n = chMake(s, m); return !chAtt(n.b, n.b.indexOf(s.turn === 'w' ? 'K' : 'k'), n.turn); });
+function chEval(b) { // dari sisi putih
+  let v = 0;
+  for (let i = 0; i < 64; i++) { const p = b[i]; if (!p) continue; const t = p.toLowerCase(), w = p !== t, r = i >> 3, c = i & 7;
+    let x = CH_V[t]; const cen = 7 - Math.abs(3.5 - r) - Math.abs(3.5 - c);
+    if (t === 'n' || t === 'b') x += cen * 4; else if (t === 'p') x += (w ? 6 - r : r - 1) * 6 + (c > 1 && c < 6 ? cen * 2 : 0); else if (t === 'q') x += cen; else if (t === 'k') x += (w ? r : 7 - r) >= 6 ? 15 : -10;
+    v += w ? x : -x; }
+  return v;
+}
+function chSearch(s, d, a, bt, ply) {
+  const ms = chLegal(s);
+  if (!ms.length) return chInCheck(s) ? -99999 + ply : 0;
+  if (!d) return (s.turn === 'w' ? 1 : -1) * chEval(s.b);
+  ms.sort((x, y) => (s.b[y.t] ? CH_V[s.b[y.t].toLowerCase()] : 0) - (s.b[x.t] ? CH_V[s.b[x.t].toLowerCase()] : 0));
+  for (const m of ms) { const v = -chSearch(chMake(s, m), d - 1, -bt, -a, ply + 1); if (v > a) a = v; if (a >= bt) break; }
+  return a;
+}
+function chBest(s) {
+  const d = CH_LV[s.lv][1], ms = chLegal(s); let best = null, bv = -Infinity;
+  for (const m of ms.sort(() => Math.random() - .5)) { const v = -chSearch(chMake(s, m), d - 1, -Infinity, -bv, 1) + (s.lv === 0 ? rnd(-80, 80) : rnd(-4, 4)); if (v > bv) { bv = v; best = m; } }
+  return best;
+}
+function chStatus(s) {
+  const ms = chLegal(s);
+  if (!ms.length) return chInCheck(s) ? (s.turn === 'w' ? 'b' : 'w') : 'draw';
+  if (s.half >= 100 || s.b.every(p => !p || p.toLowerCase() === 'k')) return 'draw';
+  return '';
+}
+function chAfter(G) { // cek akhir permainan + hadiah
+  const s = G.chs, r = chStatus(s); if (!r) return;
+  s.over = r; const st = G.chst ||= { w: 0, l: 0, d: 0 };
+  if (s.mode === 'pvp') { gToast(r === 'draw' ? '🤝 Remis!' : `🏁 ${r === 'w' ? 'Putih' : 'Hitam'} menang!`); return; }
+  if (r === 'w') { const c = CH_LV[s.lv][2]; st.w++; G.coins += c; gToast(`🏆 Skakmat! Kamu menang · +🪙${c}`); }
+  else if (r === 'b') { st.l++; gToast('😵 Skakmat… komputer menang.', 'warn'); }
+  else { st.d++; G.coins += 5; gToast('🤝 Remis · +🪙5'); }
+}
+function chAI() {
+  const G = gameG(), s = G?.chs; if (!s || s.over || s.mode !== 'ai' || s.turn !== 'b' || W.chThink) return;
+  W.chThink = true; renderMain();
+  setTimeout(() => { W.chThink = false; gDo(G => { const s = G.chs; if (!s || s.over || s.turn !== 'b') return false; const m = chBest(s); if (!m) return false; chPlay(G, m); }); }, 350);
+}
+function chPlay(G, m) { const s = G.chs, cp = s.b[m.t] || (m.ep ? (s.turn === 'w' ? 'p' : 'P') : ''); G.chs = chMake(s, m); delete G.chs.capP; G.chs.n = (s.n || 0) + 1; G.chs.cap = cp ? [...(s.cap || []), cp] : s.cap || []; W.chSel = -1; chAfter(G); }
+function gChess(G) {
+  const s = G.chs, st = G.chst || { w: 0, l: 0, d: 0 };
+  const setup = `<div class="ox-set"><span class="muted small">Mode</span>${[['ai', '🤖 vs Komputer'], ['pvp', '👥 2 pemain']].map(([k, l]) => `<button type="button" class="chip ${(W.chMode || 'ai') === k ? 'on' : ''}" data-a="chMode" data-k="${k}">${l}</button>`).join('')}
+    ${(W.chMode || 'ai') === 'ai' ? `<span class="muted small">Level</span>${CH_LV.map(([n, , c], i) => `<button type="button" class="chip ${(W.chLv ?? 1) === i ? 'on' : ''}" data-a="chLv" data-k="${i}">${n} <small>🪙${c}</small></button>`).join('')}` : ''}
+    <button type="button" class="btn primary sm" data-a="chNew">♟ Mulai baru</button></div>`;
+  if (!s) return `<section class="card gm-adopt"><h3>♟ Catur</h3><p class="muted small">Kamu main bidak putih. Menang lawan komputer dapat koin. Rekor: ${st.w} menang · ${st.d} remis · ${st.l} kalah.</p>${setup}</section>`;
+  const legal = s.over || (s.mode === 'ai' && s.turn === 'b') ? [] : chLegal(s), sel = W.chSel ?? -1, tg = new Set(legal.filter(m => m.f === sel).map(m => m.t));
+  const chk = !s.over && chInCheck(s) ? s.b.indexOf(s.turn === 'w' ? 'K' : 'k') : -1;
+  let cells = '';
+  for (let i = 0; i < 64; i++) { const p = s.b[i], r = i >> 3, c = i & 7;
+    cells += `<button type="button" class="cs ${(r + c) % 2 ? 'dk' : 'lt'} ${i === sel ? 'sel' : ''} ${s.last && s.last.includes(i) ? 'last' : ''} ${i === chk ? 'chk' : ''} ${tg.has(i) ? (p ? 'cap' : 'mv') : ''}" data-a="chSq" data-i="${i}">${p ? `<span class="pc ${chCol(p)}">${CH_G[p.toLowerCase()]}︎</span>` : ''}${c === 0 ? `<i class="rk">${8 - r}</i>` : ''}${r === 7 ? `<i class="fl">${'abcdefgh'[c]}</i>` : ''}</button>`; }
+  const capOf = col => (s.cap || []).filter(p => chCol(p) === col).sort((a, b) => CH_V[b.toLowerCase()] - CH_V[a.toLowerCase()]).map(p => `<span class="pc ${col}">${CH_G[p.toLowerCase()]}︎</span>`).join('');
+  const mat = chEval(s.b), msg = s.over ? (s.over === 'draw' ? '🤝 Remis' : s.mode === 'ai' ? (s.over === 'w' ? '🏆 Kamu menang!' : '😵 Komputer menang') : `🏁 ${s.over === 'w' ? 'Putih' : 'Hitam'} menang`)
+    : W.chThink ? '🤖 Komputer berpikir…' : `${s.turn === 'w' ? '⚪ Giliran putih' : '⚫ Giliran hitam'}${chk >= 0 ? ' · <b class="warn-t">SKAK!</b>' : ''}`;
+  return `<div class="gm-pet ch-wrap">
+    <section class="card ch-card"><div class="ch-cap">${capOf('w')}</div><div class="ch-board">${cells}</div><div class="ch-cap">${capOf('b')}</div></section>
+    <section class="card gm-stats"><h3>♟ Catur <small class="muted">${s.mode === 'ai' ? '🤖 ' + CH_LV[s.lv][0] : '👥 2 pemain'} · langkah ${Math.ceil((s.n || 0) / 2)}</small></h3>
+      <div class="ox-msg ${s.over ? 'end' : ''}">${msg}</div>
+      <p class="muted small">Ketuk bidak lalu ketuk kotak tujuan (titik = langkah sah). Promosi otomatis jadi menteri. Rokade & en passant didukung.${Math.abs(mat) > 150 ? ` Posisi: ${mat > 0 ? 'putih' : 'hitam'} unggul.` : ''}</p>
+      <div class="gm-acts">${s.over ? '' : `<button type="button" class="btn danger" data-a="chResign">🏳 Menyerah</button>`}</div>
+      ${setup}
+      <p class="muted small gm-foot">Rekor vs komputer: 🏆 ${st.w} · 🤝 ${st.d} · 😵 ${st.l}</p>
+    </section></div>`;
+}
+const GA_CHESS = {
+  chMode: el => { W.chMode = el.dataset.k; renderMain(); },
+  chLv: el => { W.chLv = Number(el.dataset.k); renderMain(); },
+  chNew: async () => { const G = gameG(); if (!G) return;
+    if (G.chs && !G.chs.over && G.chs.n > 1 && !await confirmDlg('Mulai permainan catur baru? Permainan sekarang akan ditinggalkan.', 'Mulai baru')) return;
+    gDo(G => { G.chs = chNew(W.chMode || 'ai', W.chLv ?? 1); W.chSel = -1; }); },
+  chResign: async () => { const G = gameG(); if (!G?.chs || G.chs.over) return; if (!await confirmDlg('Menyerah di permainan ini?', 'Menyerah')) return;
+    gDo(G => { const s = G.chs; if (s.mode === 'ai') { s.over = 'b'; (G.chst ||= { w: 0, l: 0, d: 0 }).l++; } else s.over = chOpp(s.turn); }); },
+  chSq: el => { const G = gameG(), s = G?.chs; if (!s || s.over || W.chThink || (s.mode === 'ai' && s.turn !== 'w')) return;
+    const i = Number(el.dataset.i), sel = W.chSel ?? -1;
+    if (sel >= 0) { const m = chLegal(s).find(m => m.f === sel && m.t === i); if (m) { gDo(G => chPlay(G, m)); setTimeout(chAI, 30); return; } }
+    W.chSel = s.b[i] && chCol(s.b[i]) === s.turn && i !== sel ? i : -1; renderMain(); },
+};
+
+// ======================= ⭕ O-X (4 sejajar menang) =======================
+const OX_LV = [['Mudah', 6], ['Sedang', 12], ['Sulit', 25]];
+const OX_SIZES = [6, 8, 10];
+function oxWin(b, n, i) {
+  const p = b[i]; if (!p) return null; const r = Math.floor(i / n), c = i % n;
+  for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+    const l = [i];
+    for (const s of [1, -1]) for (let k = 1; k < 4; k++) { const rr = r + dr * k * s, cc = c + dc * k * s; if (rr < 0 || rr >= n || cc < 0 || cc >= n || b[rr * n + cc] !== p) break; l.push(rr * n + cc); }
+    if (l.length >= 4) return l;
+  }
+  return null;
+}
+function oxAI(b, n, lv, me = 'O') {
+  const op = me === 'O' ? 'X' : 'O', sc = new Array(n * n).fill(0), A = [0, 2, 12, 120, 100000], D = [0, 1, 10, 100, 20000];
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+    const cells = []; for (let k = 0; k < 4; k++) { const rr = r + dr * k, cc = c + dc * k; if (rr < 0 || rr >= n || cc < 0 || cc >= n) break; cells.push(rr * n + cc); }
+    if (cells.length < 4) continue;
+    const m = cells.filter(x => b[x] === me).length, o = cells.filter(x => b[x] === op).length;
+    for (const x of cells) if (!b[x]) { if (!o) sc[x] += A[m]; if (!m) sc[x] += D[o] * (lv === 2 ? 1.1 : 1); }
+  }
+  const empt = b.map((v, i) => v ? -1 : i).filter(i => i >= 0); if (!empt.length) return -1;
+  empt.forEach(i => { sc[i] += 3 - (Math.abs(Math.floor(i / n) - (n - 1) / 2) + Math.abs(i % n - (n - 1) / 2)) * .3 + Math.random(); });
+  if (lv === 0 && Math.random() < .35) { const ok = empt.filter(i => sc[i] < 1e4); return pick(ok.length ? ok : empt); }
+  if (lv === 0) { const top = empt.sort((x, y) => sc[y] - sc[x]).slice(0, 4); return sc[top[0]] >= 1e4 ? top[0] : pick(top); }
+  return empt.reduce((a, i) => sc[i] > sc[a] ? i : a, empt[0]);
+}
+function oxNew(mode, lv, n) { return { b: Array(n * n).fill(''), n, turn: 'X', mode, lv, over: '', win: [], last: -1 }; }
+function oxPut(G, i) {
+  const s = G.ox; if (s.over || s.b[i]) return false;
+  s.b[i] = s.turn; s.last = i; const w = oxWin(s.b, s.n, i), st = G.oxst ||= { w: 0, l: 0, d: 0 };
+  if (w) { s.over = s.turn; s.win = w;
+    if (s.mode === 'pvp') gToast(`🏁 ${s.turn} menang!`);
+    else if (s.turn === 'X') { const c = OX_LV[s.lv][1]; st.w++; G.coins += c; gToast(`🏆 4 sejajar! Kamu menang · +🪙${c}`); } else { st.l++; gToast('😵 Komputer dapat 4 sejajar.', 'warn'); }
+  } else if (s.b.every(Boolean)) { s.over = 'draw'; if (s.mode === 'ai') { st.d++; G.coins += 2; } gToast('🤝 Seri!'); }
+  else s.turn = s.turn === 'X' ? 'O' : 'X';
+}
+function gOX(G) {
+  const s = G.ox, st = G.oxst || { w: 0, l: 0, d: 0 };
+  const setup = `<div class="ox-set"><span class="muted small">Mode</span>${[['ai', '🤖 vs Komputer'], ['pvp', '👥 2 pemain']].map(([k, l]) => `<button type="button" class="chip ${(W.oxMode || 'ai') === k ? 'on' : ''}" data-a="oxMode" data-k="${k}">${l}</button>`).join('')}
+    ${(W.oxMode || 'ai') === 'ai' ? `<span class="muted small">Level</span>${OX_LV.map(([n, c], i) => `<button type="button" class="chip ${(W.oxLv ?? 1) === i ? 'on' : ''}" data-a="oxLv" data-k="${i}">${n} <small>🪙${c}</small></button>`).join('')}` : ''}
+    <span class="muted small">Papan</span>${OX_SIZES.map(n => `<button type="button" class="chip ${(W.oxN || 8) === n ? 'on' : ''}" data-a="oxN" data-k="${n}">${n}×${n}</button>`).join('')}
+    <button type="button" class="btn primary sm" data-a="oxNew">⭕ Mulai baru</button></div>`;
+  if (!s) return `<section class="card gm-adopt"><h3>⭕ O-X · 4 sejajar</h3><p class="muted small">Susun 4 tanda (❌ atau ⭕) berderet — mendatar, menurun, atau diagonal — untuk menang. Kamu ❌ jalan duluan.</p>${setup}</section>`;
+  const msg = s.over ? (s.over === 'draw' ? '🤝 Seri' : s.mode === 'ai' ? (s.over === 'X' ? '🏆 Kamu menang!' : '😵 Komputer menang') : `🏁 ${s.over === 'X' ? '❌' : '⭕'} menang!`)
+    : W.oxThink ? '🤖 Komputer berpikir…' : `Giliran ${s.turn === 'X' ? '❌' : '⭕'}${s.mode === 'ai' ? (s.turn === 'X' ? ' (kamu)' : '') : ''}`;
+  return `<div class="gm-pet ch-wrap">
+    <section class="card ch-card"><div class="ox-board" style="grid-template-columns:repeat(${s.n},1fr)">${s.b.map((v, i) => `<button type="button" class="ox-c ${v === 'X' ? 'x' : v === 'O' ? 'o' : ''} ${s.win.includes(i) ? 'win' : ''} ${i === s.last ? 'last' : ''}" data-a="oxSq" data-i="${i}">${v === 'X' ? '✕' : v === 'O' ? '◯' : ''}</button>`).join('')}</div></section>
+    <section class="card gm-stats"><h3>⭕ O-X <small class="muted">${s.n}×${s.n} · ${s.mode === 'ai' ? '🤖 ' + OX_LV[s.lv][0] : '👥 2 pemain'}</small></h3>
+      <div class="ox-msg ${s.over ? 'end' : ''}">${msg}</div>
+      <p class="muted small">4 sejajar (mendatar/menurun/diagonal) = menang.</p>
+      ${setup}
+      <p class="muted small gm-foot">Rekor vs komputer: 🏆 ${st.w} · 🤝 ${st.d} · 😵 ${st.l}</p>
+    </section></div>`;
+}
+const GA_OX = {
+  oxMode: el => { W.oxMode = el.dataset.k; renderMain(); },
+  oxLv: el => { W.oxLv = Number(el.dataset.k); renderMain(); },
+  oxN: el => { W.oxN = Number(el.dataset.k); renderMain(); },
+  oxNew: () => gDo(G => { G.ox = oxNew(W.oxMode || 'ai', W.oxLv ?? 1, W.oxN || 8); }),
+  oxSq: el => { const G = gameG(), s = G?.ox; if (!s || s.over || W.oxThink || (s.mode === 'ai' && s.turn !== 'X')) return;
+    const i = Number(el.dataset.i); if (s.b[i]) return;
+    gDo(G => oxPut(G, i)); oxGo(); },
+};
+function oxGo() {
+  const s = gameG()?.ox; if (!s || s.over || s.mode !== 'ai' || s.turn !== 'O' || W.oxThink) return;
+  W.oxThink = true; renderMain();
+  setTimeout(() => { W.oxThink = false; gDo(G => { const s = G.ox; if (!s || s.over || s.turn !== 'O') return false; const m = oxAI(s.b, s.n, s.lv); if (m < 0) return false; oxPut(G, m); }); }, 380);
+}
+const GA2 = { ...GA_TREE, ...GA_FISH, ...GA_CHESS, ...GA_OX };
+
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261007-185236';
+const BUILD = '20261007-222732';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2496,7 +3101,7 @@ async function viewFile(id, name, mime) {
 
 // ---------- actions ----------
 const A = {
-  ...GA,
+  ...GA, ...GA2,
   pwShow() { const p = $('#l-pass'); p.type = p.type === 'password' ? 'text' : 'password'; },
   go: el => { if (dlg().open) closeAll(); go(el.dataset.v); },
   profile: () => profileDialog(),
