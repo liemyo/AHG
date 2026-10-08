@@ -823,6 +823,28 @@ main[data-view=chat]{padding-bottom:18px}
 /* angka pesan belum dibaca di tombol chat melayang (1 … 999+) */
 .chat-fab .bdot.fab-n{top:-6px;right:-8px;min-width:24px;height:24px;padding:0 6px;font-size:12px;line-height:1;letter-spacing:-.2px;box-shadow:0 2px 6px rgba(0,0,0,.3);animation:fab-n-pop .35s ease}
 @keyframes fab-n-pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+/* 🔍 Find (Reminder): bola melayang di sebelah kanan bola chat + bar pencarian di atasnya */
+.find-fab{left:calc((230px - 1px) / 2 + 40px)}
+.find-fab[hidden]{display:none}
+.find-fab.on{background:var(--card);color:var(--acc);border:1px solid var(--line)}
+@media (max-width:1180px){.find-fab{left:calc((220px - 1px) / 2 + 40px)}}
+@media (max-width:820px){.find-fab{left:calc((100vw - 8px) / 4 + 4px - 28px)}.find-fab.on{display:grid}}
+.find-bar{position:fixed;z-index:45;left:calc((230px - 1px) / 2 - 30px);bottom:92px;width:min(460px,calc(100vw - 32px));display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px 6px 6px 12px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.28);animation:tin .18s ease}
+.find-bar[hidden]{display:none}
+.find-bar .fd-ic{color:var(--muted);display:grid}
+.find-bar .fd-ic svg{width:18px;height:18px}
+.find-bar input{flex:1;min-width:80px;border:0;background:none;color:var(--text);font:inherit;font-size:15px;padding:8px 4px;outline:none}
+.find-bar input::-webkit-search-cancel-button{display:none}
+.fd-n{font-size:12px;color:var(--muted);white-space:nowrap;padding:0 4px;font-variant-numeric:tabular-nums}
+.fd-n.none{color:var(--red)}
+.fd-hid{flex-basis:100%;border:0;background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--text);font:inherit;font-size:12px;text-align:left;padding:6px 10px;border-radius:10px;cursor:pointer;margin-top:2px}
+.fd-hid[hidden]{display:none}
+.fd-hid b{color:var(--acc)}
+mark.fd-m{background:#fde047;color:#111;border-radius:3px;padding:0 1px}
+mark.fd-m.cur{background:#f97316;color:#fff;box-shadow:0 0 0 2px #f97316;scroll-margin:120px}
+@media (max-width:1180px){.find-bar{left:calc((220px - 1px) / 2 - 30px)}}
+@media (max-width:820px){.find-bar{left:16px;bottom:calc(144px + env(safe-area-inset-bottom))}}
+body.finding #main{padding-bottom:calc(260px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
@@ -1863,8 +1885,82 @@ const NA = {
 document.addEventListener('click', ev => { if (N.open && !ev.target.closest('#bell-pop,#bell-btn')) bellOpen(false); }, true);
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && N.open) bellOpen(false); });
 
+// ---------- 🔍 FIND: cari teks di halaman Reminder (tombol melayang di sebelah tombol chat) ----------
+// Sorotan = <mark class="fd-m"> dibungkus langsung di DOM daftar reminder; dipasang ulang setiap kali halaman dirender ulang.
+const F = { open: false, q: '', i: 0, hits: [], opened: new Set(), t: 0 };
+const FIND_SVG = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M15.2 15.2 21 21" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M7.6 8.6a3.4 3.4 0 0 1 2.4-1.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg>';
+const fNorm = s => String(s || '').toLowerCase();
+const fRemText = r => [r.data.title, r.data.note, uname(r.owner), ...(r.data.files || []).map(f => f.name), ...comments(r.id).flatMap(c => [c.data.text, uname(c.owner)])].join('\n');
+function findSync() { // dipanggil dari renderNav: tombol hanya tampil di halaman Reminder
+  const b = $('#find-fab'); if (!b) return;
+  const on = S.view === 'reminder';
+  b.hidden = !on; b.classList.toggle('on', F.open);
+  if (!on && F.open) findOpen(false);
+}
+function findOpen(v) {
+  F.open = v ?? !F.open;
+  const bar = $('#find-bar'); if (!bar) return;
+  bar.hidden = !F.open; $('#find-fab')?.classList.toggle('on', F.open); document.body.classList.toggle('finding', F.open);
+  if (F.open) { const q = $('#fd-q'); q.value = F.q; q.focus(); q.select(); findRun(); }
+  else { for (const id of F.opened) delete S.rem.open[id]; const had = F.opened.size; F.opened.clear(); findClear(); if (had) renderMain(); }
+}
+function findClear() {
+  for (const m of $$('mark.fd-m')) { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); }
+  F.hits = [];
+}
+function findRun() { // query berubah: buka komentar yang cocok, render, lalu sorot
+  const q = fNorm(F.q.trim());
+  for (const id of F.opened) delete S.rem.open[id]; F.opened.clear();
+  if (q) for (const r of live('reminder')) if (!S.rem.open[r.id] && comments(r.id).some(c => fNorm(c.data.text + ' ' + uname(c.owner)).includes(q))) { S.rem.open[r.id] = 1; F.opened.add(r.id); }
+  F.i = 0; renderMain(); findApply(false);
+}
+function findApply(keepIdx) {
+  findClear();
+  const q = fNorm(F.q.trim()), root = $('#main .rlist');
+  if (F.open && q && root) {
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => n.parentElement.closest('textarea,script,style,.cm-add,.pend') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    const nodes = []; while (tw.nextNode()) nodes.push(tw.currentNode);
+    for (const n of nodes) {
+      const t = n.nodeValue, lt = fNorm(t); let k = lt.indexOf(q); if (k < 0) continue;
+      const fr = document.createDocumentFragment(); let p = 0;
+      while (k >= 0) { fr.append(t.slice(p, k)); const m = document.createElement('mark'); m.className = 'fd-m'; m.textContent = t.slice(k, k + q.length); fr.append(m); F.hits.push(m); p = k + q.length; k = lt.indexOf(q, p); }
+      fr.append(t.slice(p)); n.parentNode.replaceChild(fr, n);
+    }
+  }
+  if (!keepIdx) F.i = 0;
+  F.i = F.hits.length ? (F.i + F.hits.length) % F.hits.length : 0;
+  findMark(!keepIdx);
+}
+function findMark(scroll) {
+  F.hits.forEach((m, k) => m.classList.toggle('cur', k === F.i));
+  const cur = F.hits[F.i]; if (scroll && cur) cur.scrollIntoView({ block: 'center' });
+  const c = $('#fd-n'), h = $('#fd-hid'); if (!c) return;
+  const q = fNorm(F.q.trim());
+  c.textContent = !q ? '' : F.hits.length ? `${F.i + 1}/${F.hits.length}` : '0 hasil';
+  c.classList.toggle('none', !!q && !F.hits.length);
+  const shown = new Set(remList().map(r => r.id)), hid = q ? live('reminder').filter(r => !shown.has(r.id) && fNorm(fRemText(r)).includes(q)).length : 0;
+  h.hidden = !hid; h.innerHTML = hid ? `+${hid} reminder cocok tersembunyi oleh filter · <b>Tampilkan</b>` : '';
+}
+function findStep(d) { if (!F.hits.length) return; F.i = (F.i + d + F.hits.length) % F.hits.length; findMark(true); }
+const FA = {
+  findFab: () => findOpen(),
+  findClose: () => findOpen(false),
+  findPrev: () => findStep(-1),
+  findNext: () => findStep(1),
+  findAll: () => { const R = S.rem; R.sel = ''; R.scope = 'all'; R.st = 'all'; R.who = ''; findRun(); },
+};
+document.addEventListener('input', ev => { if (ev.target.id !== 'fd-q') return; F.q = ev.target.value; clearTimeout(F.t); F.t = setTimeout(findRun, 160); });
+document.addEventListener('keydown', ev => {
+  if (ev.target.id === 'fd-q') {
+    if (ev.key === 'Enter' && !ev.isComposing) { ev.preventDefault(); clearTimeout(F.t); if (fNorm(F.q.trim()) && !F.hits.length && !$$('mark.fd-m').length) findRun(); else findStep(ev.shiftKey ? -1 : 1); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); findOpen(false); }
+    return;
+  }
+  if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && !ev.altKey && ev.key.toLowerCase() === 'f' && S.me && S.view === 'reminder' && !dlg().open) { ev.preventDefault(); findOpen(true); }
+});
+
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261008-112706';
+const BUILD = '20261008-114547';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2227,6 +2323,8 @@ function renderShell() {
     <aside class="upanel" id="users"></aside>
     <nav class="bnav" id="bnav"></nav>
     <button type="button" class="chat-fab" id="chat-fab" data-a="chatFab" title="Global Chat"></button>
+    <button type="button" class="chat-fab find-fab" id="find-fab" data-a="findFab" title="Cari teks di Reminder (Ctrl/⌘+F)" hidden>${FIND_SVG}</button>
+    <div class="find-bar card" id="find-bar" hidden><span class="fd-ic">${FIND_SVG}</span><input id="fd-q" type="search" placeholder="Cari teks di reminder…" autocomplete="off" spellcheck="false" data-keep="0"><span class="fd-n" id="fd-n"></span><button type="button" class="ib" data-a="findPrev" title="Sebelumnya (Shift+Enter)">⌃</button><button type="button" class="ib" data-a="findNext" title="Berikutnya (Enter)">⌄</button><button type="button" class="ib" data-a="findClose" title="Tutup (Esc)">✕</button><button type="button" class="fd-hid" id="fd-hid" data-a="findAll" hidden></button></div>
   </div>`;
   tickClock();
 }
@@ -2255,6 +2353,7 @@ function renderNav() {
   $('#tools-btn')?.classList.toggle('on', S.view === 'tools');
   const fab = $('#chat-fab');
   if (fab) { const on = S.view === 'chat'; setHTML(fab, `${on ? CLOSE_SVG : CHAT_SVG}${!on && b.chat ? `<i class="bdot fab-n">${b.chat > 999 ? '999+' : b.chat}</i>` : ''}`); fab.classList.toggle('on', on); fab.classList.toggle('has', !on && !!b.chat); fab.title = on ? 'Tutup chat' : b.chat ? `Global Chat · ${b.chat} pesan baru` : 'Global Chat'; }
+  findSync();
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
 function go(v) {
@@ -2292,6 +2391,7 @@ function renderMain() {
   m._h = html;
   keep(m, () => { m.innerHTML = html; m.dataset.view = S.view; m.dataset.conv = S.view === 'chat' ? S.chat.conv : ''; });
   if (S.view === 'chat') { const c = $('#c-text'); if (c && !c.dataset.init) { c.dataset.init = 1; autoGrow(c); } }
+  if (S.view === 'reminder' && F.open) findApply(true);
 }
 function autoGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(160, t.scrollHeight + 2) + 'px'; }
 
@@ -3302,7 +3402,7 @@ async function viewFile(id, name, mime) {
 
 // ---------- actions ----------
 const A = {
-  ...GA, ...GA2, ...NA,
+  ...GA, ...GA2, ...NA, ...FA,
   pwShow() { const p = $('#l-pass'); p.type = p.type === 'password' ? 'text' : 'password'; },
   go: el => { if (dlg().open) closeAll(); go(el.dataset.v); },
   profile: () => profileDialog(),
