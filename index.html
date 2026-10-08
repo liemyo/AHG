@@ -820,6 +820,9 @@ main[data-view=chat]{padding-bottom:18px}
 .bp-tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .bp-tabs small{opacity:.8;margin-left:2px}
 .bp-tabs small i{font-style:normal;background:#ef4444;color:#fff;border-radius:999px;padding:0 6px;font-size:11px}
+/* angka pesan belum dibaca di tombol chat melayang (1 … 999+) */
+.chat-fab .bdot.fab-n{top:-6px;right:-8px;min-width:24px;height:24px;padding:0 6px;font-size:12px;line-height:1;letter-spacing:-.2px;box-shadow:0 2px 6px rgba(0,0,0,.3);animation:fab-n-pop .35s ease}
+@keyframes fab-n-pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -1861,7 +1864,7 @@ document.addEventListener('click', ev => { if (N.open && !ev.target.closest('#be
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && N.open) bellOpen(false); });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261008-112000';
+const BUILD = '20261008-112706';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2251,7 +2254,7 @@ function renderNav() {
   renderBell();
   $('#tools-btn')?.classList.toggle('on', S.view === 'tools');
   const fab = $('#chat-fab');
-  if (fab) { const on = S.view === 'chat'; setHTML(fab, `${on ? CLOSE_SVG : CHAT_SVG}${!on && b.chat ? `<i class="bdot">${b.chat > 99 ? '99+' : b.chat}</i>` : ''}`); fab.classList.toggle('on', on); fab.classList.toggle('has', !on && !!b.chat); fab.title = on ? 'Tutup chat' : b.chat ? `Global Chat · ${b.chat} pesan baru` : 'Global Chat'; }
+  if (fab) { const on = S.view === 'chat'; setHTML(fab, `${on ? CLOSE_SVG : CHAT_SVG}${!on && b.chat ? `<i class="bdot fab-n">${b.chat > 999 ? '999+' : b.chat}</i>` : ''}`); fab.classList.toggle('on', on); fab.classList.toggle('has', !on && !!b.chat); fab.title = on ? 'Tutup chat' : b.chat ? `Global Chat · ${b.chat} pesan baru` : 'Global Chat'; }
   document.title = (b.chat ? `(${b.chat}) ` : '') + 'Virtual Work AHG';
 }
 function go(v) {
