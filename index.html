@@ -808,6 +808,18 @@ main[data-view=chat]{padding-bottom:18px}
 .chat-fab{left:calc((230px - 1px) / 2 - 30px)}
 @media (max-width:1180px){.chat-fab{left:calc((220px - 1px) / 2 - 30px)}}
 @media (max-width:820px){.chat-fab{left:calc((100vw - 8px) / 12 + 4px - 28px)}}
+/* 🔔 klik notifikasi → kilatan sorotan pada item tujuan; tab Mention */
+@keyframes nflash{0%,100%{box-shadow:0 0 0 0 transparent}20%,60%{box-shadow:0 0 0 3px var(--acc),0 0 18px color-mix(in srgb,var(--acc) 55%,transparent)}40%,80%{box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 40%,transparent)}}
+.nflash{animation:nflash 1.6s ease 2;border-radius:12px;scroll-margin:90px}
+.msg.nflash{animation:none}.msg.nflash .bub{animation:nflash 1.6s ease 2}
+.cmt.nflash{animation:none}.cmt.nflash>div{animation:nflash 1.6s ease 2}
+.cmt.ment>div{box-shadow:0 0 0 1px #f59e0b}
+.tx.ment{box-shadow:inset 3px 0 0 #f59e0b}
+.bp-tabs{display:flex;gap:6px;padding:8px 12px 0}
+.bp-tabs button{flex:1;border:1px solid var(--line);background:none;color:var(--text);border-radius:999px;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+.bp-tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.bp-tabs small{opacity:.8;margin-left:2px}
+.bp-tabs small i{font-style:normal;background:#ef4444;color:#fff;border-radius:999px;padding:0 6px;font-size:11px}
 </style>
 </head>
 <body>
@@ -1725,7 +1737,7 @@ const GA2 = { ...GA_TREE, ...GA_FISH, ...GA_CHESS, ...GA_OX };
 // ---------- 🔔 NOTIFIKASI: semua kegiatan baru / diperbarui oleh anggota lain + bunyi lonceng "ckringgg" ----------
 // Daftar diturunkan dari data yang sudah tersinkron (tanpa tabel baru). Penanda "sudah dibaca" = pref.data.nseen (ikut sinkron antar perangkat).
 const N_KINDS = new Set(['reminder', 'task', 'comment', 'cash', 'cashcat', 'unit', 'link', 'msg']);
-const N = { open: false, start: Date.now() - 864e5, seenOpen: 0, lastRing: 0 };
+const N = { open: false, tab: 'all', fid: '', fUntil: 0, start: Date.now() - 864e5, seenOpen: 0, lastRing: 0 };
 function nActor(it) {
   const d = it.data || {}, near = t => t && Math.abs(t - it.updated) < 8000;
   if (it.kind === 'task' && d.statusBy && near(d.statusAt)) return d.statusBy;
@@ -1738,6 +1750,8 @@ function isNotif(it) {
   if (it.kind === 'msg' && !(it.to === me || (it.data?.mentions || []).some(x => x === me || (x === 'semua' && !it.to)))) return false; // chat biasa punya badge sendiri
   return nActor(it) !== me;
 }
+// 📣 apakah item ini menandai saya (@nama / @semua)
+const nMent = it => it.kind === 'msg' ? (it.data?.mentions || []).some(x => x === S.me.name || (x === 'semua' && !it.to)) : hitsMe(itemMent(it));
 function notifs() {
   const from = srvNow() - 14 * 864e5, out = [];
   for (const it of S.items.values()) if (it.updated >= from && isNotif(it)) out.push(it);
@@ -1747,6 +1761,11 @@ const nSeen = () => prefData().nseen ?? N.start;
 const nUnread = () => { const s = nSeen(); return notifs().filter(it => it.updated > s).length; };
 function nInfo(it) { // [ikon, kalimat aksi, judul/isi]
   const d = it.data || {}, isNew = it.updated - (it.created || it.updated) < 4000, cut = s => String(s || '').replace(/\s+/g, ' ').slice(0, 90);
+  if (!it._nm && it.kind !== 'msg' && nActor(it) === it.owner && nMent(it)) { // ditandai di reminder/task/komentar/kas/unit
+    if (it.kind === 'comment') { const r = S.items.get(d.rem || d.task); return ['📣', `menandai kamu di komentar ${d.rem ? 'reminder' : 'task'} “${cut(r?.data.title || '…')}”`, cut(d.text)]; }
+    const [, , tx] = nInfo({ ...it, data: { ...d }, kind: it.kind, _nm: 1 });
+    return ['📣', `menandai kamu di ${{ reminder: 'reminder', task: 'task', cash: 'transaksi kas', unit: d.cat === 'stok' ? 'stok material' : 'input produksi' }[it.kind] || 'catatan'}`, tx];
+  }
   switch (it.kind) {
     case 'reminder': return ['⏰', d.done && nActor(it) === d.doneBy && !isNew ? 'menyelesaikan reminder' : isNew ? 'membuat reminder' : 'memperbarui reminder', `${cut(d.title)}${d.date ? ' · ' + dShort(d.date) + (d.time ? ' ' + d.time : '') : ''}`];
     case 'task': return ['✅', nActor(it) === d.statusBy && !isNew ? `mengubah status task → ${STATUS[d.status || 'todo'][0]}` : isNew ? (d.assign === S.me.name ? 'menugaskan task kepadamu' : 'membuat task') : 'memperbarui task', cut(d.title || 'Tanpa judul')];
@@ -1756,19 +1775,41 @@ function nInfo(it) { // [ikon, kalimat aksi, judul/isi]
     case 'unit': return d.cat === 'stok' ? ['📦', isNew ? `mencatat stok ${d.dir === 'out' ? 'keluar' : 'masuk'}` : 'memperbarui stok material', `${cut(d.item)} · ${d.volume ?? ''} ${d.sat || ''} · ${d.basecamp || ''}`]
       : ['🏭', isNew ? 'menginput produksi' : 'memperbarui produksi', `${d.unit || ''} ${d.volume ?? ''} ${d.sat || ''} · ${d.basecamp || ''}${d.date ? ' · ' + dShort(d.date) : ''}`];
     case 'link': return ['🔗', isNew ? 'menambahkan link kerja' : 'memperbarui link kerja', cut(d.title || d.url)];
-    case 'msg': return [it.to ? '🤫' : '📣', it.to ? 'mengirim whisper' : 'menandai kamu di Global Chat', cut(d.text || (d.files?.length ? '📎 lampiran' : ''))];
+    case 'msg': return [it.to ? '🤫' : '📣', it.to ? (nMent(it) ? 'menandai kamu di whisper' : 'mengirim whisper') : 'menandai kamu di Global Chat', cut(d.text || (d.files?.length ? '📎 lampiran' : ''))];
   }
   return ['🔔', 'memperbarui data', ''];
 }
+// klik notifikasi → buka halaman + atur filter agar item terlihat, lalu gulir ke item itu & beri kilatan sorotan
+const fl = id => N.fid === id && Date.now() < N.fUntil ? ' nflash' : '';
+const nfa = id => `data-nid="${esc(id)}"`;
+function inPeriod(P, date) { const [s, e] = periodRange(P.p, P.ref, P.from, P.to); return (!s || date >= s) && (!e || date < e); }
+function showPeriod(P, date) { if (!date || inPeriod(P, date)) return; if (P.p === 'range') P.p = 'month'; P.ref = date; }
+function remShow(r) { const R = S.rem; R.sel = ''; R.scope = 'all'; if (!remList().some(x => x.id === r.id)) { R.st = 'all'; R.who = ''; } go('reminder'); }
 function nGo(it) {
-  const d = it.data || {};
-  if (it.kind === 'reminder') { S.rem.sel = ''; go('reminder'); }
-  else if (it.kind === 'task') openTask(it.id);
-  else if (it.kind === 'comment') { const r = S.items.get(d.rem || d.task); if (!r) return; if (r.kind === 'reminder') { S.rem.open[r.id] = 1; go('reminder'); } else openTask(r.id); }
-  else if (it.kind === 'cash' || it.kind === 'cashcat') go('cash');
-  else if (it.kind === 'unit') go('unit');
-  else if (it.kind === 'link') go('task');
-  else if (it.kind === 'msg') { S.chat.conv = convOf(it); go('chat'); }
+  const d = it.data || {}, par = it.kind === 'comment' ? S.items.get(d.rem || d.task) : null;
+  if (it.kind === 'comment' && (!par || par.deleted)) { toast('Item yang dikomentari sudah dihapus.', 'warn'); return; }
+  N.fid = it.id; N.fUntil = Date.now() + 3500;
+  if (it.kind === 'reminder') remShow(it);
+  else if (it.kind === 'task') { go('task'); openTask(it.id); }
+  else if (it.kind === 'comment') { if (par.kind === 'reminder') { S.rem.open[par.id] = 1; remShow(par); } else { go('task'); openTask(par.id); } }
+  else if (it.kind === 'cash') { const C = S.cash; if (C.cat && C.cat !== d.cat) C.cat = ''; C.who = ''; C.q = ''; showPeriod(C, d.date); go('cash'); }
+  else if (it.kind === 'cashcat') { S.cash.cat = it.id; go('cash'); }
+  else if (it.kind === 'unit') { const U = S.unit; U.cat = d.cat || 'produksi'; U.bc = U.u = U.mk = U.q = ''; showPeriod(U, d.date); go('unit'); }
+  else if (it.kind === 'link') { S.task.links = true; go('task'); }
+  else if (it.kind === 'msg') {
+    const c = convOf(it), all = live('msg').filter(m => convOf(m) === c).sort((a, b) => a.created - b.created || a.id.localeCompare(b.id));
+    const i = all.findIndex(m => m.id === it.id); if (i >= 0) S.chat.limit = Math.max(S.chat.limit, all.length - i + 5);
+    S.chat.conv = c; go('chat');
+  }
+  nFocus(it.id);
+}
+function nFocus(id, n = 0) { // tunggu render/dialog, lalu gulir ke elemen [data-nid]
+  setTimeout(() => {
+    const q = `[data-nid="${CSS.escape(id)}"]`, e = $('dialog[open] ' + q) || $(q);
+    if (!e) { if (n < 6) nFocus(id, n + 1); return; }
+    e.classList.remove('nflash'); void e.offsetWidth; e.classList.add('nflash');
+    e.scrollIntoView({ block: 'center' });
+  }, n ? 120 : 60);
 }
 const BELL_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a1.6 1.6 0 0 0-1.6 1.6v.55A6.4 6.4 0 0 0 5.6 10.4v4.1L3.8 17.3a.9.9 0 0 0 .76 1.4h14.88a.9.9 0 0 0 .76-1.4l-1.8-2.8v-4.1a6.4 6.4 0 0 0-4.8-6.25V3.6A1.6 1.6 0 0 0 12 2Zm-2.6 17.6a2.6 2.6 0 0 0 5.2 0Z"/></svg>';
 function renderBell() {
@@ -1780,10 +1821,11 @@ function renderBell() {
 }
 function renderBellPop() {
   const p = $('#bell-pop'); if (!p) return;
-  const list = notifs(), seen = N.seenOpen;
+  const all = notifs(), seen = N.seenOpen, ments = all.filter(nMent), list = N.tab === 'ment' ? ments : all, nm = ments.filter(it => it.updated > seen).length;
   setHTML(p, `<div class="bp-h"><b>🔔 Notifikasi</b><span class="sp"></span><button type="button" class="mini" data-a="bellSound" title="Bunyi lonceng">${notifyPref().sound ? '🔊' : '🔇'}</button><button type="button" class="mini" data-a="bellClose">✕</button></div>
+    <div class="bp-tabs"><button type="button" class="${N.tab === 'all' ? 'on' : ''}" data-a="bellTab" data-k="all">Semua</button><button type="button" class="${N.tab === 'ment' ? 'on' : ''}" data-a="bellTab" data-k="ment">📣 Mention ${ments.length ? `<small>${nm ? `<i>${nm}</i>` : ments.length}</small>` : ''}</button></div>
     <div class="bp-l">${list.map(it => { const [ic, act, tx] = nInfo(it), who = nActor(it);
-      return `<button type="button" class="bp-i ${it.updated > seen ? 'new' : ''}" data-a="bellGo" data-id="${esc(it.id)}"><span class="bp-av">${av(who)}<i>${ic}</i></span><span class="bp-t"><span><b>${esc(uname(who))}</b> ${esc(act)}</span>${tx ? `<small>${esc(tx)}</small>` : ''}<em>${ago(it.updated)}</em></span></button>`; }).join('') || '<p class="muted small bp-e">Belum ada kegiatan dari anggota lain dalam 14 hari terakhir.</p>'}</div>`);
+      return `<button type="button" class="bp-i ${it.updated > seen ? 'new' : ''} ${nMent(it) ? 'ment' : ''}" data-a="bellGo" data-id="${esc(it.id)}"><span class="bp-av">${av(who)}<i>${ic}</i></span><span class="bp-t"><span><b>${esc(uname(who))}</b> ${esc(act)}</span>${tx ? `<small>${esc(tx)}</small>` : ''}<em>${ago(it.updated)}</em></span></button>`; }).join('') || `<p class="muted small bp-e">${N.tab === 'ment' ? 'Belum ada yang menandai kamu (@nama) dalam 14 hari terakhir.' : 'Belum ada kegiatan dari anggota lain dalam 14 hari terakhir.'}</p>`}</div>`);
 }
 function bellOpen(v) {
   N.open = v ?? !N.open; const p = $('#bell-pop'); if (!p) return;
@@ -1811,6 +1853,7 @@ function bellSound() {
 const NA = {
   bellOpen: () => bellOpen(),
   bellClose: () => bellOpen(false),
+  bellTab: el => { N.tab = el.dataset.k; renderBellPop(); },
   bellGo: el => { const it = S.items.get(el.dataset.id); bellOpen(false); if (it) nGo(it); },
   bellSound: () => { const p = notifyPref(); LS.set('notify', JSON.stringify({ ...p, sound: !p.sound })); renderBellPop(); if (!p.sound) { N.lastRing = 0; bellSound(); } },
 };
@@ -1818,7 +1861,7 @@ document.addEventListener('click', ev => { if (N.open && !ev.target.closest('#be
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && N.open) bellOpen(false); });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261007-225445';
+const BUILD = '20261008-112000';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2356,7 +2399,7 @@ function remRow(r) {
   const d = r.data, c = PALETTE[d.color]?.[1] || PALETTE.blue[1], td = today();
   const overdue = !d.done && d.date && (d.date < td || (d.date === td && d.time && d.time < hm(Date.now())));
   const open = !!S.rem.open[r.id], nc = comments(r.id).length;
-  return `<div class="rrow ${d.done ? 'done' : ''} ${mentionsMe(r) ? 'ment' : ''}" style="--c:${c}">
+  return `<div class="rrow ${d.done ? 'done' : ''} ${mentionsMe(r) ? 'ment' : ''}${fl(r.id)}" ${nfa(r.id)} style="--c:${c}">
     <button type="button" class="rchk" data-a="remDone" data-id="${r.id}" title="${d.done ? 'Tandai belum selesai' : 'Tandai selesai'}">${d.done ? '✓' : ''}</button>
     <div class="rb">
       <div class="rt">${withMentions(esc(d.title))}</div>
@@ -2412,7 +2455,7 @@ function vChat() {
     const day = ymd(new Date(m.created));
     if (day !== lastDay) { out += `<div class="dsep"><span>${day === today() ? 'Hari ini' : day === ymd(addDays(new Date(), -1)) ? 'Kemarin' : dText(day)}</span></div>`; lastDay = day; lastWho = ''; }
     const mine = m.owner === S.me.name, cont = lastWho === m.owner && m.created - lastT < 5 * 60e3;
-    out += `<div class="msg ${mine ? 'mine' : ''} ${cont ? 'cont' : ''} ${m.to ? 'wh' : ''} ${!mine && (m.data.mentions || []).some(x => x === S.me.name || x === 'semua') ? 'ment' : ''}">
+    out += `<div class="msg ${mine ? 'mine' : ''} ${cont ? 'cont' : ''} ${m.to ? 'wh' : ''} ${!mine && (m.data.mentions || []).some(x => x === S.me.name || x === 'semua') ? 'ment' : ''}${fl(m.id)}" ${nfa(m.id)}>
       ${mine ? '' : `<span class="mav">${cont ? '' : av(m.owner)}</span>`}
       <div class="bub">
         ${cont ? '' : `<div class="mh"><b style="color:${ucolor(m.owner)}">${esc(uname(m.owner))}</b>${m.to ? ` <span class="whl">🤫 whisper${mine ? ' ke ' + esc(uname(m.to)) : ''}</span>` : ''}</div>`}
@@ -2538,7 +2581,7 @@ function vTask() {
   return `<div class="head"><h1>✅ Task</h1><div class="tools"><button type="button" class="btn primary" data-a="taskNew">＋ Task baru</button></div></div>
   <section class="card links ${T.links ? 'open' : ''}">
     <button type="button" class="lk-h" data-a="linksTog"><b>🔗 Link kerja</b><span class="muted small">${links.length} link</span><span class="sp"></span><span class="tg">${T.links ? '⌃' : '⌄'}</span></button>
-    ${T.links ? `<div class="lk-l">${links.map(l => `<span class="lk"><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link. Spreadsheet, Docs, Drive, dll — terlihat semua anggota.</span>'}</div>
+    ${T.links ? `<div class="lk-l">${links.map(l => `<span class="lk${fl(l.id)}" ${nfa(l.id)}><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link. Spreadsheet, Docs, Drive, dll — terlihat semua anggota.</span>'}</div>
     <form class="lk-add" id="link-add"><input id="lk-url" placeholder="Tempel link (https://docs.google.com/…)" required><input id="lk-title" placeholder="Nama link (opsional)" maxlength="80"><button class="btn" type="submit">＋ Link</button></form>` : ''}
   </section>
   <div class="tf ${T.tab === 'routine' ? 'rt' : ''}">
@@ -2553,7 +2596,7 @@ function taskCard(t) {
   const d = t.data, P = pins(), cc = comments(t.id).length, col = NOTE_COLORS[d.color]?.[1];
   const items = d.items || [], doneN = items.filter(i => i.d).length;
   const late = d.due && d.status !== 'done' && d.due < today();
-  return `<article class="ncard ${mentionsMe(t) ? 'ment' : ''} ${col && d.color ? 'col' : ''} st-${d.status || 'todo'}" style="${col && d.color ? '--nc:' + col : ''}" data-a="taskOpen" data-id="${t.id}" tabindex="0">
+  return `<article ${nfa(t.id)} class="ncard${fl(t.id)} ${mentionsMe(t) ? 'ment' : ''} ${col && d.color ? 'col' : ''} st-${d.status || 'todo'}" style="${col && d.color ? '--nc:' + col : ''}" data-a="taskOpen" data-id="${t.id}" tabindex="0">
     <div class="nh"><h3>${withMentions(esc(d.title || 'Tanpa judul'))}</h3><button type="button" class="ib ${P.includes(t.id) ? 'on' : ''}" data-a="taskPin" data-id="${t.id}" title="${P.includes(t.id) ? 'Lepas sematan' : 'Sematkan / favorit'}">${P.includes(t.id) ? '★' : '☆'}</button></div>
     ${d.body ? `<div class="nb">${withMentions(linkify(d.body.slice(0, 600)))}</div>` : ''}
     ${items.length ? `<div class="cl">${items.slice(0, 6).map((it, i) => `<div class="cli ${it.d ? 'dn' : ''}"><button type="button" class="cb" data-a="taskItem" data-id="${t.id}" data-i="${i}">${it.d ? '☑' : '☐'}</button><span>${esc(it.t)}</span></div>`).join('')}${items.length > 6 ? `<span class="muted small">+${items.length - 6} item</span>` : ''}</div>` : ''}
@@ -2620,7 +2663,7 @@ function openTask(id, opts = {}) {
 const clRow = (it, i, ro) => `<div class="cli-ed"><input type="checkbox" class="tf-d" ${it.d ? 'checked' : ''}><input class="tf-t" value="${esc(it.t)}" placeholder="Item…" ${ro ? 'disabled' : ''}>${ro ? '' : '<button type="button" class="ib" data-a="clDel" title="Hapus item">✕</button>'}</div>`;
 function cmtHtml(id) {
   const l = comments(id);
-  return l.length ? l.map(c => `<div class="cmt">${av(c.owner)}<div><div class="ch"><b>${esc(uname(c.owner))}</b><span class="muted small">${dtText(c.created)}</span>${canEdit(c) ? `<button type="button" class="mini" data-a="cmtDel" data-id="${c.id}">hapus</button>` : ''}</div>${c.data.text ? `<div class="ct">${withMentions(linkify(c.data.text))}</div>` : ''}${filesHtml(c.data.files)}</div></div>`).join('') : '<p class="muted small">Belum ada komentar.</p>';
+  return l.length ? l.map(c => `<div class="cmt${mentionsMe(c) ? ' ment' : ''}${fl(c.id)}" ${nfa(c.id)}>${av(c.owner)}<div><div class="ch"><b>${esc(uname(c.owner))}</b><span class="muted small">${dtText(c.created)}</span>${canEdit(c) ? `<button type="button" class="mini" data-a="cmtDel" data-id="${c.id}">hapus</button>` : ''}</div>${c.data.text ? `<div class="ct">${withMentions(linkify(c.data.text))}</div>` : ''}${filesHtml(c.data.files)}</div></div>`).join('') : '<p class="muted small">Belum ada komentar.</p>';
 }
 function readTaskForm() {
   const f = $('#task-form');
@@ -2668,7 +2711,7 @@ function shiftRef(p, ref, n) { const d = pYmd(ref); if (p === 'week') return ymd
 const PERIODS = { all: 'Semua', week: 'Mingguan', month: 'Bulanan', year: 'Tahunan', range: 'Rentang' };
 function vCash() {
   const C = S.cash, cl = cats(), [s, e] = periodRange(C.p, C.ref, C.from, C.to);
-  const cards = cl.filter(c => !c.data.archived || C.cat === c.id).map(c => { const t = catTotals(c.id); return `<button type="button" class="kcard ${C.cat === c.id ? 'on' : ''}" style="--c:${catColor(c.id)}" data-a="cashCat" data-id="${c.id}">
+  const cards = cl.filter(c => !c.data.archived || C.cat === c.id).map(c => { const t = catTotals(c.id); return `<button type="button" ${nfa(c.id)} class="kcard${fl(c.id)} ${C.cat === c.id ? 'on' : ''}" style="--c:${catColor(c.id)}" data-a="cashCat" data-id="${c.id}">
       <span class="kh"><b>${esc(c.data.name)}</b>${canEdit(c) ? `<span class="ib sm" data-a="catEdit" data-id="${c.id}" title="Ubah kategori">✏️</span>` : ''}</span>
       <span class="ks ${t.close < 0 ? 'neg' : ''}">${money(t.close)}</span><span class="kl">sisa kasbon</span>
       <span class="kio"><span class="in">▲ ${money(t.in)}</span><span class="out">▼ ${money(t.out)}</span></span>
@@ -2691,7 +2734,7 @@ function vCash() {
   </section>
   <div class="csum"><span>Periode: <b>${esc(periodLabel(C.p, C.ref, C.from, C.to))}</b>${C.cat ? ` · ${esc(catName(C.cat))}` : ''}</span><span class="in">Masuk ${money(tin)}</span><span class="out">Keluar ${money(tout)}</span><span>Selisih <b>${money(tin - tout)}</b></span><span class="muted">${tx.length} transaksi</span></div>
   <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, l]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${money(l.reduce((a, t) => a + (t.data.type === 'in' ? t.data.amount : -t.data.amount), 0))}</span></div>
-    ${l.map(t => `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="cashEdit" data-id="${t.id}"` : ''}><span class="tic ${t.data.type}">${t.data.type === 'in' ? '▲' : '▼'}</span>
+    ${l.map(t => `<div ${nfa(t.id)} class="tx${fl(t.id)}${mentionsMe(t) ? ' ment' : ''} ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="cashEdit" data-id="${t.id}"` : ''}><span class="tic ${t.data.type}">${t.data.type === 'in' ? '▲' : '▼'}</span>
       <span class="ti"><b>${withMentions(esc(t.data.note || (t.data.type === 'in' ? 'Uang masuk' : 'Uang keluar')))}</b><small><span class="kc" style="--c:${catColor(t.data.cat)}">${esc(catName(t.data.cat))}</span> · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}${t.data.file ? ' · 📎 bukti' : ''}</small>${t.data.file ? filesHtml([t.data.file]) : ''}</span>
       <span class="ta ${t.data.type}">${t.data.type === 'in' ? '+' : '−'}${money(t.data.amount)}</span></div>`).join('')}</div>`).join('') : '<p class="empty">Belum ada transaksi di periode ini.</p>'}</div>`;
 }
@@ -2886,7 +2929,7 @@ function vUnit() {
   <div class="ugrid">${Object.values(tot).sort((a, b) => a.unit.localeCompare(b.unit)).map(x => `<button type="button" class="ucard ${U.u === x.unit ? 'on' : ''}" data-a="unitPick" data-u="${esc(x.unit)}"><span class="ub">${esc(x.unit)}</span><span class="uv">${vol(x.v)} <small>${esc(x.sat || '')}</small></span><span class="muted small">${x.n} input · ${esc([...x.bc].join(', '))}</span></button>`).join('') || ''}</div>
   <p class="muted small">Periode: <b>${esc(periodLabel(U.p, U.ref, U.from, U.to))}</b> · ${l.length} input${U.bc ? ' · ' + esc(U.bc) : ''}</p>
   <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, g]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${g.length} input</span></div>
-    ${g.map(t => { const x = t.data; return `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
+    ${g.map(t => { const x = t.data; return `<div ${nfa(t.id)} class="tx${fl(t.id)}${mentionsMe(t) ? ' ment' : ''} ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
       <span class="ti"><b>${esc(pu[x.unit]?.name || x.unit)}${x.size ? ' · ' + esc(x.size) : ''}</b><small>📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${withMentions(linkify(x.note))}</small>` : ''}</span>
       <span class="ta">${vol(x.volume)} <small>${esc(x.sat || '')}</small></span></div>`; }).join('')}</div>`).join('') : '<p class="empty">Belum ada input produksi di periode ini.</p>'}</div>`;
 }
@@ -2959,7 +3002,7 @@ function vStok() {
     </tbody></table></div></div>` : ''}
   <p class="muted small">Periode: <b>${esc(D.label)}</b> · ${l.length} transaksi${U.bc ? ' · ' + esc(U.bc) : ''}</p>
   <div class="txl">${Object.keys(groups).length ? Object.entries(groups).map(([d, g]) => `<div class="txd"><div class="txh"><b>${dText(d)}</b><span class="muted small">${g.length} transaksi</span></div>
-    ${g.map(t => { const x = t.data; return `<div class="tx ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
+    ${g.map(t => { const x = t.data; return `<div ${nfa(t.id)} class="tx${fl(t.id)}${mentionsMe(t) ? ' ment' : ''} ${canEdit(t) ? 'ed' : ''}" ${canEdit(t) ? `data-a="unitEdit" data-id="${t.id}"` : ''}><span class="ubadge u-${esc(x.unit)}">${esc(x.unit)}</span>
       <span class="ti"><b>${esc(x.item || '')}${x.mcat ? ` <small class="muted">· ${esc(x.mcat)}</small>` : ''}</b><small>${x.dir === 'out' ? '📤 Keluar' : '📥 Masuk'} · 📍 ${esc(x.basecamp)} · ${av(t.owner, 'xs')} ${esc(uname(t.owner))} · dicatat ${dtText(t.created)}</small>${x.note ? `<small class="un">${withMentions(linkify(x.note))}</small>` : ''}</span>
       <span class="ta ${x.dir === 'out' ? 'out' : 'in'}">${sgn(x)}${vol(x.volume)} <small>${esc(x.sat || '')}</small></span></div>`; }).join('')}</div>`).join('') : '<p class="empty">Belum ada transaksi stok di periode ini.</p>'}</div>`;
 }
