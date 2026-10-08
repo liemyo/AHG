@@ -3673,7 +3673,7 @@ document.addEventListener('submit', async ev => {
     const b = $('button[type=submit]', f); b.disabled = true; b.textContent = 'Menyimpan…'; err.textContent = '';
     try {
       const r = await rpc('ahg_admin_profile', { p_token: S.token, p_target: name, p_display: display, p_color: color });
-      if (!r?.ok) throw new Error(r?.err || 'gagal');
+      if (!r?.ok) throw new Error({ auth: 'sesi admin tidak valid — logout lalu login lagi sebagai admin', protected: 'akun admin tidak bisa diubah di sini', display: 'nickname 1–40 karakter', color: 'warna tidak valid', not_found: 'user tidak ditemukan' }[r?.err] || r?.err || 'gagal');
       closeAll(); toast(`Profil <b>${esc(name)}</b> diperbarui.`, 'info', null, 3000); ping(); await syncNow(); render();
     } catch (e) { b.disabled = false; b.textContent = 'Simpan perubahan'; err.textContent = 'Gagal: ' + e.message; }
   } else if (f.id === 'pw-form') {

@@ -9,18 +9,14 @@ create or replace function public.ahg_admin_profile(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = public, extensions, pg_temp
 as $$
 declare
   v_admin boolean;
   v_display text := btrim(coalesce(p_display, ''));
 begin
-  select exists (
-    select 1
-    from public.ahg_sessions s
-    join public.ahg_users u on u.name = s.name
-    where s.token = p_token and u.role = 'admin'
-  ) into v_admin;
+  -- ahg_sessions.token stores sha256(token); ahg_me hashes it the same way as every other ahg_* RPC
+  v_admin := coalesce((public.ahg_me(p_token)).role = 'admin', false);
 
   if not v_admin then return jsonb_build_object('ok', false, 'err', 'auth'); end if;
   if p_target = 'admin' then return jsonb_build_object('ok', false, 'err', 'protected'); end if;
@@ -46,17 +42,13 @@ create or replace function public.ahg_admin_kick(
 ) returns jsonb
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = public, extensions, pg_temp
 as $$
 declare
   v_admin boolean;
 begin
-  select exists (
-    select 1
-    from public.ahg_sessions s
-    join public.ahg_users u on u.name = s.name
-    where s.token = p_token and u.role = 'admin'
-  ) into v_admin;
+  -- ahg_sessions.token stores sha256(token); ahg_me hashes it the same way as every other ahg_* RPC
+  v_admin := coalesce((public.ahg_me(p_token)).role = 'admin', false);
 
   if not v_admin then return jsonb_build_object('ok', false, 'err', 'auth'); end if;
   if p_target = 'admin' then return jsonb_build_object('ok', false, 'err', 'protected'); end if;
