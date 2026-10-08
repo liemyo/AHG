@@ -1970,7 +1970,7 @@ document.addEventListener('keydown', ev => {
 });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261008-140050';
+const BUILD = '20261008-175554';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2030,7 +2030,7 @@ const now0 = new Date();
 const S = {
   token: '', me: null, users: [], skew: 0, items: new Map(), seq: 0, queue: new Set(), loaded: false,
   view: 'reminder',
-  rem: { open: {}, cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '' },
+  rem: { open: {}, cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '', sort: 'date' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
   task: { links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
   unit: { cat: 'produksi', p: 'month', ref: today(), from: '', to: '', bc: '', u: '', mk: '', q: '' },
@@ -2487,10 +2487,11 @@ function vReminder() {
   </form>
   <div class="lhead">
     <div class="chips">
-      ${[['open', 'Belum selesai'], ['done', 'Selesai'], ['all', 'Semua']].map(([k, l]) => `<button type="button" class="chip ${R.st === k ? 'on' : ''}" data-a="remSt" data-k="${k}">${l} <small>${counts[k]}</small></button>`).join('')}
+      <select id="rem-st" data-ch="remSt" data-keep="0" class="chip-sel" title="Filter status">${[['open', '⏳ Belum selesai'], ['done', '✅ Selesai'], ['all', '📋 Semua status']].map(([k, l]) => `<option value="${k}" ${R.st === k ? 'selected' : ''}>${l} (${counts[k]})</option>`).join('')}</select>
       ${R.sel ? `<button type="button" class="chip on acc" data-a="remDay" data-d="${R.sel}">📅 ${dText(R.sel)} ✕</button>`
     : `<select id="rem-scope" data-ch="remScope" data-keep="0" class="chip-sel"><option value="all" ${R.scope === 'all' ? 'selected' : ''}>Semua tanggal</option><option value="month" ${R.scope === 'month' ? 'selected' : ''}>${MONTHS[R.m]} ${R.y}</option></select>`}
       <select id="rem-who" data-ch="remWho" data-keep="0" class="chip-sel"><option value="">Semua pembuat</option><option value="@me" ${R.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${R.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select>
+      <select id="rem-sort" data-ch="remSort" data-keep="0" class="chip-sel" title="Urutkan">${REM_SORTS.map(([k, l]) => `<option value="${k}" ${R.sort === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
     </div>
   </div>
   <div class="rlist">${list.length ? list.map(remRow).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Belum ada reminder.'}</p>`}</div>`;
@@ -2501,12 +2502,18 @@ function remFilter(list, st, who) {
   return list;
 }
 const remKey = r => (r.data.date || '9999') + ' ' + (r.data.time || '99:99');
+const remUpd = r => Math.max(r.updated || 0, r.data.doneAt || 0, ...comments(r.id).map(c => c.updated || 0)); // perubahan terakhir, termasuk komentar
+const REM_SORTS = [['date', '📅 Tanggal terbaru'], ['upd', '🕘 Update terbaru'], ['old', '📅 Tanggal terlama']];
 function remList() { // what the Reminder page shows
   const R = S.rem; let list = live('reminder');
   if (R.sel) list = list.filter(r => r.data.date === R.sel);
   else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); }
   list = remFilter(list, R.st, R.who);
-  return list.sort((a, b) => (a.data.done - b.data.done) || (a.data.done ? (b.data.doneAt || 0) - (a.data.doneAt || 0) : remKey(a).localeCompare(remKey(b))));
+  const upd = new Map(list.map(r => [r.id, remUpd(r)])), byUpd = (a, b) => upd.get(b.id) - upd.get(a.id);
+  if (R.sort === 'upd') return list.sort(byUpd);
+  // tanggal (terbaru / terlama), yang belum selesai di atas; tanggal sama → update terbaru dulu
+  const dir = R.sort === 'old' ? 1 : -1;
+  return list.sort((a, b) => (a.data.done - b.data.done) || dir * remKey(a).localeCompare(remKey(b)) || byUpd(a, b));
 }
 function remRow(r) {
   const d = r.data, c = PALETTE[d.color]?.[1] || PALETTE.blue[1], td = today();
@@ -3430,7 +3437,6 @@ const A = {
   remToday: () => { const n = new Date(); S.rem.y = n.getFullYear(); S.rem.m = n.getMonth(); S.rem.sel = today(); S.rem.addDate = ''; renderMain(); },
   remDay: el => { const d = el.dataset.d; S.rem.sel = S.rem.sel === d ? '' : d; S.rem.addDate = ''; const p = pYmd(d); if (p.getMonth() !== S.rem.m) { S.rem.m = p.getMonth(); S.rem.y = p.getFullYear(); } renderMain(); },
   calTog: () => { S.rem.cal = !S.rem.cal; renderMain(); },
-  remSt: el => { S.rem.st = el.dataset.k; renderMain(); },
   remDone: el => { const r = S.items.get(el.dataset.id); if (!r) return; const done = !r.data.done; patch(r.id, { done, doneBy: done ? S.me.name : '', doneAt: done ? srvNow() : 0 }); },
   remEdit: el => remDialog(S.items.get(el.dataset.id)),
   remDel: async el => { const r = S.items.get(el.dataset.id); if (r && await confirmDlg(`Hapus reminder <b>${esc(r.data.title)}</b> beserta komentarnya?`, 'Hapus')) { closeAll(); comments(r.id).forEach(c => remove(c.id)); remove(r.id); } },
@@ -3505,6 +3511,8 @@ const CH = { // change / input handlers
   remY: el => { S.rem.y = Number(el.value); S.rem.sel = ''; renderMain(); },
   remScope: el => { S.rem.scope = el.value; renderMain(); },
   remWho: el => { S.rem.who = el.value; renderMain(); },
+  remSt: el => { S.rem.st = el.value; renderMain(); },
+  remSort: el => { S.rem.sort = el.value; renderMain(); },
   raDate: el => { S.rem.addDate = el.value; },
   convSel: el => { if (el.value === '+') { const others = S.users.filter(u => u.name !== S.me.name); pickUser(others); return; } S.chat.conv = el.value; renderMain(); markRead(); renderNav(); },
   whNew: el => { if (el.value) { S.chat.conv = 'w:' + el.value; renderMain(); markRead(); $('#c-text')?.focus(); } },
