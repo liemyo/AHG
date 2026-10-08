@@ -1970,7 +1970,7 @@ document.addEventListener('keydown', ev => {
 });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261008-175554';
+const BUILD = '20261008-204253';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -3347,13 +3347,25 @@ function vAdmin() {
   const count = (n, k) => live(k).filter(i => i.owner === n).length;
   const list = [...S.users].sort((a, b) => (a.role === 'admin' ? -1 : b.role === 'admin' ? 1 : a.name.localeCompare(b.name)));
   return `<div class="head"><h1>👑 Panel Admin <span class="hc">${S.users.length} akun</span></h1></div>
-  <p class="muted small">Admin bisa melihat & mengubah semua data (reminder, task, cash, chat global), mereset password, dan menghapus user. Whisper tetap pribadi antara pengirim dan penerima.</p>
+  <p class="muted small">Admin bisa mengedit profil anggota, mengganti nickname, mengeluarkan anggota dari semua perangkat, mereset password, dan menghapus akun. Whisper tetap pribadi antara pengirim dan penerima.</p>
   <div class="card tbl-wrap"><table class="atbl"><thead><tr><th>User</th><th>Status</th><th>Bergabung</th><th>Reminder</th><th>Task</th><th>Cash</th><th>Pesan</th><th></th></tr></thead><tbody>
   ${list.map(u => `<tr><td><span class="uc">${av(u.name)}<span><b>${esc(uname(u.name))}</b><small>@${esc(u.name)}${u.role === 'admin' ? ' · Admin' : ''}</small></span></span></td>
     <td>${lastSeenText(u)}${u.reset ? '<br><small class="warn-t">password direset — login berikutnya membuat password baru</small>' : ''}</td><td>${u.created ? dtText(Date.parse(u.created) + S.skew) : ''}</td>
     <td>${count(u.name, 'reminder')}</td><td>${count(u.name, 'task')}</td><td>${count(u.name, 'cash')}</td><td>${count(u.name, 'msg')}</td>
-    <td class="acts">${u.role === 'admin' ? '' : `<button type="button" class="btn sm" data-a="whisper" data-u="${esc(u.name)}">🤫</button><button type="button" class="btn sm" data-a="admReset" data-u="${esc(u.name)}">Reset password</button><button type="button" class="btn sm danger" data-a="admDel" data-u="${esc(u.name)}">Hapus</button>`}</td></tr>`).join('')}
+    <td class="acts">${u.role === 'admin' ? '<span class="muted small">Akun utama</span>' : `<button type="button" class="btn sm" data-a="admEdit" data-u="${esc(u.name)}">Edit</button><button type="button" class="btn sm" data-a="whisper" data-u="${esc(u.name)}">🤫</button><button type="button" class="btn sm" data-a="admKick" data-u="${esc(u.name)}">Keluarkan</button><button type="button" class="btn sm" data-a="admReset" data-u="${esc(u.name)}">Reset password</button><button type="button" class="btn sm danger" data-a="admDel" data-u="${esc(u.name)}">Hapus</button>`}</td></tr>`).join('')}
   </tbody></table></div>`;
+}
+function adminEditDialog(name) {
+  const u = user(name); if (!u || u.role === 'admin') return;
+  S.dlg = { type: 'admin-user', name };
+  openDlg(`<form class="dlg" id="adm-user-form" data-u="${esc(name)}">
+    <div class="ed-bar"><b>Edit user</b><span class="sp"></span><button type="button" class="ib" data-a="close">✕</button></div>
+    <div class="pf-top">${av(name, 'xl')}<div><b class="big">${esc(uname(name))}</b><div class="muted small">@${esc(name)}</div></div></div>
+    <label>Nickname / nama tampilan<input id="adm-display" value="${esc(u.display || u.name)}" maxlength="40" required placeholder="Nama tampilan"></label>
+    <label>Warna avatar<div class="swatches">${AV_COLORS.map(c => `<label class="sw"><input type="radio" name="adm-color" value="${c}" ${(u.color || ucolor(name)) === c ? 'checked' : ''}><i style="--c:${c}"></i></label>`).join('')}</div></label>
+    <p class="err" id="adm-user-err"></p>
+    <div class="dlg-f"><button type="button" class="btn" data-a="close">Batal</button><span class="sp"></span><button type="submit" class="btn primary">Simpan perubahan</button></div>
+  </form>`);
 }
 async function adminAct(action, name, purge) {
   try { const r = await rpc('ahg_admin', { p_token: S.token, p_action: action, p_target: name, p_purge: !!purge }); if (!r?.ok) throw new Error(r?.err || 'gagal'); toast(action === 'reset' ? `Password <b>${esc(name)}</b> direset. Login berikutnya dengan password apa pun akan menjadi password barunya.` : `User <b>${esc(name)}</b> dihapus.`, 'info', null, 9000); ping(); syncNow(); }
@@ -3503,6 +3515,11 @@ const A = {
   unitPick: el => { S.unit.u = S.unit.u === el.dataset.u ? '' : el.dataset.u; renderMain(); },
   repPdf: () => reportPdf(), repXlsx: () => reportXlsx(), repPrint: () => reportPrint(),
   // admin
+  admEdit: el => adminEditDialog(el.dataset.u),
+  admKick: async el => { const n = el.dataset.u; if (await confirmDlg(`Keluarkan <b>${esc(uname(n))}</b> (@${esc(n)}) dari semua perangkat? User tetap dapat masuk kembali dengan passwordnya.`, 'Keluarkan')) {
+    try { const r = await rpc('ahg_admin_kick', { p_token: S.token, p_target: n }); if (!r?.ok) throw new Error(r?.err || 'gagal'); toast(`<b>${esc(uname(n))}</b> telah dikeluarkan dari semua perangkat.`, 'info', null, 5000); ping(); syncNow(); }
+    catch (e) { toast('Gagal mengeluarkan user: ' + esc(e.message), 'warn'); }
+  } },
   admReset: async el => { const n = el.dataset.u; if (await confirmDlg(`Reset password <b>${esc(n)}</b>? User akan keluar dari semua perangkat; login berikutnya dengan password apa pun menjadi password barunya.`, 'Reset')) adminAct('reset', n); },
   admDel: async el => { const n = el.dataset.u; const r = await confirmDlg(`Hapus user <b>${esc(n)}</b>? Akun & sesi dihapus (nama bisa dipakai daftar lagi).`, 'Hapus user', true, `<label class="chk-l"><input type="checkbox" id="cf-purge"> Hapus juga semua data buatannya (reminder, task, cash, pesan)</label>`); if (r) adminAct('delete', n, $('#cf-purge')?.checked); }
 };
@@ -3650,6 +3667,15 @@ document.addEventListener('submit', async ev => {
     closeAll();
   } else if (f.id === 'pf-form') {
     try { const r = await rpc('ahg_profile', { p_token: S.token, p_display: $('#pf-disp').value, p_color: $('input[name=pf-color]:checked', f)?.value || '' }); if (r?.ok) { S.me = r.me; toast('Profil disimpan.', 'info', null, 2000); ping(); await syncNow(); render(); profileDialog(); } } catch (e) { toast('Gagal: ' + esc(e.message), 'warn'); }
+  } else if (f.id === 'adm-user-form') {
+    const name = f.dataset.u, display = $('#adm-display').value.trim(), color = $('input[name=adm-color]:checked', f)?.value || '', err = $('#adm-user-err');
+    if (!display) { err.textContent = 'Nickname tidak boleh kosong.'; return; }
+    const b = $('button[type=submit]', f); b.disabled = true; b.textContent = 'Menyimpan…'; err.textContent = '';
+    try {
+      const r = await rpc('ahg_admin_profile', { p_token: S.token, p_target: name, p_display: display, p_color: color });
+      if (!r?.ok) throw new Error(r?.err || 'gagal');
+      closeAll(); toast(`Profil <b>${esc(name)}</b> diperbarui.`, 'info', null, 3000); ping(); await syncNow(); render();
+    } catch (e) { b.disabled = false; b.textContent = 'Simpan perubahan'; err.textContent = 'Gagal: ' + e.message; }
   } else if (f.id === 'pw-form') {
     const n1 = $('#pw-new').value, n2 = $('#pw-new2').value, err = $('#pw-err'); err.textContent = '';
     if (n1 !== n2) { err.textContent = 'Password baru tidak sama.'; return; }
