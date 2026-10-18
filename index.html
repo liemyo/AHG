@@ -2193,7 +2193,7 @@ async function prepFile(file) { // → {fid, name, mime, size, data(base64), thu
 }
 async function uploadFile(f) {
   const r = await rpc('ahg_file_put', { p_token: S.token, p_id: f.fid, p_name: f.name, p_mime: f.mime, p_data: f.data });
-  if (!r?.ok) throw new Error(r?.err === 'size' ? 'File terlalu besar.' : 'Upload gagal.');
+  if (!r?.ok) throw new Error(r?.err === 'quota' ? 'Penyimpanan penuh (maks 100 MB total). Hapus file lama dulu.' : r?.err === 'size' ? 'File terlalu besar.' : 'Upload gagal.');
   return { id: f.fid, name: f.name, mime: f.mime, size: f.size, thumb: f.thumb || '' };
 }
 async function fileUrl(id) {
@@ -2734,13 +2734,14 @@ function fileIcon2(f) {
   const x = fileExt(f.name).toLowerCase();
   return /^image\//.test(f.mime) ? '🖼' : /pdf/.test(f.mime) || x === 'pdf' ? '📕' : /sheet|excel|csv/.test(f.mime) || /^(xlsx?|csv)$/.test(x) ? '📗' : /word|document/.test(f.mime) || /^docx?$/.test(x) ? '📘' : /presentation|powerpoint/.test(f.mime) || /^pptx?$/.test(x) ? '📙' : fileIcon(f.mime);
 }
-const FILE_MAX = 100 * 1048576, CHUNK = 3145728; // Files tab: sampai 100 MB, dikirim per 3 MiB
+const FILE_MAX = 100 * 1048576, FILE_QUOTA = FILE_MAX, CHUNK = 3145728; // Files tab: sampai 100 MB, dikirim per 3 MiB
 async function uploadBig(file, onProg) {
   if (file.size > FILE_MAX) throw new Error(`"${file.name}" terlalu besar (maks 100 MB).`);
   if (!file.size) throw new Error(`"${file.name}" kosong.`);
+  if ((S.task.used || 0) + file.size > FILE_QUOTA) throw new Error(`Penyimpanan penuh: ${fsize(S.task.used || 0)} / 100 MB terpakai, "${file.name}" (${fsize(file.size)}) tidak muat.`);
   const id = uid() + uid().slice(0, 6), n = Math.ceil(file.size / CHUNK);
   const b = await rpc('ahg_file_begin', { p_token: S.token, p_id: id, p_name: file.name || 'file', p_mime: file.type || 'application/octet-stream', p_size: file.size, p_chunks: n });
-  if (!b?.ok) throw new Error('Upload gagal (' + (b?.err || 'server') + ').');
+  if (!b?.ok) throw new Error(b?.err === 'quota' ? 'Penyimpanan penuh (maks 100 MB total). Hapus file lama dulu.' : 'Upload gagal (' + (b?.err || 'server') + ').');
   for (let i = 0; i < n; i++) {
     onProg?.(i, n);
     const x = await rpc('ahg_file_chunk_put', { p_token: S.token, p_id: id, p_idx: i, p_data: await readB64(file.slice(i * CHUNK, (i + 1) * CHUNK)) });
@@ -2753,7 +2754,7 @@ async function loadFiles() {
   try {
     const r = await rpc('ahg_file_list', { p_token: S.token });
     if (!r?.ok) throw new Error(r?.err === 'auth' ? 'sesi habis' : r?.err === undefined ? 'RPC ahg_file_list belum dipasang di Supabase' : r.err);
-    S.task.files = r.files || []; S.task.filesErr = '';
+    S.task.files = r.files || []; S.task.filesErr = ''; S.task.used = r.used ?? S.task.files.reduce((a, f) => a + (f.size || 0), 0);
   } catch (e) { S.task.files = S.task.files || []; S.task.filesErr = /404/.test(e.message) ? 'fungsi Files belum ada di server (404) — jalankan SQL "Files library" di Supabase SQL editor' : e.message; }
   if (S.view === 'task' && S.task.tab === 'files') renderMain();
 }
@@ -2761,6 +2762,7 @@ function vFiles() {
   const T = S.task, q = (T.fq || '').trim().toLowerCase();
   const l = (T.files || []).filter(f => !q || (f.name + ' ' + uname(f.owner)).toLowerCase().includes(q));
   return `<section class="card files">
+    ${(() => { const u = T.used || 0, p = Math.min(100, u / FILE_QUOTA * 100); return `<div class="fl-use" title="Total penyimpanan semua file"><b>${(u / 1048576).toFixed(1)}/100 MB</b><div class="prog"><i style="width:${p}%;${p >= 90 ? 'background:#e5484d' : ''}"></i></div></div>`; })()}
     <div class="fl-h"><label class="btn primary attach">⬆ Upload<input type="file" multiple hidden data-ch="flUpload"></label>
       <input id="fl-q" class="t-q" placeholder="🔍 Cari file / pemilik…" data-ch="flQ" value="${esc(T.fq || '')}">
       <button type="button" class="ib" data-a="flReload" title="Muat ulang">⟳</button></div>
@@ -3618,7 +3620,7 @@ const CH = { // change / input handlers
   flQ: el => { S.task.fq = el.value; renderMain(); const i = $('#fl-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } },
   flUpload: async el => {
     const fs = [...el.files]; el.value = ''; let ok = 0;
-    for (const f of fs) { try { if (f.size > 8e6 || !/^image\//.test(f.type) && f.size > 3e6) await uploadBig(f, (i, n) => toast(`Mengupload ${esc(f.name)}… ${Math.round(i / n * 100)}%`, 'info', null, 4000)); else await uploadFile(await prepFile(f)); ok++; } catch (e) { toast(esc(e.message), 'warn'); } }
+    for (const f of fs) { try { if ((S.task.used || 0) + f.size > FILE_QUOTA) throw new Error(`Penyimpanan penuh: ${fsize(S.task.used || 0)} / 100 MB terpakai, "${f.name}" (${fsize(f.size)}) tidak muat.`); if (f.size > 8e6 || !/^image\//.test(f.type) && f.size > 3e6) await uploadBig(f, (i, n) => toast(`Mengupload ${esc(f.name)}… ${Math.round(i / n * 100)}%`, 'info', null, 4000)); else await uploadFile(await prepFile(f)); S.task.used = (S.task.used || 0) + f.size; ok++; } catch (e) { toast(esc(e.message), 'warn'); } }
     if (ok) toast(`${ok} file diupload.`, 'info', null, 3000);
     await loadFiles();
   },
