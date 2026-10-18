@@ -855,6 +855,14 @@ body.finding #main{padding-bottom:calc(260px + env(safe-area-inset-bottom))}
 .bell-pop .bp-h{background:color-mix(in srgb,var(--acc) 14%,var(--pop))}
 .bell-pop .bp-i.new{background:color-mix(in srgb,var(--acc) 20%,var(--pop))}
 .bell-pop .bp-t small,.bell-pop .bp-t em{color:color-mix(in srgb,var(--text) 72%,var(--pop))}
+
+.files .fl-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.files .fl-h .t-q{flex:1;min-width:140px}
+.fltbl{width:100%;border-collapse:collapse}
+.fltbl th,.fltbl td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:middle}
+.fltbl td.fi{font-size:20px;width:30px}
+.fltbl .acts{white-space:nowrap;text-align:right}
+.fltbl .linkish{word-break:break-all;text-align:left}
 </style>
 </head>
 <body>
@@ -1970,7 +1978,7 @@ document.addEventListener('keydown', ev => {
 });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261008-204253';
+const BUILD = '20261019-014532';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2032,7 +2040,7 @@ const S = {
   view: 'reminder',
   rem: { open: {}, cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '', sort: 'date' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
-  task: { links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
+  task: { files: null, fq: '', links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
   unit: { cat: 'produksi', p: 'month', ref: today(), from: '', to: '', bc: '', u: '', mk: '', q: '' },
   cash: { cat: '', p: 'month', ref: today(), from: '', to: '', q: '', who: '' },
   rep: null, sync: { busy: false, again: false, at: null, err: '' }, dlg: null
@@ -2696,7 +2704,8 @@ function vTask() {
   const T = S.task, links = live('link').sort((a, b) => a.created - b.created), P = pins(), me = S.me.name;
   const all = live('task').filter(t => !t.data.archived);
   const n = { all: all.filter(t => t.data.status !== 'done' || P.includes(t.id)).length, pin: all.filter(t => P.includes(t.id)).length, routine: all.filter(t => t.data.routine?.on).length, mine: all.filter(t => t.owner === me).length, assigned: all.filter(t => t.data.assign === me).length, done: all.filter(t => t.data.status === 'done').length, archive: live('task').filter(t => t.data.archived).length };
-  const tabs = [['all', '📋 Aktif'], ['pin', '📌 Disematkan'], ['routine', '🔁 Rutin mingguan'], ['assigned', '🙋 Untukku'], ['mine', '✍️ Buatanku'], ['done', '✔ Selesai'], ['archive', '🗄 Arsip']];
+  const tabs = [['all', '📋 Aktif'], ['pin', '📌 Disematkan'], ['routine', '🔁 Rutin mingguan'], ['assigned', '🙋 Untukku'], ['mine', '✍️ Buatanku'], ['done', '✔ Selesai'], ['archive', '🗄 Arsip'], ['files', '📎 Files']];
+  n.files = T.files ? T.files.length : '…';
   const owners = [...new Set(live('task').map(t => t.owner))];
   return `<div class="head"><h1>✅ Task</h1><div class="tools"><button type="button" class="btn primary" data-a="taskNew">＋ Task baru</button></div></div>
   <section class="card links ${T.links ? 'open' : ''}">
@@ -2704,13 +2713,44 @@ function vTask() {
     ${T.links ? `<div class="lk-l">${links.map(l => `<span class="lk${fl(l.id)}" ${nfa(l.id)}><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link. Spreadsheet, Docs, Drive, dll — terlihat semua anggota.</span>'}</div>
     <form class="lk-add" id="link-add"><input id="lk-url" placeholder="Tempel link (https://docs.google.com/…)" required><input id="lk-title" placeholder="Nama link (opsional)" maxlength="80"><button class="btn" type="submit">＋ Link</button></form>` : ''}
   </section>
-  <div class="tf ${T.tab === 'routine' ? 'rt' : ''}">
+  <div class="tf ${T.tab === 'routine' || T.tab === 'files' ? 'rt' : ''}">
     <select id="t-tab" data-ch="taskTabSel" data-keep="0" class="t-tab">${tabs.map(([k, l]) => `<option value="${k}" ${T.tab === k ? 'selected' : ''}>${l} (${n[k]})</option>`).join('')}</select>
-    ${T.tab !== 'routine' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option><option value="@me" ${T.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
+    ${T.tab !== 'routine' && T.tab !== 'files' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option><option value="@me" ${T.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
     <input id="t-q" class="t-q" placeholder="🔍 Cari task…" data-ch="taskQ" value="${esc(T.q)}">` : ''}
   </div>
-  ${T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
+  ${T.tab === 'files' ? vFiles() : T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
     ${l.length ? `<div class="grid ${T.layout}">${l.map(taskCard).join('')}</div>` : '<p class="empty">Tidak ada task di sini.</p>'}`; })()}`;
+}
+// ---------- TASK › Files (perpustakaan dokumen: semua file yang pernah diupload) ----------
+const canFile = f => isAdmin() || f.owner === S.me.name; // rename / hapus: pemilik atau admin (server juga memeriksa)
+const fileExt = n => (String(n).match(/\.([A-Za-z0-9]{1,5})$/) || [, ''])[1].toUpperCase();
+function fileIcon2(f) {
+  const x = fileExt(f.name).toLowerCase();
+  return /^image\//.test(f.mime) ? '🖼' : /pdf/.test(f.mime) || x === 'pdf' ? '📕' : /sheet|excel|csv/.test(f.mime) || /^(xlsx?|csv)$/.test(x) ? '📗' : /word|document/.test(f.mime) || /^docx?$/.test(x) ? '📘' : /presentation|powerpoint/.test(f.mime) || /^pptx?$/.test(x) ? '📙' : fileIcon(f.mime);
+}
+async function loadFiles() {
+  try {
+    const r = await rpc('ahg_file_list', { p_token: S.token });
+    if (!r?.ok) throw new Error(r?.err === 'auth' ? 'sesi habis' : r?.err === undefined ? 'RPC ahg_file_list belum dipasang di Supabase' : r.err);
+    S.task.files = r.files || []; S.task.filesErr = '';
+  } catch (e) { S.task.files = S.task.files || []; S.task.filesErr = e.message; }
+  if (S.view === 'task' && S.task.tab === 'files') renderMain();
+}
+function vFiles() {
+  const T = S.task, q = (T.fq || '').trim().toLowerCase();
+  const l = (T.files || []).filter(f => !q || (f.name + ' ' + uname(f.owner)).toLowerCase().includes(q));
+  return `<section class="card files">
+    <div class="fl-h"><label class="btn primary attach">⬆ Upload<input type="file" multiple hidden data-ch="flUpload"></label>
+      <input id="fl-q" class="t-q" placeholder="🔍 Cari file / pemilik…" data-ch="flQ" value="${esc(T.fq || '')}">
+      <button type="button" class="ib" data-a="flReload" title="Muat ulang">⟳</button></div>
+    ${T.filesErr ? `<p class="err">Gagal memuat: ${esc(T.filesErr)}</p>` : ''}
+    ${T.files === null ? '<p class="empty">Memuat…</p>' : l.length ? `<div class="tbl-wrap"><table class="fltbl"><thead><tr><th></th><th>Nama</th><th>Ukuran</th><th>Pemilik</th><th>Tanggal</th><th></th></tr></thead><tbody>${l.map(f => `<tr>
+      <td class="fi">${fileIcon2(f)}</td>
+      <td><button type="button" class="linkish" data-a="openFile" data-id="${esc(f.id)}" data-name="${esc(f.name)}" data-mime="${esc(f.mime)}" title="Klik untuk unduh / buka">${esc(f.name)}</button>${fileExt(f.name) ? `<small class="muted"> ${esc(fileExt(f.name))}</small>` : ''}</td>
+      <td>${fsize(f.size || 0)}</td><td>${av(f.owner, 'xs')} ${esc(uname(f.owner))}</td><td>${dtText(f.created)}</td>
+      <td class="acts">${canFile(f) ? `<button type="button" class="btn sm" data-a="flRename" data-id="${esc(f.id)}">✏️ Edit</button><button type="button" class="btn sm danger" data-a="flDel" data-id="${esc(f.id)}">🗑 Hapus</button>` : ''}</td>
+    </tr>`).join('')}</tbody></table></div>` : `<p class="empty">${q ? 'Tidak ada file yang cocok.' : 'Belum ada file. Klik ⬆ Upload untuk menambah.'}</p>`}
+  </section>`;
 }
 function taskCard(t) {
   const d = t.data, P = pins(), cc = comments(t.id).length, col = NOTE_COLORS[d.color]?.[1];
@@ -3440,6 +3480,20 @@ const A = {
   vclose: () => $('#viewer').close(),
   stop: () => {},
   dl: el => saveAs(el.dataset.url, el.dataset.name),
+  flReload: () => loadFiles(),
+  flRename: async el => {
+    const f = S.task.files?.find(x => x.id === el.dataset.id); if (!f || !canFile(f)) return;
+    const r = await confirmDlg('Ubah nama file', 'Simpan', false, `<label>Nama baru<input id="fl-name" value="${esc(f.name)}" maxlength="200" required></label>`);
+    if (!r) return; const nm = $('#fl-name', r.form).value.trim(); if (!nm || nm === f.name) return;
+    try { const x = await rpc('ahg_file_rename', { p_token: S.token, p_id: f.id, p_name: nm }); if (!x?.ok) throw new Error({ forbidden: 'hanya pemilik / admin', name: 'nama 1–200 karakter', missing: 'file tidak ada' }[x?.err] || x?.err || 'gagal'); f.name = x.name; renderMain(); toast('Nama file diubah.', 'info', null, 2500); }
+    catch (e) { toast('Gagal mengubah nama: ' + esc(e.message), 'warn'); loadFiles(); }
+  },
+  flDel: async el => {
+    const f = S.task.files?.find(x => x.id === el.dataset.id); if (!f || !canFile(f)) return;
+    if (!await confirmDlg(`Hapus file <b>${esc(f.name)}</b>? Lampiran di task / chat yang memakai file ini tidak bisa dibuka lagi.`, 'Hapus')) return;
+    try { const x = await rpc('ahg_file_delete', { p_token: S.token, p_id: f.id }); if (!x?.ok) throw new Error({ forbidden: 'hanya pemilik / admin', missing: 'file tidak ada' }[x?.err] || x?.err || 'gagal'); fileUrls.delete(f.id); S.task.files = S.task.files.filter(y => y.id !== f.id); renderMain(); toast('File dihapus.', 'info', null, 2500); }
+    catch (e) { toast('Gagal menghapus: ' + esc(e.message), 'warn'); loadFiles(); }
+  },
   openFile: el => viewFile(el.dataset.id, el.dataset.name, el.dataset.mime),
   toolsBtn: () => go(S.view === 'tools' ? 'reminder' : 'tools'),
   chatFab: () => go(S.view === 'chat' ? S.chatBack || 'reminder' : 'chat'),
@@ -3538,7 +3592,14 @@ const CH = { // change / input handlers
   cFile: el => { addPending([...el.files]); el.value = ''; },
   cText: (el, ev) => { if (ev.type === 'input') { autoGrow(el); mentionCheck(el); } },
   taskQ: (el, ev) => { if (ev.type === 'input') { S.task.q = el.value; renderMain(); } },
-  taskTabSel: el => { S.task.tab = el.value; renderMain(); },
+  taskTabSel: el => { S.task.tab = el.value; renderMain(); if (el.value === 'files') loadFiles(); },
+  flQ: el => { S.task.fq = el.value; renderMain(); const i = $('#fl-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } },
+  flUpload: async el => {
+    const fs = [...el.files]; el.value = ''; let ok = 0;
+    for (const f of fs) { try { await uploadFile(await prepFile(f)); ok++; } catch (e) { toast(esc(e.message), 'warn'); } }
+    if (ok) toast(`${ok} file diupload.`, 'info', null, 3000);
+    await loadFiles();
+  },
   taskWho: el => { S.task.who = el.value; renderMain(); },
   cashCatSel: el => { S.cash.cat = el.value; renderMain(); },
   cashP: el => { S.cash.p = el.value; S.cash.ref = today(); renderMain(); },
