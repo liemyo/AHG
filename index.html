@@ -863,6 +863,11 @@ body.finding #main{padding-bottom:calc(260px + env(safe-area-inset-bottom))}
 .fltbl td.fi{font-size:20px;width:30px}
 .fltbl .acts{white-space:nowrap;text-align:right}
 .fltbl .linkish{word-break:break-all;text-align:left}
+.files-btn{border:2px solid #22d3ee;color:var(--text);box-shadow:0 0 0 3px rgba(34,211,238,.22),0 0 12px rgba(34,211,238,.45);font-weight:700}
+.files-btn:hover,.files-btn.on{background:#22d3ee;color:#04222a;border-color:#67e8f9}
+.files-btn .fb-n{background:#22d3ee;color:#04222a;border-radius:9px;padding:0 6px;font-size:11px;margin-left:3px}
+.files-btn.on .fb-n{background:#04222a;color:#67e8f9}
+.files.card{border:2px solid #22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.18)}
 </style>
 </head>
 <body>
@@ -1978,7 +1983,7 @@ document.addEventListener('keydown', ev => {
 });
 
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261019-014532';
+const BUILD = '20261019-015645';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2704,22 +2709,21 @@ function vTask() {
   const T = S.task, links = live('link').sort((a, b) => a.created - b.created), P = pins(), me = S.me.name;
   const all = live('task').filter(t => !t.data.archived);
   const n = { all: all.filter(t => t.data.status !== 'done' || P.includes(t.id)).length, pin: all.filter(t => P.includes(t.id)).length, routine: all.filter(t => t.data.routine?.on).length, mine: all.filter(t => t.owner === me).length, assigned: all.filter(t => t.data.assign === me).length, done: all.filter(t => t.data.status === 'done').length, archive: live('task').filter(t => t.data.archived).length };
-  const tabs = [['all', '📋 Aktif'], ['pin', '📌 Disematkan'], ['routine', '🔁 Rutin mingguan'], ['assigned', '🙋 Untukku'], ['mine', '✍️ Buatanku'], ['done', '✔ Selesai'], ['archive', '🗄 Arsip'], ['files', '📎 Files']];
-  n.files = T.files ? T.files.length : '…';
+  const tabs = [['all', '📋 Aktif'], ['pin', '📌 Disematkan'], ['routine', '🔁 Rutin mingguan'], ['assigned', '🙋 Untukku'], ['mine', '✍️ Buatanku'], ['done', '✔ Selesai'], ['archive', '🗄 Arsip']];
   const owners = [...new Set(live('task').map(t => t.owner))];
-  return `<div class="head"><h1>✅ Task</h1><div class="tools"><button type="button" class="btn primary" data-a="taskNew">＋ Task baru</button></div></div>
-  <section class="card links ${T.links ? 'open' : ''}">
+  return `<div class="head"><h1>✅ Task</h1><div class="tools"><button type="button" class="btn files-btn ${T.tab === 'files' ? 'on' : ''}" data-a="taskFiles">📎 Files${T.files ? ` <span class="fb-n">${T.files.length}</span>` : ''}</button><button type="button" class="btn primary" data-a="taskNew">＋ Task baru</button></div></div>
+  ${T.tab === 'files' ? vFiles() : `<section class="card links ${T.links ? 'open' : ''}">
     <button type="button" class="lk-h" data-a="linksTog"><b>🔗 Link kerja</b><span class="muted small">${links.length} link</span><span class="sp"></span><span class="tg">${T.links ? '⌃' : '⌄'}</span></button>
     ${T.links ? `<div class="lk-l">${links.map(l => `<span class="lk${fl(l.id)}" ${nfa(l.id)}><a href="${esc(l.data.url)}" target="_blank" rel="noopener" title="${esc(l.data.url)}"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(host(l.data.url))}&sz=32" alt="" loading="lazy"><span>${esc(l.data.title || host(l.data.url))}</span></a>${canEdit(l) ? `<button type="button" class="x" data-a="linkDel" data-id="${l.id}" title="Hapus link">✕</button>` : ''}</span>`).join('') || '<span class="muted small">Belum ada link. Spreadsheet, Docs, Drive, dll — terlihat semua anggota.</span>'}</div>
     <form class="lk-add" id="link-add"><input id="lk-url" placeholder="Tempel link (https://docs.google.com/…)" required><input id="lk-title" placeholder="Nama link (opsional)" maxlength="80"><button class="btn" type="submit">＋ Link</button></form>` : ''}
   </section>
-  <div class="tf ${T.tab === 'routine' || T.tab === 'files' ? 'rt' : ''}">
+  <div class="tf ${T.tab === 'routine' ? 'rt' : ''}">
     <select id="t-tab" data-ch="taskTabSel" data-keep="0" class="t-tab">${tabs.map(([k, l]) => `<option value="${k}" ${T.tab === k ? 'selected' : ''}>${l} (${n[k]})</option>`).join('')}</select>
-    ${T.tab !== 'routine' && T.tab !== 'files' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option><option value="@me" ${T.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
+    ${T.tab !== 'routine' ? `<select id="t-who" data-ch="taskWho" data-keep="0"><option value="">Semua pembuat</option><option value="@me" ${T.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${T.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select><button type="button" class="ib" data-a="taskLayout" title="Tampilan">${T.layout === 'grid' ? '☰' : '▦'}</button>
     <input id="t-q" class="t-q" placeholder="🔍 Cari task…" data-ch="taskQ" value="${esc(T.q)}">` : ''}
   </div>
-  ${T.tab === 'files' ? vFiles() : T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
-    ${l.length ? `<div class="grid ${T.layout}">${l.map(taskCard).join('')}</div>` : '<p class="empty">Tidak ada task di sini.</p>'}`; })()}`;
+  ${T.tab === 'routine' ? vRoutine() : (() => { const l = taskList(); return `<button type="button" class="quick" data-a="taskNew">Tulis task baru…<span>＋</span></button>
+    ${l.length ? `<div class="grid ${T.layout}">${l.map(taskCard).join('')}</div>` : '<p class="empty">Tidak ada task di sini.</p>'}`; })()}`}`;
 }
 // ---------- TASK › Files (perpustakaan dokumen: semua file yang pernah diupload) ----------
 const canFile = f => isAdmin() || f.owner === S.me.name; // rename / hapus: pemilik atau admin (server juga memeriksa)
@@ -3480,6 +3484,7 @@ const A = {
   vclose: () => $('#viewer').close(),
   stop: () => {},
   dl: el => saveAs(el.dataset.url, el.dataset.name),
+  taskFiles: () => { const T = S.task; if (T.tab === 'files') { T.tab = T.prev || 'all'; renderMain(); } else { T.prev = T.tab; T.tab = 'files'; renderMain(); loadFiles(); } },
   flReload: () => loadFiles(),
   flRename: async el => {
     const f = S.task.files?.find(x => x.id === el.dataset.id); if (!f || !canFile(f)) return;
@@ -3592,7 +3597,7 @@ const CH = { // change / input handlers
   cFile: el => { addPending([...el.files]); el.value = ''; },
   cText: (el, ev) => { if (ev.type === 'input') { autoGrow(el); mentionCheck(el); } },
   taskQ: (el, ev) => { if (ev.type === 'input') { S.task.q = el.value; renderMain(); } },
-  taskTabSel: el => { S.task.tab = el.value; renderMain(); if (el.value === 'files') loadFiles(); },
+  taskTabSel: el => { S.task.tab = el.value; renderMain(); },
   flQ: el => { S.task.fq = el.value; renderMain(); const i = $('#fl-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } },
   flUpload: async el => {
     const fs = [...el.files]; el.value = ''; let ok = 0;
