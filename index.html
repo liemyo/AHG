@@ -471,7 +471,7 @@ main[data-view=chat]{padding-bottom:18px}
   .me-btn{padding:3px}
   .side{display:none}
   main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
-  .bnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .bnav{display:grid;grid-template-columns:repeat(7,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
   .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-radius:12px}
   .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
   .bnav .ic{font-size:20px;position:relative;line-height:1.2}
@@ -810,7 +810,7 @@ main[data-view=chat]{padding-bottom:18px}
 /* chat + find tampil berdua → pasangan (60+10+60) dipusatkan di kolom sidebar */
 @media (min-width:821px){.chat-fab:has(+ .find-fab:not([hidden])){left:calc((230px - 1px) / 2 - 65px)}}
 @media (min-width:821px) and (max-width:1180px){.chat-fab:has(+ .find-fab:not([hidden])){left:calc((220px - 1px) / 2 - 65px)}}
-@media (max-width:820px){.chat-fab{left:calc((100vw - 8px) / 12 + 4px - 28px)}}
+@media (max-width:820px){.chat-fab{left:calc((100vw - 8px) / 14 + 4px - 28px)}}
 /* 🔔 klik notifikasi → kilatan sorotan pada item tujuan; tab Mention */
 @keyframes nflash{0%,100%{box-shadow:0 0 0 0 transparent}20%,60%{box-shadow:0 0 0 3px var(--acc),0 0 18px color-mix(in srgb,var(--acc) 55%,transparent)}40%,80%{box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 40%,transparent)}}
 .nflash{animation:nflash 1.6s ease 2;border-radius:12px;scroll-margin:90px}
@@ -831,7 +831,7 @@ main[data-view=chat]{padding-bottom:18px}
 .find-fab[hidden]{display:none}
 .find-fab.on{background:var(--card);color:var(--acc);border:1px solid var(--line)}
 @media (max-width:1180px){.find-fab{left:calc((220px - 1px) / 2 + 5px)}}
-@media (max-width:820px){.find-fab{left:calc(4px + (100vw - 8px) * 11 / 12 - 28px)}.find-fab.on{display:grid}}
+@media (max-width:820px){.find-fab{left:calc(4px + (100vw - 8px) * 13 / 14 - 28px)}.find-fab.on{display:grid}}
 .find-bar{position:fixed;z-index:45;left:calc((230px - 1px) / 2 - 30px);bottom:92px;width:min(460px,calc(100vw - 32px));display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px 6px 6px 12px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.28);animation:tin .18s ease}
 .find-bar[hidden]{display:none}
 .find-bar .fd-ic{color:var(--muted);display:grid}
@@ -896,6 +896,73 @@ dialog::backdrop{background:rgba(10,20,40,.35);backdrop-filter:blur(4px);-webkit
 .mpop{backdrop-filter:var(--g-blur);-webkit-backdrop-filter:var(--g-blur)}
 .bnav{background:color-mix(in srgb,var(--card) 70%,transparent);border-top:1px solid var(--g-edge)}
 .lcard{border-top:4px solid var(--ahg-blue)}
+
+/* ---- 📊 dashboard + reminder Daftar / Papan ---- */
+.rtag{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap;background:var(--soft);color:var(--muted);flex:none}
+.rtag.late{background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red)}
+.rtag.today{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+.rtag.done{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.late{color:var(--red)}.tod{color:var(--acc)}
+.hck{width:20px;height:20px;border-radius:50%;border:2px solid var(--c,var(--acc));background:none;cursor:pointer;flex:none;padding:0;color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center}
+.hck:hover{background:color-mix(in srgb,var(--c,var(--acc)) 25%,transparent)}.hck.ok{background:var(--c,var(--acc))}
+.hkpi{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.hk{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:14px 16px;text-align:left;cursor:pointer;color:var(--text);font:inherit;min-width:0}
+.hk:hover{border-color:var(--acc)}
+.hk-l{font-size:13px;font-weight:600;color:var(--muted)}.hk b{font-size:28px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.hk-s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hk.hot b{color:var(--red)}.hk.neg b{color:var(--red)}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:14px;align-items:start}
+.hlist{padding:4px 0 8px;gap:0}
+.hsec{padding:12px 16px 4px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.hrow,.crow{display:flex;align-items:center;gap:10px;padding:8px 16px;border-top:1px solid var(--line);min-width:0}
+.hsec+.hrow{border-top:0}
+.ht{flex:1;min-width:0;border:0;background:none;padding:0;text-align:left;font:inherit;font-weight:600;color:var(--text);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ht:hover{color:var(--acc)}
+.hnone{margin:2px 16px 6px}
+.hmore{display:block;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:8px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer}.hmore:hover{color:var(--acc)}
+.hside{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hbox{padding:14px 16px}.hbh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hbar{margin:9px 0}.hbar>div{display:flex;justify-content:space-between;font-size:13.5px}
+.hbar i{display:block;height:8px;border-radius:99px;background:var(--soft);margin-top:4px;overflow:hidden}.hbar em{display:block;height:100%;border-radius:99px;background:var(--c)}
+.havs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hact{display:flex;flex-direction:column;margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
+.hact button{display:flex;gap:8px;align-items:flex-start;border:0;background:none;font:inherit;font-size:13px;color:var(--text);text-align:left;padding:5px 2px;cursor:pointer;border-radius:8px}
+.hact button:hover{background:var(--soft)}.hact button>span:last-child{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--g-edge,var(--line));border-radius:12px;background:var(--card);backdrop-filter:var(--g-blur);-webkit-backdrop-filter:var(--g-blur)}
+.seg button{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--muted);padding:5px 11px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--soft);color:var(--text);box-shadow:inset 0 1px 0 var(--g-hi,transparent)}
+.rsplit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:14px;align-items:start}
+.rcomp{padding:6px;gap:0;max-height:calc(100dvh - 300px);overflow:auto}
+.crow{border-top:0;border-radius:10px;padding:8px 10px;cursor:pointer}
+.crow:hover{background:var(--soft)}.crow.on{background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.crow .ct{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow.done .ct{text-decoration:line-through;color:var(--muted)}
+.rdet{position:sticky;top:76px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;max-height:calc(100dvh - 92px);overflow:auto}
+.rd-h{display:flex;gap:12px;align-items:flex-start}.rd-h .rchk{border-color:var(--c)}.rd-h .rchk.ok{background:var(--c)}
+.rd-t{font-size:19px;font-weight:800;overflow-wrap:anywhere}
+.rd-back{display:none}
+.rd-note{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--soft)}
+.rd-act{display:flex;gap:8px;flex-wrap:wrap}
+.rd-cm{display:flex;flex-direction:column;gap:8px}
+.bload{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-4px 0 12px}
+.board.rlist{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
+.bcol{display:flex;flex-direction:column;gap:10px;min-height:120px;border-radius:16px;padding:4px;transition:background .15s}
+.bcol.over{background:color-mix(in srgb,var(--acc) 12%,transparent);outline:2px dashed color-mix(in srgb,var(--acc) 50%,transparent)}
+.bch{display:flex;align-items:center;gap:8px;padding:2px 6px}
+.bcard{padding:12px 13px;border-left:4px solid var(--c)!important;cursor:grab}
+.bcard.drag{opacity:.4}.bcard.done{opacity:.65}.bcard.done .bt{text-decoration:line-through}
+.bcard .bt{font-weight:700;overflow-wrap:anywhere}.bcard .bn{font-size:12.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bm{display:flex;align-items:center;gap:6px;margin-top:8px}
+.bnone{text-align:center;margin:6px 0}
+@media (max-width:1180px){.hkpi{grid-template-columns:repeat(3,minmax(0,1fr))}.board.rlist{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:820px){
+  .hkpi{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.hk{padding:10px 12px}.hk b{font-size:22px}
+  .hgrid{grid-template-columns:minmax(0,1fr)}
+  .rsplit{grid-template-columns:minmax(0,1fr)}.rsplit.has .rcomp,.rsplit:not(.has) .rdet{display:none}
+  .rcomp{max-height:none}.rdet{position:static;max-height:none}.rd-back{display:grid}
+  .board.rlist{grid-template-columns:minmax(0,1fr)}
+  .head .tools .seg{order:-1}
+  #main:has(.rsplit.has) #rem-add,#main:has(.rsplit.has) .lhead{display:none}
+}
 </style>
 </head>
 <body>
@@ -1860,7 +1927,7 @@ const fl = id => N.fid === id && Date.now() < N.fUntil ? ' nflash' : '';
 const nfa = id => `data-nid="${esc(id)}"`;
 function inPeriod(P, date) { const [s, e] = periodRange(P.p, P.ref, P.from, P.to); return (!s || date >= s) && (!e || date < e); }
 function showPeriod(P, date) { if (!date || inPeriod(P, date)) return; if (P.p === 'range') P.p = 'month'; P.ref = date; }
-function remShow(r) { const R = S.rem; R.sel = ''; R.scope = 'all'; if (!remList().some(x => x.id === r.id)) { R.st = 'all'; R.who = ''; } go('reminder'); }
+function remShow(r) { const R = S.rem; R.sel = ''; R.scope = 'all'; if (R.mode !== 'cal') { R.mode = 'list'; R.pick = r.id; } if (!remList().some(x => x.id === r.id)) { R.st = 'all'; R.who = ''; } go('reminder'); }
 function nGo(it) {
   const d = it.data || {}, par = it.kind === 'comment' ? S.items.get(d.rem || d.task) : null;
   if (it.kind === 'comment' && (!par || par.deleted)) { toast('Item yang dikomentari sudah dihapus.', 'warn'); return; }
@@ -2010,8 +2077,130 @@ document.addEventListener('keydown', ev => {
   if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && !ev.altKey && ev.key.toLowerCase() === 'f' && S.me && S.view === 'reminder' && !dlg().open) { ev.preventDefault(); findOpen(true); }
 });
 
+// ---------- 📊 DASHBOARD (halaman utama) + tampilan Reminder: Daftar (inbox 2 panel) / Papan (kolom status) / Kalender ----------
+// Semua angka diturunkan dari data yang sudah tersinkron (reminder, task rutin, cash, unit produksi) — tidak ada data baru.
+const REM_MODES = [['list', '☰', 'Daftar'], ['board', '▦', 'Papan'], ['cal', '📅', 'Kalender']];
+const remColor = r => PALETTE[r.data.color]?.[1] || PALETTE.blue[1];
+function remBucket(r) { // late | today | soon (≤7 hari) | later | done
+  const d = r.data, td = today();
+  if (d.done) return 'done';
+  if (!d.date) return 'later';
+  if (d.date < td || (d.date === td && d.time && d.time < hm(Date.now()))) return 'late';
+  if (d.date === td) return 'today';
+  return d.date <= ymd(addDays(new Date(), 7)) ? 'soon' : 'later';
+}
+const remWhen = r => { const d = r.data; if (!d.date) return '—'; if (d.date === today()) return d.time || 'Hari ini'; const p = pYmd(d.date); return `${DSH[p.getDay()]} ${p.getDate()} ${MSH[p.getMonth()]}`; };
+const lateDays = r => Math.round((pYmd(today()) - pYmd(r.data.date)) / 864e5);
+const rpShort = n => { const a = Math.abs(n), s = n < 0 ? '−Rp' : 'Rp'; return a >= 1e9 ? s + vol(a / 1e9) + ' M' : a >= 1e6 ? s + (a / 1e6).toLocaleString('id-ID', { maximumFractionDigits: 1 }) + ' jt' : s + num(a); };
+function remBuckets(list) {
+  const b = { late: [], today: [], soon: [], later: [], done: [] };
+  for (const r of list) b[remBucket(r)].push(r);
+  const asc = (a, c) => remKey(a).localeCompare(remKey(c));
+  b.late.sort((a, c) => asc(c, a)); b.today.sort(asc); b.soon.sort(asc); b.later.sort(asc);
+  b.done.sort((a, c) => (c.data.doneAt || c.updated) - (a.data.doneAt || a.updated));
+  return b;
+}
+
+// ---------- dashboard ----------
+const hRow = r => `<div class="hrow${fl(r.id)}" ${nfa(r.id)}><button type="button" class="hck" style="--c:${remColor(r)}" data-a="remDone" data-id="${r.id}" title="Tandai selesai"></button><button type="button" class="ht" data-a="remPick" data-id="${r.id}">${esc(r.data.title)}</button>${comments(r.id).length ? `<span class="muted small">💬 ${comments(r.id).length}</span>` : ''}${av(r.owner, 'xs')}<span class="rtag ${remBucket(r)}">${remWhen(r)}</span></div>`;
+function hSec(title, cls, list, max, empty) {
+  return `<div class="hsec"><span class="${cls}">● ${title} · ${list.length}</span></div>${list.length ? list.slice(0, max).map(hRow).join('') : `<p class="muted small hnone">${empty}</p>`}${list.length > max ? `<button type="button" class="hmore" data-a="homeGo" data-k="board">+${list.length - max} lainnya · Lihat semua</button>` : ''}`;
+}
+function vHome() {
+  const b = remBuckets(live('reminder')), h = new Date().getHours();
+  const hi = h < 11 ? 'pagi' : h < 15 ? 'siang' : h < 18 ? 'sore' : 'malam';
+  const rt = routineToday(), rtDone = rt.filter(x => x.done).length;
+  const [ms, me] = periodRange('month', today()), ct = catTotals('', ms, me), mon = MONTHS[new Date().getMonth()];
+  const [ws, we] = periodRange('week', today()), prod = new Map();
+  for (const t of unitTx()) if ((t.data.cat || 'produksi') === 'produksi' && t.data.date >= ws && t.data.date < we) { const k = t.data.unit + '|' + (t.data.sat || ''); const a = prod.get(k) || { unit: t.data.unit, sat: t.data.sat || '', v: 0 }; a.v += Number(t.data.volume) || 0; prod.set(k, a); }
+  const pl = [...prod.values()].sort((a, c) => a.unit.localeCompare(c.unit)), pmax = Math.max(1, ...pl.map(p => p.v));
+  const ons = S.users.filter(online), acts = notifs().slice(0, 4);
+  const kpi = (k, label, val, sub, cls = '') => `<button type="button" class="card hk ${cls}" data-a="homeGo" data-k="${k}"><span class="hk-l">${label}</span><b>${val}</b><span class="hk-s">${sub}</span></button>`;
+  return `<div class="head"><h1>Selamat ${hi}, ${esc(uname(S.me.name).split(' ')[0])}</h1><div class="tools"><button type="button" class="btn primary" data-a="homeAdd">＋ Reminder baru</button></div></div>
+  <div class="hkpi">
+    ${kpi('late', 'Terlambat', b.late.length, b.late.length ? 'perlu tindakan' : 'aman 👍', b.late.length ? 'hot' : '')}
+    ${kpi('today', 'Hari ini', b.today.length, 'reminder jatuh tempo')}
+    ${kpi('soon', '7 hari ke depan', b.soon.length, 'akan datang')}
+    ${kpi('task', 'Task rutin hari ini', `${rtDone}/${rt.length}`, rt.length ? 'sudah dicentang' : 'tidak ada jadwal')}
+    ${kpi('cash', 'Sisa kasbon', rpShort(ct.close), `${mon}: ▲ ${rpShort(ct.in)} · ▼ ${rpShort(ct.out)}`, ct.close < 0 ? 'neg' : '')}
+  </div>
+  <div class="hgrid">
+    <section class="card hlist rlist">
+      ${hSec('Terlambat', 'late', b.late, 6, 'Tidak ada yang terlambat.')}
+      ${hSec('Hari ini', 'tod', b.today, 6, 'Tidak ada reminder hari ini.')}
+      ${hSec('7 hari ke depan', '', b.soon, 5, 'Belum ada jadwal minggu ini.')}
+    </section>
+    <div class="hside">
+      <section class="card hbox"><div class="hbh"><b>🏭 Produksi minggu ini</b><button type="button" class="mini" data-a="go" data-v="unit">Detail ›</button></div>
+        ${pl.length ? pl.map(p => `<div class="hbar"><div><b>${esc(p.unit)}</b><span>${vol(p.v)} <span class="muted">${esc(p.sat)}</span></span></div><i><em style="width:${Math.round(p.v / pmax * 100)}%;--c:${ucolor(p.unit)}"></em></i></div>`).join('') : '<p class="muted small">Belum ada input produksi minggu ini.</p>'}
+      </section>
+      <section class="card hbox"><div class="hbh"><b>👥 Tim</b><span class="on-t small">● ${ons.length} online</span></div>
+        <div class="havs">${S.users.slice().sort((a, c) => online(c) - online(a)).slice(0, 9).map(u => `<span class="avw">${av(u.name)}<i class="st ${online(u) ? 'on' : ''}"></i></span>`).join('')}${S.users.length > 9 ? `<span class="muted small">+${S.users.length - 9}</span>` : ''}</div>
+        ${acts.length ? `<div class="hact">${acts.map(it => { const [ic, act, tx] = nInfo(it); return `<button type="button" data-a="bellGo" data-id="${it.id}"><span>${ic}</span><span><b>${esc(uname(nActor(it)))}</b> ${esc(act)}${tx ? ` <span class="muted">· ${esc(tx)}</span>` : ''}</span></button>`; }).join('')}</div>` : '<p class="muted small">Belum ada aktivitas baru.</p>'}
+      </section>
+    </div>
+  </div>`;
+}
+
+// ---------- Reminder: header + Daftar + Papan ----------
+const remSeg = () => `<div class="seg">${REM_MODES.map(([k, ic, l]) => `<button type="button" class="${S.rem.mode === k ? 'on' : ''}" data-a="remMode" data-m="${k}">${ic} ${l}</button>`).join('')}</div>`;
+const cRow = (r, on) => `<div class="crow ${on ? 'on' : ''} ${r.data.done ? 'done' : ''}${fl(r.id)}" ${nfa(r.id)} data-a="remPick" data-id="${r.id}"><button type="button" class="hck ${r.data.done ? 'ok' : ''}" style="--c:${remColor(r)}" data-a="remDone" data-id="${r.id}" title="${r.data.done ? 'Tandai belum selesai' : 'Tandai selesai'}">${r.data.done ? '✓' : ''}</button><span class="ct">${withMentions(esc(r.data.title))}</span>${r.data.files?.length ? '<span class="muted small">📎</span>' : ''}${comments(r.id).length ? `<span class="muted small">💬 ${comments(r.id).length}</span>` : ''}${av(r.owner, 'xs')}<span class="rtag ${remBucket(r)}">${remWhen(r)}</span></div>`;
+function remDetail(r) {
+  if (!r) return '<p class="empty">Pilih reminder di daftar untuk melihat detail.</p>';
+  const d = r.data, k = remBucket(r);
+  const st = { late: `Terlambat ${lateDays(r) ? lateDays(r) + ' hari' : ''}`, today: 'Hari ini', soon: 'Akan datang', later: 'Akan datang', done: 'Selesai' }[k];
+  return `<div class="rd-h"><button type="button" class="ib rd-back" data-a="remPick" data-id="" title="Kembali ke daftar">‹</button><button type="button" class="rchk ${d.done ? 'ok' : ''}" style="--c:${remColor(r)}" data-a="remDone" data-id="${r.id}" title="${d.done ? 'Tandai belum selesai' : 'Tandai selesai'}">${d.done ? '✓' : ''}</button>
+    <div class="rb"><div class="rd-t">${withMentions(esc(d.title))}</div>
+    <div class="rm"><span class="rtag ${k}">${st}</span><span>📅 ${d.date ? dText(d.date) : '—'}${d.time ? ' · ' + d.time : ''}</span><span>✍️ ${av(r.owner, 'xs')} <b>${esc(uname(r.owner))}</b> · ${dtText(r.created)}</span>${d.done ? `<span class="okm">✅ ${esc(uname(d.doneBy))} · ${dtText(d.doneAt)}</span>` : ''}</div></div>
+    ${canEdit(r) ? `<div class="ra"><button type="button" class="ib" data-a="remEdit" data-id="${r.id}" title="Ubah">✏️</button><button type="button" class="ib" data-a="remDel" data-id="${r.id}" title="Hapus">🗑</button></div>` : ''}</div>
+  ${d.note || d.files?.length ? `<div class="rd-note">${d.note ? `<div class="rn">${withMentions(linkify(d.note))}</div>` : ''}${filesHtml(d.files)}</div>` : ''}
+  <div class="rd-act"><button type="button" class="btn ${d.done ? '' : 'primary'}" data-a="remDone" data-id="${r.id}">${d.done ? '↺ Belum selesai' : '✓ Tandai selesai'}</button>${canEdit(r) && !d.done ? '<button type="button" class="btn" data-a="remSnooze" data-id="' + r.id + '">⏱ Tunda ke besok</button>' : ''}</div>
+  <div class="rd-cm"><b class="muted small">KOMENTAR · ${comments(r.id).length}</b>${cmtHtml(r.id)}
+    <div class="cm-add"><textarea id="rc-${r.id}" data-men rows="1" maxlength="5000" placeholder="Tulis komentar… @ untuk menandai · Ctrl/⌘+Enter kirim"></textarea>${attachBtn('rc-' + r.id)}<button type="button" class="btn primary sm" data-a="remCmAdd" data-id="${r.id}">Kirim</button></div><div class="pend" data-pf="rc-${r.id}">${pfHtml('rc-' + r.id)}</div></div>`;
+}
+function vRemList(list) {
+  const R = S.rem, cur = list.find(r => r.id === R.pick) || (R.pick && S.items.get(R.pick)?.kind === 'reminder' && !S.items.get(R.pick).deleted ? S.items.get(R.pick) : null) || list[0];
+  return `<div class="rsplit ${R.pick ? 'has' : ''}"><div class="card rlist rcomp">${list.length ? list.map(r => cRow(r, r === cur)).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Tidak ada reminder untuk filter ini.'}</p>`}</div>
+    <div class="card rdet">${remDetail(cur)}</div></div>`;
+}
+const BOARD = [['late', '🔴 Terlambat', 'late'], ['today', '🔵 Hari ini', 'tod'], ['soon', '⏳ Akan datang', ''], ['done', '✅ Selesai', '']];
+const bCard = r => `<div class="card bcard ${r.data.done ? 'done' : ''}${fl(r.id)}" ${nfa(r.id)} style="--c:${remColor(r)}" draggable="true" data-id="${r.id}" data-a="remPick">
+  <div class="bt">${withMentions(esc(r.data.title))}</div>${r.data.note ? `<div class="bn">${esc(r.data.note.split('\n')[0].slice(0, 90))}</div>` : ''}
+  <div class="bm">${av(r.owner, 'xs')}<span class="rtag ${remBucket(r)}">${remWhen(r)}</span><span class="sp"></span>${comments(r.id).length ? `<span class="muted small">💬 ${comments(r.id).length}</span>` : ''}<button type="button" class="hck ${r.data.done ? 'ok' : ''}" style="--c:${remColor(r)}" data-a="remDone" data-id="${r.id}" title="${r.data.done ? 'Tandai belum selesai' : 'Tandai selesai'}">${r.data.done ? '✓' : ''}</button></div></div>`;
+function vRemBoard(list) {
+  const b = remBuckets(list); b.soon = b.soon.concat(b.later);
+  const load = {}; for (const r of list) if (!r.data.done) load[r.owner] = (load[r.owner] || 0) + 1;
+  const lt = Object.entries(load).sort((a, c) => c[1] - a[1]).slice(0, 5);
+  return `${lt.length ? `<div class="bload"><span class="muted small">Beban kerja (belum selesai):</span>${lt.map(([o, n]) => `<button type="button" class="chip ${S.rem.who === o ? 'on' : ''}" data-a="remWhoSet" data-v="${esc(o)}">${av(o, 'xs')} ${n}</button>`).join('')}</div>` : ''}
+  <div class="board rlist">${BOARD.map(([k, l, cls]) => { const all = b[k], show = k === 'done' ? all.slice(0, 20) : all;
+    return `<div class="bcol" data-col="${k}"><div class="bch"><b class="${cls}">${l}</b><span class="n">${all.length}</span></div>${show.map(bCard).join('') || '<p class="muted small bnone">Kosong</p>'}${all.length > show.length ? `<p class="muted small bnone">+${all.length - show.length} lainnya (filter “Selesai” di Daftar)</p>` : ''}</div>`; }).join('')}</div>`;
+}
+function remMove(id, col) {
+  const r = S.items.get(id); if (!r || remBucket(r) === col || (col === 'soon' && remBucket(r) === 'later')) return;
+  if (col === 'late') return toast('Reminder tidak bisa dipindah ke Terlambat.', 'warn');
+  if (col === 'done') return patch(id, { done: true, doneBy: S.me.name, doneAt: srvNow() });
+  const date = col === 'today' ? today() : ymd(addDays(new Date(), 1)), undo = r.data.done ? { done: false, doneBy: '', doneAt: 0 } : {};
+  if (r.data.date === date || (col === 'soon' && r.data.date > today())) return patch(id, undo);
+  if (!canEdit(r)) { if (r.data.done) patch(id, undo); return toast('Hanya pembuat reminder atau admin yang bisa mengubah tanggal.', 'warn'); }
+  patch(id, { ...undo, date, ...(col === 'today' && r.data.time && r.data.time < hm(Date.now()) ? { time: '' } : {}) }); // jam yang sudah lewat → tanpa jam, supaya tidak langsung “terlambat” lagi
+  toast(`📅 “${esc(r.data.title)}” dipindah ke ${col === 'today' ? 'hari ini' : 'besok'}.`, 'info');
+}
+document.addEventListener('dragstart', ev => { const c = ev.target.closest?.('.bcard'); if (!c) return; ev.dataTransfer.setData('text/x-rem', c.dataset.id); ev.dataTransfer.effectAllowed = 'move'; c.classList.add('drag'); });
+document.addEventListener('dragend', ev => { ev.target.closest?.('.bcard')?.classList.remove('drag'); $$('.bcol.over').forEach(e => e.classList.remove('over')); });
+document.addEventListener('dragover', ev => { const c = ev.target.closest?.('.bcol'); if (!c || !ev.dataTransfer.types.includes('text/x-rem')) return; ev.preventDefault(); $$('.bcol.over').forEach(e => e !== c && e.classList.remove('over')); c.classList.add('over'); });
+document.addEventListener('drop', ev => { const c = ev.target.closest?.('.bcol'), id = ev.dataTransfer?.getData('text/x-rem'); if (!c || !id) return; ev.preventDefault(); c.classList.remove('over'); remMove(id, c.dataset.col); });
+
+const HA = {
+  homeGo: el => { const k = el.dataset.k; if (k === 'task') return go('task'); if (k === 'cash') return go('cash'); Object.assign(S.rem, { mode: 'board', sel: '', scope: 'all', who: '' }); LS.set('remMode', 'board'); go('reminder'); },
+  homeAdd: () => { if (S.rem.mode === 'board') S.rem.mode = 'list'; go('reminder'); $('#ra-title')?.focus(); },
+  remMode: el => { S.rem.mode = el.dataset.m; LS.set('remMode', S.rem.mode); if (S.rem.mode !== 'list') S.rem.pick = ''; renderMain(); },
+  remPick: el => { const id = el.dataset.id; if (id && S.view !== 'reminder' || S.rem.mode === 'board') { const r = S.items.get(id); S.rem.mode = 'list'; S.rem.pick = id; if (r) remShow(r); else go('reminder'); return; } S.rem.pick = id; renderMain(); if (!id) window.scrollTo(0, 0); },
+  remSnooze: el => { const r = S.items.get(el.dataset.id); if (!r || !canEdit(r)) return; const base = r.data.date && r.data.date > today() ? pYmd(r.data.date) : new Date(); const date = ymd(addDays(base, 1)); patch(r.id, { date }); toast(`⏱ Ditunda ke ${dText(date)}.`, 'info'); },
+  remWhoSet: el => { S.rem.who = S.rem.who === el.dataset.v ? '' : el.dataset.v; renderMain(); },
+};
+
 // Virtual Work AHG — reminder, global chat (+ whisper), task (+ rutin mingguan) dan kasbon tim. Data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261022-103504';
+const BUILD = '20261022-105630';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only ahg_* functions
 
 // ---------- helpers ----------
@@ -2064,14 +2253,14 @@ const NOTE_COLORS = { '': ['Tanpa warna', 'transparent'], red: ['Merah', '#f28b8
 const ACCENTS = { '#1f6fc0': 'Biru AHG (logo)', '#d62b2b': 'Merah AHG (logo)', '#1a8566': 'Hijau', '#2563eb': 'Biru', '#7c3aed': 'Ungu', '#db2777': 'Pink', '#e07b00': 'Oranye', '#dc2626': 'Merah', '#0d9488': 'Toska', '#475569': 'Abu' };
 const AV_COLORS = ['#1a8566', '#2563eb', '#7c3aed', '#db2777', '#e07b00', '#dc2626', '#0d9488', '#475569', '#9333ea', '#0891b2'];
 const STATUS = { todo: ['Belum', '○'], doing: ['Proses', '◐'], done: ['Selesai', '●'] };
-const VIEWS = { reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], wait: ['🎮', 'Waiting'], tools: ['🧰', 'Tools'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
+const VIEWS = { home: ['📊', 'Dashboard'], reminder: ['⏰', 'Reminder'], chat: ['💬', 'Global Chat'], task: ['✅', 'Task'], cash: ['💰', 'Cash'], unit: ['🏭', 'Unit'], wait: ['🎮', 'Waiting'], tools: ['🧰', 'Tools'], users: ['👥', 'Users'], admin: ['👑', 'Admin'] };
 
 // ---------- state ----------
 const now0 = new Date();
 const S = {
   token: '', me: null, users: [], skew: 0, items: new Map(), seq: 0, queue: new Set(), loaded: false,
   view: 'reminder',
-  rem: { open: {}, cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '', sort: 'date' },
+  rem: { mode: ['list', 'board', 'cal'].includes(LS.get('remMode')) ? LS.get('remMode') : 'list', pick: '', open: {}, cal: true, y: now0.getFullYear(), m: now0.getMonth(), sel: '', addDate: '', st: 'open', scope: 'all', who: '', sort: 'date' },
   chat: { conv: 'g', files: [], limit: 200, sending: false },
   task: { files: null, fq: '', links: false, tab: 'all', q: '', who: '', week: 0, layout: LS.get('task.layout') || 'grid' },
   unit: { cat: 'produksi', p: 'month', ref: today(), from: '', to: '', bc: '', u: '', mk: '', q: '' },
@@ -2322,7 +2511,7 @@ async function login(name, pass, remember) {
   start(r.new ? `Selamat datang, <b>${esc(r.me.name)}</b>! Akunmu sudah dibuat — ingat password-nya.` : '');
 }
 function start(msg) {
-  loadCache(); S.loaded = false; S.view = 'reminder'; S.chat.conv = 'g'; S.dlg = null;
+  loadCache(); S.loaded = false; S.view = 'home'; S.chat.conv = 'g'; S.dlg = null;
   const t = prefData().theme; if (t && !LS.get('theme')) { LS.set('theme', JSON.stringify(t)); applyTheme(); }
   render(); liveStart(); syncNow().then(() => { const t2 = prefData().theme; if (t2 && JSON.stringify(t2) !== JSON.stringify(theme())) { LS.set('theme', JSON.stringify(t2)); applyTheme(); } checkDue(true); });
   if (msg) toast(msg, 'info', null, 9000);
@@ -2396,11 +2585,11 @@ function badges() {
 }
 function renderNav() {
   const b = badges(), on = S.users.filter(online).length;
-  const items = ['reminder', 'task', 'cash', 'unit', 'wait', 'users', ...(isAdmin() ? ['admin'] : [])];
+  const items = ['home', 'reminder', 'task', 'cash', 'unit', 'wait', 'users', ...(isAdmin() ? ['admin'] : [])];
   const n = { reminder: b.rem, chat: b.chat, task: b.task, wait: waitBadge(), users: on };
   setHTML($('#side'), items.map(v => `<button type="button" class="nav ${S.view === v ? 'on' : ''} nv-${v}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}</span><span class="lb">${VIEWS[v][1]}</span>${n[v] ? `<span class="n ${v === 'chat' ? 'hot' : v === 'users' ? 'grn' : ''}">${n[v]}</span>` : ''}</button>`).join('')
     + `<div class="side-f"><span class="sync"></span><span class="muted small">versi ${BUILD}</span></div>`);
-  setHTML($('#bnav'), ['reminder', 'task', 'cash', 'unit', 'wait', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : VIEWS[v][1]}</span></button>`).join(''));
+  setHTML($('#bnav'), ['home', 'reminder', 'task', 'cash', 'unit', 'wait', 'users'].map(v => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="go" data-v="${v}"><span class="ic">${VIEWS[v][0]}${n[v] && v !== 'users' ? `<i class="dot ${v === 'chat' ? 'hot' : ''}">${n[v] > 99 ? '99+' : n[v]}</i>` : ''}</span><span>${v === 'chat' ? 'Chat' : v === 'home' ? 'Home' : VIEWS[v][1]}</span></button>`).join(''));
   setHTML($('#me-btn'), `${av(S.me.name)}<span class="mn">${esc(uname(S.me.name))}${isAdmin() ? ' <small>Admin</small>' : ''}</span><span class="caret">▾</span>`);
   renderBell();
   $('#tools-btn')?.classList.toggle('on', S.view === 'tools');
@@ -2429,7 +2618,7 @@ function keep(root, fn) {
 }
 function renderMain() {
   const m = $('#main'); if (!m) return;
-  const html = ({ reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, wait: vWait, tools: vTools, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
+  const html = ({ home: vHome, reminder: vReminder, chat: vChat, task: vTask, cash: vCash, unit: vUnit, wait: vWait, tools: vTools, users: vUsersPage, admin: vAdmin }[S.view] || vReminder)();
   const sameChat = S.view === 'chat' && m.dataset.view === 'chat' && m.dataset.conv === S.chat.conv && $('#composer', m);
   if (sameChat) { // keep the composer (typing, IME, file picker) — refresh only lists and header
     const tmp = document.createElement('div'); tmp.innerHTML = html;
@@ -2507,8 +2696,9 @@ function vReminder() {
   const counts = { all: rems.length, open: rems.filter(r => !r.data.done).length, done: rems.filter(r => r.data.done).length };
   const owners = [...new Set(rems.map(r => r.owner))];
   const addDate = R.addDate || R.sel || td;
-  return `<div class="head"><h1>⏰ Reminder</h1><div class="tools"><button type="button" class="btn sm" data-a="remExpDlg" title="Unduh daftar reminder PDF / Excel">📤 Export</button><button type="button" class="btn sm" data-a="remToday">Hari ini</button></div></div>
-  <button type="button" class="hb-tog" data-a="calTog" title="${R.cal ? 'Sembunyikan kalender' : 'Tampilkan kalender'}"><span>${R.cal ? '⌃' : '⌄'}</span></button>
+  const mode = R.mode, cal = mode === 'cal';
+  return `<div class="head"><h1>⏰ Reminder <span class="hc">${counts.open} aktif</span></h1><div class="tools">${remSeg()}<button type="button" class="btn sm" data-a="remExpDlg" title="Unduh daftar reminder PDF / Excel">📤 Export</button>${cal ? '<button type="button" class="btn sm" data-a="remToday">Hari ini</button>' : ''}</div></div>
+  ${cal ? `<button type="button" class="hb-tog" data-a="calTog" title="${R.cal ? 'Sembunyikan kalender' : 'Tampilkan kalender'}"><span>${R.cal ? '⌃' : '⌄'}</span></button>
   ${R.cal ? `<section class="card cal">
     <div class="cal-h" id="cal-h">
       <button type="button" class="ib big" data-a="remMon" data-n="-1" title="Bulan sebelumnya">‹</button>
@@ -2518,7 +2708,7 @@ function vReminder() {
     </div>
     <div class="cal-g wk">${['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => `<span>${d}</span>`).join('')}</div>
     <div class="cal-g days" id="cal-days">${cells}</div>
-  </section>` : ''}
+  </section>` : ''}` : ''}
   <form class="card qadd" id="rem-add">
     <input id="ra-title" data-men placeholder="➕ Tulis reminder baru… (@ untuk menandai)" maxlength="200" required>
     <input id="ra-date" type="date" value="${addDate}" data-keep="0" data-ch="raDate" required>
@@ -2530,14 +2720,14 @@ function vReminder() {
   </form>
   <div class="lhead">
     <div class="chips">
-      <select id="rem-st" data-ch="remSt" data-keep="0" class="chip-sel" title="Filter status">${[['open', '⏳ Belum selesai'], ['done', '✅ Selesai'], ['all', '📋 Semua status']].map(([k, l]) => `<option value="${k}" ${R.st === k ? 'selected' : ''}>${l} (${counts[k]})</option>`).join('')}</select>
+      ${mode === 'board' ? '' : `<select id="rem-st" data-ch="remSt" data-keep="0" class="chip-sel" title="Filter status">${[['open', '⏳ Belum selesai'], ['done', '✅ Selesai'], ['all', '📋 Semua status']].map(([k, l]) => `<option value="${k}" ${R.st === k ? 'selected' : ''}>${l} (${counts[k]})</option>`).join('')}</select>`}
       ${R.sel ? `<button type="button" class="chip on acc" data-a="remDay" data-d="${R.sel}">📅 ${dText(R.sel)} ✕</button>`
     : `<select id="rem-scope" data-ch="remScope" data-keep="0" class="chip-sel"><option value="all" ${R.scope === 'all' ? 'selected' : ''}>Semua tanggal</option><option value="month" ${R.scope === 'month' ? 'selected' : ''}>${MONTHS[R.m]} ${R.y}</option></select>`}
       <select id="rem-who" data-ch="remWho" data-keep="0" class="chip-sel"><option value="">Semua pembuat</option><option value="@me" ${R.who === '@me' ? 'selected' : ''}>📣 Menandai saya</option>${owners.map(o => `<option value="${esc(o)}" ${R.who === o ? 'selected' : ''}>${esc(uname(o))}</option>`).join('')}</select>
-      <select id="rem-sort" data-ch="remSort" data-keep="0" class="chip-sel" title="Urutkan">${REM_SORTS.map(([k, l]) => `<option value="${k}" ${R.sort === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      ${mode === 'board' ? '' : `<select id="rem-sort" data-ch="remSort" data-keep="0" class="chip-sel" title="Urutkan">${REM_SORTS.map(([k, l]) => `<option value="${k}" ${R.sort === k ? 'selected' : ''}>${l}</option>`).join('')}</select>`}
     </div>
   </div>
-  <div class="rlist">${list.length ? list.map(remRow).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Belum ada reminder.'}</p>`}</div>`;
+  ${mode === 'list' ? vRemList(list) : mode === 'board' ? vRemBoard(remFilter(remScoped(), 'all', R.who)) : `<div class="rlist">${list.length ? list.map(remRow).join('') : `<p class="empty">${R.sel ? 'Tidak ada reminder di tanggal ini.' : 'Belum ada reminder.'}</p>`}</div>`}`;
 }
 function remFilter(list, st, who) {
   if (st === 'open') list = list.filter(r => !r.data.done); else if (st === 'done') list = list.filter(r => r.data.done);
@@ -2547,11 +2737,14 @@ function remFilter(list, st, who) {
 const remKey = r => (r.data.date || '9999') + ' ' + (r.data.time || '99:99');
 const remUpd = r => Math.max(r.updated || 0, r.data.doneAt || 0, ...comments(r.id).map(c => c.updated || 0)); // perubahan terakhir, termasuk komentar
 const REM_SORTS = [['date', '📅 Tanggal terbaru'], ['upd', '🕘 Update terbaru'], ['old', '📅 Tanggal terlama']];
-function remList() { // what the Reminder page shows
+function remScoped() { // date scope (calendar day / month) of the Reminder page
   const R = S.rem; let list = live('reminder');
   if (R.sel) list = list.filter(r => r.data.date === R.sel);
   else if (R.scope === 'month') { const p = `${R.y}-${pad(R.m + 1)}`; list = list.filter(r => (r.data.date || '').startsWith(p)); }
-  list = remFilter(list, R.st, R.who);
+  return list;
+}
+function remList() { // what the Reminder page shows
+  const R = S.rem; let list = remFilter(remScoped(), R.st, R.who);
   const upd = new Map(list.map(r => [r.id, remUpd(r)])), byUpd = (a, b) => upd.get(b.id) - upd.get(a.id);
   if (R.sort === 'upd') return list.sort(byUpd);
   // tanggal (terbaru / terlama), yang belum selesai di atas; tanggal sama → update terbaru dulu
@@ -3522,7 +3715,7 @@ async function viewFile(id, name, mime) {
 
 // ---------- actions ----------
 const A = {
-  ...GA, ...GA2, ...NA, ...FA,
+  ...GA, ...GA2, ...NA, ...FA, ...HA,
   pwShow() { const p = $('#l-pass'); p.type = p.type === 'password' ? 'text' : 'password'; },
   go: el => { if (dlg().open) closeAll(); go(el.dataset.v); },
   profile: () => profileDialog(),
@@ -3547,8 +3740,8 @@ const A = {
     catch (e) { toast('Gagal menghapus: ' + esc(e.message), 'warn'); loadFiles(); }
   },
   openFile: el => viewFile(el.dataset.id, el.dataset.name, el.dataset.mime),
-  toolsBtn: () => go(S.view === 'tools' ? 'reminder' : 'tools'),
-  chatFab: () => go(S.view === 'chat' ? S.chatBack || 'reminder' : 'chat'),
+  toolsBtn: () => go(S.view === 'tools' ? 'home' : 'tools'),
+  chatFab: () => go(S.view === 'chat' ? S.chatBack || 'home' : 'chat'),
   whisper: el => { closeAll(); S.chat.conv = 'w:' + el.dataset.u; go('chat'); setTimeout(() => $('#c-text')?.focus(), 50); },
   // reminder
   remMon: el => { const d = new Date(S.rem.y, S.rem.m + Number(el.dataset.n), 1); S.rem.y = d.getFullYear(); S.rem.m = d.getMonth(); S.rem.sel = ''; S.rem.addDate = ''; renderMain(); },
